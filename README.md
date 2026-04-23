@@ -1,142 +1,431 @@
 # SignalForge
 
-SignalForge is a production-oriented starter repo for a B2B lead qualification and conversion agent. It is designed around one core constraint: every outbound claim must be grounded in verified signals, explicit uncertainty, or a question.
+SignalForge is a production-oriented B2B outbound intelligence system for Tenacious Consulting. It turns structured hiring and market signals into grounded outreach, then carries the thread through qualification and booking without inventing facts.
 
-## What this scaffold includes
+The current system is intentionally built around one discipline: `prove before you persuade`.
 
-- Deterministic enrichment and brief generation for one prospect flow
-- Rule-based hiring signals and AI maturity scoring
-- Simple peer benchmarking for competitor-gap analysis
-- Confidence-aware email drafting that asks instead of over-claiming
-- FastAPI endpoints for single runs, scenario runs, and batch evaluation
-- JSON artifacts and trace logs for inspection and evaluation
+## Executive Summary
 
-## Repo layout
+SignalForge currently provides:
+
+- a deterministic enrichment pipeline over local synthetic data
+- structured hiring and competitor-gap briefs
+- a confidence engine that controls tone
+- an OpenRouter-backed email generation layer with claim validation
+- a FastAPI backend for single-run and batch evaluation
+- adversarial probes for business-risk-focused evaluation
+
+The repo is designed to be evaluation-ready before it is automation-heavy.
+
+## Product Goal
+
+For Tenacious, the job is not to blast generic outbound. The job is to identify credible hiring pressure, frame a relevant talent or advisory angle, and earn a discovery call with a technical buyer such as a CTO or VP Engineering.
+
+SignalForge is optimized around:
+
+- signal grounding
+- confidence-aware messaging
+- hallucination resistance
+- traceability
+- low operating cost per prospect
+
+## System Architecture
 
 ```text
-agent/       Deterministic signal logic, orchestrator, tools, and email generator
-backend/     FastAPI application and request handling
-data/        Local synthetic company and layoffs datasets
-eval/        Adversarial scenario definitions and evaluator
-logs/        Run history in JSONL format
-outputs/     Generated briefs, emails, and evaluation summaries
-scripts/     Local entrypoints for direct runs and batch evaluation
+                        +-----------------------+
+                        |   Local Datasets      |
+                        |  crunchbase_sample    |
+                        |  layoffs.csv          |
+                        +-----------+-----------+
+                                    |
+                                    v
+                    +---------------+---------------+
+                    |    Deterministic Enrichment   |
+                    |  CrunchbaseTool               |
+                    |  layoffs loader               |
+                    |  peer selection               |
+                    +---------------+---------------+
+                                    |
+                   +----------------+----------------+
+                   |                                 |
+                   v                                 v
+        +----------+-----------+         +-----------+----------+
+        | Hiring Signal Brief  |         | Competitor Gap Brief |
+        | funding              |         | peer AI maturity     |
+        | job velocity         |         | top practices        |
+        | layoffs              |         | benchmark summary    |
+        | AI maturity          |         +-----------+----------+
+        +----------+-----------+                     |
+                   |                                 |
+                   +----------------+----------------+
+                                    |
+                                    v
+                       +------------+------------+
+                       | Confidence Engine       |
+                       | low / medium / high     |
+                       +------------+------------+
+                                    |
+                                    v
+                     +--------------+---------------+
+                     | LLM Email Generation Layer   |
+                     | OpenRouter client            |
+                     | confidence-aware prompt      |
+                     | claim validator              |
+                     | deterministic fallback       |
+                     +--------------+---------------+
+                                    |
+                                    v
+                     +--------------+---------------+
+                     | Orchestrator / API Layer     |
+                     | /run-prospect                |
+                     | /run-prospect/scenarios      |
+                     | /run-prospect/batch          |
+                     +--------------+---------------+
+                                    |
+                                    v
+                     +--------------+---------------+
+                     | Outputs / Evaluation         |
+                     | JSON artifacts               |
+                     | JSONL traces                 |
+                     | adversarial probe library    |
+                     +------------------------------+
 ```
 
-## Quick start
+## Repository Structure
 
-1. Create a virtual environment.
-2. Install dependencies from `requirements.txt`.
-3. Copy `.env.example` to `.env` and fill in any keys you need.
-4. Run the API:
+```text
+agent/
+  core/         orchestration, confidence, routing
+  signals/      hiring signals, AI maturity, competitor gap logic
+  tools/        local data loaders and deterministic enrichers
+  llm/          OpenRouter client and email generation
+  guards/       claim validation and outbound safety checks
+  channels/     email, sms, voice channel adapters and stubs
+  crm/          HubSpot-facing mapping and logging stubs
+  calendar/     booking link adapter
+  utils/        config, tracing, logging
+
+backend/
+  routes/       FastAPI endpoints
+  services/     run orchestration and API-facing service layer
+  schemas.py    request and response contracts
+
+data/           local synthetic prospect and layoffs data
+eval/           adversarial scenarios and evaluation harness
+probes/         production-grade probe library and failure analysis
+scripts/        local execution helpers
+tests/          regression and LLM-layer tests
+outputs/        generated artifacts for latest and scenario runs
+logs/           append-only JSONL run logs
+```
+
+## Core Runtime Flow
+
+The active working path is:
+
+`Input -> Enrichment -> Hiring Signal Brief -> Competitor Gap Brief -> Confidence -> LLM Email -> Claim Validation -> Reply -> Qualification -> Booking`
+
+Default synthetic prospect:
+
+- `Northstar Lending`
+
+Default API response shape:
+
+```json
+{
+  "company": "Northstar Lending",
+  "hiring_signal_brief": {},
+  "competitor_gap_brief": {},
+  "email": {
+    "subject": "string",
+    "body": "string"
+  },
+  "confidence": "low|medium|high",
+  "trace_id": "string"
+}
+```
+
+## Technology Stack
+
+### Backend
+
+- `FastAPI` for the API surface
+- `Pydantic v2` for typed request and response contracts
+- `Uvicorn` for local serving
+- `Python 3.12+`
+
+### Intelligence Layer
+
+- deterministic enrichment over local datasets
+- rule-based AI maturity scoring
+- confidence-aware orchestration
+- `OpenRouter` as the LLM gateway
+- `deepseek/deepseek-chat` as the default generation model
+- `qwen/qwen3-32b` as fallback
+
+### Observability and Evaluation
+
+- JSON artifacts in `outputs/`
+- JSONL run logs in `logs/`
+- `Langfuse` hooks for trace and cost instrumentation
+- adversarial scenario runner in `eval/`
+- business-risk-focused probe pack in `probes/`
+
+### Planned / Stubbed Integrations
+
+- `Resend` for outbound email delivery
+- `HubSpot` for CRM logging
+- `Cal.com` for booking links
+- `Africa's Talking` for SMS
+
+These keys can be configured now, but not all integrations are live in the request path yet.
+
+## Design Principles
+
+SignalForge follows a few hard rules:
+
+- never fabricate signals
+- never overstate weak evidence
+- prefer asking over asserting when confidence is low
+- keep deterministic logic where deterministic logic is enough
+- make every prospect run inspectable after the fact
+
+This is especially important for Tenacious, where one wrong hiring claim can kill a high-value thread instantly.
+
+## How Confidence Works
+
+SignalForge reduces the structured brief into a global confidence label:
+
+- `high`: strong, recent, internally consistent signals
+- `medium`: some evidence, but not enough for aggressive claims
+- `low`: incomplete, stale, or contradictory signals
+
+Confidence controls prompt tone:
+
+- `high` -> assertive and specific
+- `medium` -> careful and directional
+- `low` -> exploratory and question-led
+
+## Claim Validation
+
+Every LLM-generated email is checked against the available structured claims.
+
+Current protections include:
+
+- only using claims present in the generated claim catalog
+- rejecting unsupported numeric language
+- regeneration in strict mode if a mismatch is detected
+- deterministic fallback if claim validation still fails
+
+This is the main anti-hallucination boundary in the current architecture.
+
+## Setup
+
+### 1. Clone the repository
 
 ```bash
-uvicorn backend.main:app --reload
+git clone https://github.com/nebiyuephrata/SignalForge.git
+cd SignalForge
 ```
 
-5. Check health:
+### 2. Create a virtual environment
 
 ```bash
-curl http://127.0.0.1:8000/health
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-## Core flow
+### 3. Install dependencies
 
-SignalForge currently proves one complete deterministic loop:
+```bash
+pip install -r requirements.txt
+```
 
-`Input -> Enrichment -> Hiring Brief -> Competitor Gap -> Draft Email -> Reply -> Qualification -> Booking`
+### 4. Configure environment variables
 
-The default prospect is `Northstar Lending`, backed by the local dataset in `data/crunchbase_sample.json`.
+```bash
+cp .env.example .env
+```
 
-## Local scripts
+Minimum useful configuration:
 
-Run the default prospect:
+```env
+APP_NAME=SignalForge
+APP_ENV=development
+APP_HOST=127.0.0.1
+APP_PORT=8000
+LOG_LEVEL=INFO
+
+OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_MODEL=deepseek/deepseek-chat
+OPENROUTER_FALLBACK_MODEL=qwen/qwen3-32b
+OPENROUTER_TIMEOUT_SECONDS=30
+OPENROUTER_MAX_TOKENS=300
+```
+
+Optional integrations:
+
+- `LANGFUSE_PUBLIC_KEY`
+- `LANGFUSE_SECRET_KEY`
+- `LANGFUSE_HOST`
+- `RESEND_API_KEY`
+- `HUBSPOT_API_KEY`
+- `CALCOM_API_KEY`
+- `AFRICAS_TALKING_API_KEY`
+
+## Running the Backend
+
+Start the API locally:
+
+```bash
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Health check:
+
+```bash
+curl -sS http://127.0.0.1:8000/health
+```
+
+## API Endpoints
+
+### Run the default prospect
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/run-prospect
+```
+
+### Run a named adversarial scenario
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/run-prospect \
+  -H 'Content-Type: application/json' \
+  -d '{"scenario_name":"weak_confidence"}'
+```
+
+### Run a direct company override
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/run-prospect \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Quiet Current Bank","reply_text":"No, not a priority"}'
+```
+
+### List adversarial scenarios
+
+```bash
+curl -sS http://127.0.0.1:8000/run-prospect/scenarios
+```
+
+### Run the compact batch evaluation
+
+```bash
+curl -sS http://127.0.0.1:8000/run-prospect/batch
+```
+
+## Local Execution Scripts
+
+Run the default prospect from Python:
 
 ```bash
 python3 scripts/run_prospect.py
 ```
 
-Run the adversarial suite:
+Run the adversarial scenarios:
 
 ```bash
 python3 scripts/run_adversarial_cases.py
 ```
 
-Run the compact batch summary directly from Python:
+Run the compact batch summary:
 
 ```bash
 python3 scripts/run_batch_summary.py
 ```
 
-## API usage
+## Generated Artifacts
 
-Start the API:
-
-```bash
-uvicorn backend.main:app --reload
-```
-
-List available scenarios:
-
-```bash
-curl http://127.0.0.1:8000/run-prospect/scenarios
-```
-
-Run the default prospect:
-
-```bash
-curl -X POST http://127.0.0.1:8000/run-prospect
-```
-
-Run a named scenario:
-
-```bash
-curl -X POST http://127.0.0.1:8000/run-prospect \
-  -H 'Content-Type: application/json' \
-  -d '{"scenario_name":"weak_confidence"}'
-```
-
-Run a direct company override:
-
-```bash
-curl -X POST http://127.0.0.1:8000/run-prospect \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Quiet Current Bank","reply_text":"No, not a priority"}'
-```
-
-Run all adversarial scenarios as a compact evaluation batch:
-
-```bash
-curl http://127.0.0.1:8000/run-prospect/batch
-```
-
-## Output artifacts
-
-Every run writes inspectable artifacts under `outputs/`:
+Each prospect run writes machine-readable artifacts into `outputs/`:
 
 - `hiring_signal_brief.json`
 - `competitor_gap_brief.json`
+- `email.json`
 - `draft_email.json`
 - `full_prospect_run.json`
-- scenario-specific files such as `weak_confidence_full_run.json`
+- scenario-specific output files such as `weak_confidence_full_run.json`
 - `adversarial_results.json`
 - `adversarial_batch_summary.json`
 
-Run history is appended to:
+Append-only run logging:
 
 - `logs/prospect_runs.jsonl`
 - `eval/logs/trace_log.jsonl`
 - `eval/logs/score_log.json`
 
-## Current scenarios
+## Evaluation Assets
 
-- `conflicting_signals`: hiring growth plus recent layoffs
-- `no_hiring_signals`: flat roles and stale funding
-- `weak_confidence`: slight role growth but not enough evidence for a hard claim
+SignalForge includes two layers of evaluation:
 
-## Notes
+### 1. Executable adversarial scenarios
 
-- Most external integrations are intentionally thin stubs so the repo stays runnable before keys are wired in.
-- The repo is intentionally local-first: company data and layoffs data are synthetic and deterministic.
-- The current emphasis is evaluation and traceability, not volume or automation.
-- The orchestration path can later be swapped to tool-backed live enrichment without changing the API shape.
+Located in:
+
+- [eval/adversarial_cases.py](eval/adversarial_cases.py)
+- [eval/run_adversarial.py](eval/run_adversarial.py)
+
+Current scenarios include:
+
+- `conflicting_signals`
+- `no_hiring_signals`
+- `weak_confidence`
+
+### 2. Probe-driven failure analysis
+
+Located in:
+
+- [probes/probe_library.md](probes/probe_library.md)
+- [probes/failure_taxonomy.md](probes/failure_taxonomy.md)
+- [probes/target_failure_mode.md](probes/target_failure_mode.md)
+
+This layer is aimed at production risk, not just unit correctness.
+
+## Current Status
+
+Working today:
+
+- deterministic enrichment
+- structured brief generation
+- confidence-aware OpenRouter email generation
+- claim validation
+- FastAPI execution path
+- run logging and artifact emission
+- adversarial evaluation pack
+
+Not yet fully wired into the live path:
+
+- real outbound email sending via Resend
+- HubSpot writeback
+- live Cal.com automation beyond booking link return
+- multi-turn conversational orchestration
+- frontend dashboard
+
+## Recommended Next Steps
+
+1. add the frontend dashboard over the existing API
+2. wire Resend into a guarded outbound send path
+3. connect HubSpot writeback and activity logging
+4. make Langfuse tracing first-class in deployment
+5. turn the markdown probe library into executable scored probes
+
+## Professional Notes
+
+This repo is intentionally local-first and evaluation-heavy. That is by design.
+
+Before a system like this is trusted to automate outbound at scale, it should prove:
+
+- that its claims stay inside evidence bounds
+- that its tone follows confidence
+- that its failure modes are visible
+- that its cost profile is controlled
+
+SignalForge is built to make those properties inspectable.
