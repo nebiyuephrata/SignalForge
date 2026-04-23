@@ -15,7 +15,7 @@ def generate_grounded_email(
         )
         return {
             "channel": "email",
-            "subject": f"{company['company_name']}: quick signal check",
+            "subject": f"Question: {company['company_name']} signal check",
             "body": body,
             "word_count": len(body.split()),
             "grounding": {
@@ -24,8 +24,10 @@ def generate_grounded_email(
             },
         }
 
-    funding = signals[0]["value"]
-    velocity = signals[1]["value"]
+    funding_signal = next((signal for signal in signals if signal.get("signal") == "funding_event"), {"value": {}})
+    velocity_signal = next((signal for signal in signals if signal.get("signal") == "job_post_velocity"), {"value": {}})
+    funding = funding_signal["value"]
+    velocity = velocity_signal["value"]
     if overall_confidence < 0.5:
         body = (
             f"I'm not confident enough to make a hard claim about {company['company_name']} from the local data alone. "
@@ -48,7 +50,7 @@ def generate_grounded_email(
 
     return {
         "channel": "email",
-        "subject": f"{company['company_name']}: hiring signal and peer benchmark",
+        "subject": f"Context: {company['company_name']} hiring signal",
         "body": body,
         "word_count": len(body.split()),
         "grounding": {

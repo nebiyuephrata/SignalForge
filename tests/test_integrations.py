@@ -58,6 +58,15 @@ def test_hiring_signal_brief_merges_all_required_sources() -> None:
     assert {"funding_event", "job_post_scrape", "job_post_velocity", "layoffs", "leadership_change"} <= signal_names
     assert brief["source_artifact"]["job_post_scrape"]["confidence"] >= 0.7
     assert brief["source_artifact"]["leadership_change"]["confidence"] >= 0.35
+    assert brief["primary_segment_match"] in {
+        "segment_1_series_a_b",
+        "segment_2_mid_market_restructure",
+        "segment_3_leadership_transition",
+        "segment_4_specialized_capability",
+        "abstain",
+    }
+    assert "bench_to_brief_match" in brief
+    assert "data_sources_checked" in brief
 
 
 def test_email_handler_routes_inbound_replies_to_downstream_handler() -> None:

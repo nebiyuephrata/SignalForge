@@ -7,6 +7,8 @@ dist/
 __pycache__/
 *.py[cod]
 *.tsbuildinfo
+.DS_Store
+__MACOSX/
 
 logs/*.jsonl
 logs/*.json

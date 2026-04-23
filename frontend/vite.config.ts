@@ -12,7 +12,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "@tanstack/react-query"],
-          charts: ["recharts"],
           icons: ["lucide-react"],
         },
       },

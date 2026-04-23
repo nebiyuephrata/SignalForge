@@ -5,6 +5,7 @@ from typing import Any
 from agent.channels.email.email_generator import generate_grounded_email as generate_fallback_email
 from agent.core.confidence import compute_global_confidence
 from agent.llm.client import LLMClientResponse, OpenRouterClient, OpenRouterClientError
+from agent.tenacious.context import load_icp_definition, load_style_guide
 from agent.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -21,12 +22,21 @@ def generate_outreach_email(
     company_name = str(hiring_signal_brief.get("company_name", "this company"))
     confidence = confidence_level or compute_global_confidence(hiring_signal_brief)
     claim_catalog = build_claim_catalog(hiring_signal_brief, competitor_gap_brief)
+    structured_signals = hiring_signal_brief.get("signals", [])
     if not claim_catalog:
         return generate_deterministic_fallback_email(
             hiring_signal_brief,
             competitor_gap_brief,
             confidence_level=confidence,
             reason="no_claims",
+        )
+
+    if confidence == "low" and (not isinstance(structured_signals, list) or len(structured_signals) == 0):
+        return generate_deterministic_fallback_email(
+            hiring_signal_brief,
+            competitor_gap_brief,
+            confidence_level=confidence,
+            reason="no_structured_signals",
         )
 
     if confidence == "low" and len(claim_catalog) <= 2:
@@ -118,6 +128,32 @@ def build_claim_catalog(
             }
         )
 
+    primary_segment_match = str(hiring_signal_brief.get("primary_segment_match", "")).strip()
+    segment_confidence = float(hiring_signal_brief.get("segment_confidence", 0.0) or 0.0)
+    if primary_segment_match:
+        catalog.append(
+            {
+                "id": "primary_segment_match",
+                "type": "segment",
+                "confidence": segment_confidence,
+                "statement": f"Primary Tenacious segment match is {primary_segment_match}.",
+            }
+        )
+
+    bench_match = hiring_signal_brief.get("bench_to_brief_match", {})
+    if isinstance(bench_match, dict):
+        catalog.append(
+            {
+                "id": "bench_to_brief_match",
+                "type": "bench",
+                "confidence": 0.9,
+                "statement": (
+                    f"Bench availability for required stacks is {bench_match.get('bench_available', False)} "
+                    f"with gaps: {', '.join(bench_match.get('gaps', [])) or 'none'}."
+                ),
+            }
+        )
+
     if competitor_gap_brief:
         catalog.append(
             {
@@ -147,6 +183,17 @@ def build_claim_catalog(
                     "statement": f"Top-quartile practice: {practice}.",
                 }
             )
+        for index, finding in enumerate(competitor_gap_brief.get("gap_findings", [])[:2], start=1):
+            if not isinstance(finding, dict):
+                continue
+            catalog.append(
+                {
+                    "id": f"gap_finding_{index}",
+                    "type": "competitor_gap",
+                    "confidence": 0.8 if finding.get("confidence") == "high" else 0.6,
+                    "statement": f"Gap finding: {finding.get('practice')}. Prospect state: {finding.get('prospect_state')}",
+                }
+            )
 
     return [claim for claim in catalog if claim["statement"]]
 
@@ -163,10 +210,13 @@ def _build_system_prompt(confidence_level: str, strict_mode: bool) -> str:
         else "Keep the note concise and executive-level."
     )
     return (
-        "You are generating B2B outreach for SignalForge. "
+        "You are generating B2B outreach for Tenacious via SignalForge. "
         "Never fabricate or infer any fact not listed in the provided claims. "
         "Reference only the available structured claims. "
         "If unsure, ask instead of asserting. "
+        "Follow the Tenacious style guide: be direct, grounded, honest, professional, and non-condescending. "
+        "Subject lines must start with Request, Question, Context, or Follow-up and stay under 60 characters. "
+        "Keep the body under 120 words and avoid offshore-vendor cliches. "
         f"{tone_rule} {strict_instruction} "
         "Return JSON with keys: subject, body, claims_used. "
         "claims_used must be a list of claim ids selected from the allowed claims."
@@ -184,11 +234,14 @@ def _build_user_prompt(
     return (
         f"Company: {company_name}\n"
         f"Confidence level: {confidence_level}\n"
+        f"Tenacious ICP reference:\n{load_icp_definition()[:2200]}\n\n"
+        f"Tenacious style reference:\n{load_style_guide()[:2200]}\n\n"
         "Allowed claims:\n"
         f"{claim_lines}\n\n"
         "Write one outreach email under 120 words. "
         "Use only the allowed claims. "
-        "If confidence is low, make the body question-led and exploratory."
+        "If confidence is low, make the body question-led and exploratory. "
+        "If segment match is abstain or confidence is below 0.6, avoid a segment-specific pitch."
     )
 
 

@@ -79,14 +79,14 @@ def test_generate_outreach_email_uses_llm_output_without_hallucinated_claim_ids(
         confidence_level="medium",
         client=FakeClient(
             {
-                "subject": "Northstar Lending hiring signal",
+                "subject": "Request: Northstar hiring context",
                 "body": "It looks like Northstar Lending moved from 3 to 12 open roles after a Series B.",
                 "claims_used": ["funding_event", "job_post_velocity"],
             }
         ),
     )
 
-    assert email["subject"] == "Northstar Lending hiring signal"
+    assert email["subject"].startswith("Request:")
     assert email["confidence_level"] == "medium"
     report = validate_email_claims(email, hiring_signal_brief, competitor_gap_brief)
     assert report["valid"] is True
