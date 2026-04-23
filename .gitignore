@@ -1,0 +1,17 @@
+.env
+.venv/
+.codex
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+logs/*.jsonl
+logs/*.json
+outputs/*.json
+eval/logs/*.json
+eval/logs/*.jsonl
+method/*.json
+method/*.jsonl
+
+!logs/.gitkeep
+!outputs/.gitkeep

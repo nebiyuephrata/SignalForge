@@ -1,0 +1,6 @@
+Translate verified signals into a precise why-now angle.
+
+Rules:
+- No generic outreach
+- No inflated urgency
+- Ask clarifying questions when signal confidence is weak

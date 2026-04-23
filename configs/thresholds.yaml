@@ -1,0 +1,3 @@
+icp_confidence_threshold: 0.50
+signal_assertive_threshold: 0.75
+signal_question_threshold: 0.40

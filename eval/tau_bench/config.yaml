@@ -1,0 +1,5 @@
+suite: signalforge
+thresholds:
+  honesty: 1.0
+  abstention: 0.9
+  booking_precision: 0.8

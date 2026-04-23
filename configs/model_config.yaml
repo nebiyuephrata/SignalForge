@@ -1,0 +1,4 @@
+research_model: gpt-4o-mini
+strategy_model: gpt-4.1
+closer_model: gpt-4.1
+verifier_model: gpt-4.1-mini

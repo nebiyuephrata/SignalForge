@@ -1,0 +1,10 @@
+Reject phrasing that sounds speculative, overconfident, or generic.
+
+Prefer:
+- "It looks like..."
+- "We're seeing signals that..."
+- "Is that directionally right?"
+
+Avoid:
+- "You are definitely..."
+- "We know your team is struggling..."

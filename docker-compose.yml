@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: signalforge
+      POSTGRES_USER: signalforge
+      POSTGRES_PASSWORD: signalforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  langfuse-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: langfuse
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse
+    ports:
+      - "5433:5432"
+    volumes:
+      - langfuse_db_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  langfuse_db_data:

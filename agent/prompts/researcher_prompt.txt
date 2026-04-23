@@ -1,0 +1,7 @@
+Collect only verified external signals. If a source is unavailable, record the gap instead of guessing.
+
+Focus:
+- Hiring signals
+- Compliance exposure
+- AI maturity evidence
+- Competitor-gap context
