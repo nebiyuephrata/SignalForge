@@ -16,6 +16,10 @@ class LeadRecord(BaseModel):
     employee_count: int | None = None
     industry: str | None = None
     location: str | None = None
+    contact_name: str | None = None
+    contact_email: str | None = None
+    phone_number: str | None = None
+    last_email_reply_text: str | None = None
 
 
 class BriefSection(BaseModel):

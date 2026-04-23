@@ -53,6 +53,14 @@ export interface ProspectRunResponse {
       justification: string[];
     };
     overall_confidence: number;
+    source_artifact?: Record<
+      string,
+      {
+        confidence: number;
+        evidence?: string[];
+        value?: Record<string, unknown>;
+      }
+    >;
   };
   competitor_gap_brief: {
     company_name: string;

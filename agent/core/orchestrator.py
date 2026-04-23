@@ -66,7 +66,9 @@ class SignalForgeOrchestrator:
 
         booking = {
             "should_book": qualification["qualification_status"] == "qualified",
-            "booking_url": self.cal_client.booking_link(),
+            "booking_url": self.cal_client.booking_link(
+                company_name=company_name,
+            ),
             "booking_reason": qualification["next_action"],
         }
 

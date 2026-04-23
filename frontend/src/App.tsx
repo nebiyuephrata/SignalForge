@@ -447,6 +447,31 @@ function App() {
                         value={`Score ${currentResult.hiring_signal_brief.ai_maturity_score.value} / 3`}
                       />
                     </div>
+                    {currentResult.hiring_signal_brief.source_artifact ? (
+                      <div className="mt-5 rounded-lg border border-white/10 bg-slate-950/50 p-4">
+                        <div className="mb-3">
+                          <p className="label">Source coverage</p>
+                          <h4 className="mt-1 text-base font-semibold text-white">Merged enrichment artifact</h4>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          {Object.entries(currentResult.hiring_signal_brief.source_artifact).map(([sourceName, source]) => (
+                            <div key={sourceName} className="rounded-md border border-white/8 bg-white/[0.03] px-3 py-3">
+                              <div className="mb-2 flex items-center justify-between gap-3">
+                                <span className="text-sm font-medium capitalize text-white">{sourceName.replaceAll("_", " ")}</span>
+                                <span className="rounded-full bg-white/5 px-2 py-1 text-xs text-slate-200">
+                                  {source.confidence.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="space-y-2 text-sm leading-6 text-slate-400">
+                                {(source.evidence ?? []).slice(0, 2).map((item) => (
+                                  <div key={item}>{item}</div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </article>
 
                   <article className="panel rounded-lg p-5 md:p-6">
@@ -469,6 +494,40 @@ function App() {
                       <PeerChart peers={peersChartData} />
                     </div>
                   </article>
+                </section>
+
+                <section className="panel rounded-lg p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="label">Operational handlers</p>
+                      <h3 className="mt-1 text-xl font-semibold text-white">Channel and integration readiness</h3>
+                    </div>
+                    <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200">
+                      backend-wired
+                    </span>
+                  </div>
+                  <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <OpsCard
+                      title="Email"
+                      subtitle="Resend outbound + inbound replies"
+                      points={["Structured send result", "Bounce-safe webhook", "Downstream callback routing"]}
+                    />
+                    <OpsCard
+                      title="SMS"
+                      subtitle="Africa's Talking warm lead only"
+                      points={["Outbound send path", "Inbound reply routing", "Cold outreach gate enforced"]}
+                    />
+                    <OpsCard
+                      title="CRM"
+                      subtitle="HubSpot sync"
+                      points={["Contact upsert", "Enrichment note payload", "Booking-linked follow-up writes"]}
+                    />
+                    <OpsCard
+                      title="Calendar"
+                      subtitle="Cal.com booking callback"
+                      points={["Callable booking links", "Completed booking webhook", "CRM update on completion"]}
+                    />
+                  </div>
                 </section>
 
                 <section className="panel rounded-lg p-5 md:p-6">
@@ -699,6 +758,35 @@ function EmptyState({ text }: { text: string }) {
         <Sparkles className="h-5 w-5" />
       </div>
       <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">{text}</p>
+    </div>
+  );
+}
+
+function OpsCard({
+  title,
+  subtitle,
+  points,
+}: {
+  title: string;
+  subtitle: string;
+  points: string[];
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-slate-950/60 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h4 className="text-base font-semibold text-white">{title}</h4>
+          <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+        </div>
+        <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-200">live</span>
+      </div>
+      <div className="mt-4 space-y-2 text-sm text-slate-300">
+        {points.map((point) => (
+          <div key={point} className="rounded-md border border-white/5 bg-white/[0.03] px-3 py-2">
+            {point}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

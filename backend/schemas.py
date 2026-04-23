@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -48,3 +50,55 @@ class ProspectRunResponse(BaseModel):
     reply_text: str | None = None
     qualification: dict[str, object]
     booking: dict[str, object]
+
+
+class DraftChannelRequest(BaseModel):
+    lead: dict[str, Any]
+
+
+class SendEmailRequest(BaseModel):
+    company_name: str
+    contact_email: str
+    contact_name: str | None = None
+    subject: str | None = None
+    body: str | None = None
+    reply_text: str | None = None
+    sync_to_crm: bool = True
+
+
+class SendWarmSmsRequest(BaseModel):
+    company_name: str
+    phone_number: str
+    contact_email: str | None = None
+    body: str
+    prior_email_reply: bool = False
+
+
+class ProviderSendResponse(BaseModel):
+    channel: str
+    provider: str
+    status: str
+    destination: str
+    external_id: str | None = None
+    detail: str = ""
+    error_code: str | None = None
+    raw_response: dict[str, Any] = Field(default_factory=dict)
+    crm_sync: dict[str, Any] | None = None
+
+
+class WebhookResponse(BaseModel):
+    status: str
+    provider: str
+    channel: str
+    event_type: str
+    routed_handlers: int = 0
+    detail: str = ""
+    event: dict[str, Any] | None = None
+
+
+class BookingWebhookRequest(BaseModel):
+    company_name: str
+    contact_email: str
+    booking_id: str
+    booking_url: str
+    meeting_start: str

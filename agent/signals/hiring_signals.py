@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime
 from statistics import mean
 
+from agent.tools.job_scraper import JobScraper
+from agent.tools.leadership_tool import LeadershipChangeTool
 from agent.signals.ai_maturity import build_ai_maturity_assessment
 from agent.tools.crunchbase_tool import CrunchbaseTool
 from agent.tools.layoffs_tool import LayoffsTool, REFERENCE_DATE
@@ -17,6 +19,8 @@ def build_hiring_signal_brief(
     company_name: str,
     crunchbase_tool: CrunchbaseTool,
     layoffs_tool: LayoffsTool | None = None,
+    leadership_tool: LeadershipChangeTool | None = None,
+    job_scraper: JobScraper | None = None,
     as_of_date: date = REFERENCE_DATE,
 ) -> dict[str, object]:
     company = crunchbase_tool.get_company_by_name(company_name)
@@ -24,7 +28,11 @@ def build_hiring_signal_brief(
         raise ValueError(f"Company not found in local dataset: {company_name}")
 
     layoffs_tool = layoffs_tool or LayoffsTool()
+    leadership_tool = leadership_tool or LeadershipChangeTool(crunchbase_tool)
+    job_scraper = job_scraper or JobScraper(crunchbase_tool)
     recent_layoffs = layoffs_tool.get_recent_layoffs(company_name, as_of_date=as_of_date)
+    recent_leadership_changes = leadership_tool.get_recent_changes(company_name, as_of_date=as_of_date)
+    job_post_scrape = job_scraper.scrape_company_jobs(company_name)
     ai_maturity = build_ai_maturity_assessment(company)
 
     funding_days = _days_since(str(company["funding_date"]), as_of_date)
@@ -39,10 +47,21 @@ def build_hiring_signal_brief(
         "evidence": [f"{company['last_funding_round']} on {company['funding_date']}"],
     }
 
-    open_roles_current = int(company["open_roles_current"])
+    scraped_open_roles = int(job_post_scrape.get("open_roles", 0) or 0)
+    open_roles_current = scraped_open_roles or int(company["open_roles_current"])
     open_roles_60_days_ago = int(company["open_roles_60_days_ago"])
     velocity_delta = open_roles_current - open_roles_60_days_ago
     velocity_ratio = round(open_roles_current / max(open_roles_60_days_ago, 1), 2)
+    job_scrape_signal = {
+        "signal": "job_post_scrape",
+        "value": {
+            "open_roles_scraped": open_roles_current,
+            "role_titles": list(job_post_scrape.get("role_titles", []))[:10],
+            "source": job_post_scrape.get("source", "unknown"),
+        },
+        "confidence": float(job_post_scrape.get("confidence", 0.3)),
+        "evidence": list(job_post_scrape.get("evidence", [])),
+    }
     job_velocity_signal = {
         "signal": "job_post_velocity",
         "value": {
@@ -52,7 +71,10 @@ def build_hiring_signal_brief(
             "ratio": velocity_ratio,
         },
         "confidence": 0.85 if velocity_delta >= 3 else 0.6 if velocity_delta > 0 else 0.35 if velocity_delta < 0 else 0.4,
-        "evidence": [f"{open_roles_60_days_ago} roles -> {open_roles_current} roles in 60 days"],
+        "evidence": [
+            f"{open_roles_60_days_ago} roles -> {open_roles_current} roles in 60 days",
+            *job_scrape_signal["evidence"][:1],
+        ],
     }
 
     layoffs_signal = {
@@ -69,12 +91,19 @@ def build_hiring_signal_brief(
 
     leadership_signal = {
         "signal": "leadership_change",
-        "value": {"detected": False, "status": "stub"},
-        "confidence": 0.2,
-        "evidence": ["Leadership change detection is stubbed in the local-first version."],
+        "value": recent_leadership_changes or [{"detected": False, "status": "none_recent"}],
+        "confidence": 0.78 if recent_leadership_changes else 0.35,
+        "evidence": (
+            [
+                f"{change['change_type']} {change['role']} ({change['person']}) on {change['date']}"
+                for change in recent_leadership_changes
+            ]
+            if recent_leadership_changes
+            else ["No recent leadership changes were found in the synthetic company record."]
+        ),
     }
 
-    signals = [funding_signal, job_velocity_signal, layoffs_signal, leadership_signal]
+    signals = [funding_signal, job_scrape_signal, job_velocity_signal, layoffs_signal, leadership_signal]
     overall_confidence = round(mean(signal["confidence"] for signal in signals + [ai_maturity]), 2)
 
     if recent_layoffs and velocity_delta > 0:
@@ -108,4 +137,13 @@ def build_hiring_signal_brief(
         "signals": signals,
         "ai_maturity_score": ai_maturity,
         "overall_confidence": overall_confidence,
+        "source_artifact": {
+            "crunchbase_company_profile": {
+                "confidence": 0.95,
+                "evidence": [f"Loaded firmographics for {company_name} from the local Crunchbase fixture."],
+            },
+            "job_post_scrape": job_scrape_signal,
+            "layoffs": layoffs_signal,
+            "leadership_change": leadership_signal,
+        },
     }

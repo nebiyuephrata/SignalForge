@@ -10,7 +10,11 @@
     "open_roles_current": 12,
     "open_roles_60_days_ago": 3,
     "ai_roles_open": 2,
-    "ai_practices": ["risk analytics pilot", "shared data platform"]
+    "ai_practices": ["risk analytics pilot", "shared data platform"],
+    "career_page_path": "data/job_posts/northstar_lending.html",
+    "leadership_changes": [
+      {"date": "2026-03-10", "role": "VP Engineering", "person": "Maya Chen", "change_type": "hired"}
+    ]
   },
   {
     "company_name": "Apex Harbor Finance",
@@ -23,7 +27,11 @@
     "open_roles_current": 16,
     "open_roles_60_days_ago": 8,
     "ai_roles_open": 4,
-    "ai_practices": ["AI governance council", "retrieval workflows", "risk analyst copilots"]
+    "ai_practices": ["AI governance council", "retrieval workflows", "risk analyst copilots"],
+    "career_page_path": "data/job_posts/apex_harbor_finance.html",
+    "leadership_changes": [
+      {"date": "2026-02-26", "role": "Head of Platform", "person": "Julian Ross", "change_type": "promoted"}
+    ]
   },
   {
     "company_name": "Beacon Ridge Payments",
@@ -36,7 +44,11 @@
     "open_roles_current": 18,
     "open_roles_60_days_ago": 10,
     "ai_roles_open": 5,
-    "ai_practices": ["document automation", "LLM evaluation harness", "AI operations reviews"]
+    "ai_practices": ["document automation", "LLM evaluation harness", "AI operations reviews"],
+    "career_page_path": "data/job_posts/beacon_ridge_payments.html",
+    "leadership_changes": [
+      {"date": "2026-02-05", "role": "Director of AI Operations", "person": "Nia Brooks", "change_type": "hired"}
+    ]
   },
   {
     "company_name": "Cinder Vault Capital",
@@ -49,7 +61,9 @@
     "open_roles_current": 9,
     "open_roles_60_days_ago": 4,
     "ai_roles_open": 1,
-    "ai_practices": ["workflow tagging"]
+    "ai_practices": ["workflow tagging"],
+    "career_page_path": "",
+    "leadership_changes": []
   },
   {
     "company_name": "Delta Pine Credit",
@@ -62,7 +76,11 @@
     "open_roles_current": 14,
     "open_roles_60_days_ago": 11,
     "ai_roles_open": 4,
-    "ai_practices": ["AI policy reviews", "underwriting copilots"]
+    "ai_practices": ["AI policy reviews", "underwriting copilots"],
+    "career_page_path": "",
+    "leadership_changes": [
+      {"date": "2025-09-12", "role": "CTO", "person": "Imani Wells", "change_type": "hired"}
+    ]
   },
   {
     "company_name": "Elm Street Treasury",
@@ -75,7 +93,11 @@
     "open_roles_current": 15,
     "open_roles_60_days_ago": 7,
     "ai_roles_open": 3,
-    "ai_practices": ["model monitoring", "human review queue"]
+    "ai_practices": ["model monitoring", "human review queue"],
+    "career_page_path": "",
+    "leadership_changes": [
+      {"date": "2026-01-19", "role": "VP Risk Engineering", "person": "Tara Singh", "change_type": "hired"}
+    ]
   },
   {
     "company_name": "Quiet Current Bank",
@@ -88,7 +110,9 @@
     "open_roles_current": 2,
     "open_roles_60_days_ago": 2,
     "ai_roles_open": 0,
-    "ai_practices": []
+    "ai_practices": [],
+    "career_page_path": "data/job_posts/quiet_current_bank.html",
+    "leadership_changes": []
   },
   {
     "company_name": "Harborline Ledger",
@@ -101,6 +125,10 @@
     "open_roles_current": 3,
     "open_roles_60_days_ago": 2,
     "ai_roles_open": 0,
-    "ai_practices": []
+    "ai_practices": [],
+    "career_page_path": "data/job_posts/harborline_ledger.html",
+    "leadership_changes": [
+      {"date": "2026-01-15", "role": "VP Engineering", "person": "Owen Patel", "change_type": "hired"}
+    ]
   }
 ]

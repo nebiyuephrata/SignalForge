@@ -12,6 +12,8 @@ SignalForge currently provides:
 - structured hiring and competitor-gap briefs
 - a confidence engine that controls tone
 - an OpenRouter-backed email generation layer with claim validation
+- provider-backed channel handlers for email and SMS
+- CRM and booking callback plumbing
 - a FastAPI backend for single-run and batch evaluation
 - adversarial probes for business-risk-focused evaluation
 
@@ -100,9 +102,9 @@ agent/
   tools/        local data loaders and deterministic enrichers
   llm/          OpenRouter client and email generation
   guards/       claim validation and outbound safety checks
-  channels/     email, sms, voice channel adapters and stubs
-  crm/          HubSpot-facing mapping and logging stubs
-  calendar/     booking link adapter
+  channels/     email and SMS provider clients, webhook handlers, event routing
+  crm/          HubSpot write path and enrichment-note sync
+  calendar/     booking link generation and callback support
   utils/        config, tracing, logging
 
 backend/
@@ -182,12 +184,12 @@ Default API response shape:
 
 ### Planned / Stubbed Integrations
 
-- `Resend` for outbound email delivery
-- `HubSpot` for CRM logging
-- `Cal.com` for booking links
-- `Africa's Talking` for SMS
+- `Resend` for outbound email delivery and inbound reply / bounce events
+- `HubSpot` for contact upsert and enrichment-note logging
+- `Cal.com` for booking links and completed-booking callbacks
+- `Africa's Talking` for warm-lead SMS and inbound reply routing
 
-These keys can be configured now, but not all integrations are live in the request path yet.
+These paths are now implemented in code. In this local environment there is no HubSpot MCP server available, so the repo currently uses the HubSpot HTTP API boundary instead of MCP for writes.
 
 ## Design Principles
 
@@ -280,7 +282,15 @@ Optional integrations:
 - `RESEND_API_KEY`
 - `HUBSPOT_API_KEY`
 - `CALCOM_API_KEY`
+- `CALCOM_BASE_URL`
+- `CALCOM_BOOKING_SLUG`
+- `CALCOM_WEBHOOK_SECRET`
 - `AFRICAS_TALKING_API_KEY`
+- `AFRICAS_TALKING_BASE_URL`
+- `AFRICAS_TALKING_WEBHOOK_SECRET`
+- `RESEND_FROM_EMAIL`
+- `RESEND_REPLY_TO`
+- `RESEND_WEBHOOK_SECRET`
 
 ## Running the Backend
 
@@ -354,6 +364,58 @@ curl -sS http://127.0.0.1:8000/run-prospect/scenarios
 curl -sS http://127.0.0.1:8000/run-prospect/batch
 ```
 
+## Operational Channel Endpoints
+
+### Draft an email for a lead
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/email/draft \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example"}'
+```
+
+### Send an outbound email through Resend
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/email/send \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example"}'
+```
+
+### Receive inbound Resend events
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/email/resend/events \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"email.replied","data":{"email_id":"email-123","to":"cto@northstar.example","text":"Interested","tags":[{"name":"company_name","value":"Northstar Lending"}]}}'
+```
+
+### Send a warm-lead SMS through Africa's Talking
+
+SignalForge treats SMS as a warm channel only. A prior email reply must be acknowledged in the request.
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/sms/send-warm \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Northstar Lending","phone_number":"+15551234567","body":"Following up here after your note.","prior_email_reply":true}'
+```
+
+### Receive inbound Africa's Talking replies
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/sms/africas-talking/events \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"sms-1","from":"+15551234567","text":"Let us talk next week","company_name":"Northstar Lending"}'
+```
+
+### Receive a completed Cal.com booking callback
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/webhooks/cal/booking-completed \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example","booking_id":"booking-1","booking_url":"https://cal.com/signalforge-discovery/booking-1","meeting_start":"2026-04-24T15:00:00Z"}'
+```
+
 ## Local Execution Scripts
 
 Run the default prospect from Python:
@@ -420,24 +482,59 @@ Located in:
 
 This layer is aimed at production risk, not just unit correctness.
 
+## Rubric Coverage Notes
+
+### Outbound email handler
+
+- Provider: `Resend`
+- Outbound send path: implemented
+- Inbound reply / bounce webhook: implemented
+- Downstream interface: handler-level callback registration through the channel event router
+- Error handling: malformed payloads return `400`, failed sends return structured failure objects, bounces are logged as explicit events
+
+### SMS handler
+
+- Provider: `Africa's Talking`
+- Outbound SMS: implemented
+- Inbound replies: implemented
+- Warm-lead gating: enforced in code
+- Downstream routing: inbound replies emit channel events to registered handlers
+
+### CRM and calendar integration
+
+- HubSpot write path: implemented via HTTP API client in this environment
+- Enrichment data: written as structured CRM note content including ICP segment, signal data, and enrichment timestamp
+- Cal.com booking path: callable from agent code
+- Booking callback to CRM update: implemented
+
+### Signal enrichment pipeline
+
+- Crunchbase fixture loader: implemented
+- Job-post scraping via Playwright: implemented with a fixture fallback if the browser runtime is unavailable locally
+- layoffs.fyi CSV parsing: implemented
+- leadership change detection: implemented from synthetic company records
+- merged structured artifact with confidences: exposed in `hiring_signal_brief.source_artifact`
+
 ## Current Status
 
 Working today:
 
 - deterministic enrichment
+- four-source signal artifact with confidence scores
 - structured brief generation
 - confidence-aware OpenRouter email generation
 - claim validation
 - FastAPI execution path
 - frontend dashboard over the live API
+- Resend send path plus inbound email webhook
+- Africa's Talking warm-SMS path plus inbound SMS webhook
+- HubSpot contact and enrichment-note sync
+- Cal.com booking callback to CRM update
 - run logging and artifact emission
 - adversarial evaluation pack
 
 Not yet fully wired into the live path:
 
-- real outbound email sending via Resend
-- HubSpot writeback
-- live Cal.com automation beyond booking link return
 - multi-turn conversational orchestration
 
 ## Recommended Next Steps
