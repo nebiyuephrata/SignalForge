@@ -35,12 +35,16 @@ class ProspectEmail(BaseModel):
 
 
 class ProspectRunResponse(BaseModel):
+    as_of_date: str | None = None
     company: str
+    company_profile: dict[str, object] | None = None
     hiring_signal_brief: dict[str, object]
     competitor_gap_brief: dict[str, object]
     email: ProspectEmail
     confidence: str
     trace_id: str
     trace_url: str | None = None
+    claim_validation: dict[str, object] | None = None
+    reply_text: str | None = None
     qualification: dict[str, object]
     booking: dict[str, object]

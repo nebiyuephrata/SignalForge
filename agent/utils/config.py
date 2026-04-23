@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     log_level: str = "INFO"
+    frontend_origins: str = "http://127.0.0.1:5173,http://localhost:5173"
 
     openai_api_key: str = ""
     openrouter_api_key: str = ""

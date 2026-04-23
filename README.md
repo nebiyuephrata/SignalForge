@@ -110,6 +110,7 @@ backend/
   services/     run orchestration and API-facing service layer
   schemas.py    request and response contracts
 
+frontend/       React + Vite dashboard for signals, email output, and peers
 data/           local synthetic prospect and layoffs data
 eval/           adversarial scenarios and evaluation harness
 probes/         production-grade probe library and failure analysis
@@ -153,6 +154,14 @@ Default API response shape:
 - `Pydantic v2` for typed request and response contracts
 - `Uvicorn` for local serving
 - `Python 3.12+`
+
+### Frontend
+
+- `React` with `Vite`
+- `TanStack Query` for async data fetching and cache control
+- `Tailwind CSS` for the UI system
+- `Lucide React` for iconography
+- lightweight custom data visualization for peer comparison
 
 ### Intelligence Layer
 
@@ -287,6 +296,28 @@ Health check:
 curl -sS http://127.0.0.1:8000/health
 ```
 
+## Running the Frontend
+
+From the `frontend/` directory:
+
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The dashboard runs at:
+
+```text
+http://127.0.0.1:5173
+```
+
+If your backend is not on the default port, set:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
 ## API Endpoints
 
 ### Run the default prospect
@@ -398,6 +429,7 @@ Working today:
 - confidence-aware OpenRouter email generation
 - claim validation
 - FastAPI execution path
+- frontend dashboard over the live API
 - run logging and artifact emission
 - adversarial evaluation pack
 
@@ -407,7 +439,6 @@ Not yet fully wired into the live path:
 - HubSpot writeback
 - live Cal.com automation beyond booking link return
 - multi-turn conversational orchestration
-- frontend dashboard
 
 ## Recommended Next Steps
 
