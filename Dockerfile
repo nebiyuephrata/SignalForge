@@ -24,7 +24,6 @@ COPY eval/ ./eval/
 COPY logs/ ./logs/
 COPY outputs/ ./outputs/
 COPY probes/ ./probes/
-COPY tenacious_sales_data/ ./tenacious_sales_data/
 COPY frontend/package.json ./frontend/package.json
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
