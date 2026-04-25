@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,12 +24,14 @@ class Settings(BaseSettings):
     resend_api_base_url: str = "https://api.resend.com"
     resend_from_email: str = "SignalForge <signals@updates.signalforge.local>"
     resend_reply_to: str = "replies@updates.signalforge.local"
+    staff_sink_email: str = ""
     resend_webhook_secret: str = ""
     africas_talking_api_key: str = ""
     africas_talking_username: str = "sandbox"
     africas_talking_base_url: str = "https://api.africastalking.com/version1"
     africas_talking_webhook_secret: str = ""
     hubspot_api_key: str = ""
+    hubspot_access_token: str = ""
     hubspot_base_url: str = "https://api.hubapi.com"
     calcom_api_key: str = ""
     calcom_base_url: str = "https://cal.com"
@@ -36,7 +39,10 @@ class Settings(BaseSettings):
     calcom_webhook_secret: str = ""
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
-    langfuse_host: str = "http://localhost:3001"
+    langfuse_host: str = Field(
+        default="http://localhost:3001",
+        validation_alias=AliasChoices("LANGFUSE_HOST", "LANGFUSE_BASE_URL"),
+    )
 
     redis_url: str = "redis://localhost:6379/0"
     database_url: str = "postgresql://signalforge:signalforge@localhost:5432/signalforge"

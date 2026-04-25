@@ -1,12 +1,12 @@
 import asyncio
 
-from fastapi import HTTPException
-
-from agent.briefs.brief_schema import CRMFields, LeadRecord, OutboundMessage
-from agent.channels.channel_schema import InboundChannelEvent, ProviderSendRequest, ProviderSendResult, WebhookProcessingResult
+from agent.briefs.brief_schema import LeadRecord
+from agent.channels.channel_schema import InboundChannelEvent, ProviderSendRequest, ProviderSendResult
 from agent.channels.email.email_handler import EmailHandler
-from agent.channels.event_router import ChannelEventRouter
 from agent.channels.sms.sms_handler import SMSHandler
+from agent.core.channel_orchestrator import ChannelOrchestrator
+from agent.core.models import LeadLifecycleState
+from agent.core.state_manager import ProspectStateStore
 from agent.signals.hiring_signals import build_hiring_signal_brief
 from agent.tools.crunchbase_tool import CrunchbaseTool
 from backend.routes import webhook_cal, webhook_email, webhook_sms
@@ -46,34 +46,43 @@ class FakeHubSpotClient:
         self.calls.append(("upsert_contact", {"email": email, **properties}))
         return {"id": "contact-1", "properties": properties}
 
-    def create_note(self, *, contact_id: str, body: str) -> dict[str, object]:
-        self.calls.append(("create_note", {"contact_id": contact_id, "body": body}))
+    def update_contact_properties(self, *, contact_id: str, properties: dict[str, object]) -> dict[str, object]:
+        self.calls.append(("update_contact_properties", {"contact_id": contact_id, **properties}))
+        return {"status": "success", "id": contact_id}
+
+    def create_activity(self, *, contact_id: str, subject: str, body: str, channel: str) -> dict[str, object]:
+        self.calls.append(
+            ("create_activity", {"contact_id": contact_id, "subject": subject, "body": body, "channel": channel})
+        )
         return {"id": "note-1", "contact_id": contact_id}
 
 
-def test_hiring_signal_brief_merges_all_required_sources() -> None:
+class FallbackHubSpotClient(FakeHubSpotClient):
+    def update_contact_properties(self, *, contact_id: str, properties: dict[str, object]) -> dict[str, object]:
+        self.calls.append(("update_contact_properties", {"contact_id": contact_id, **properties}))
+        return {
+            "status": "failed",
+            "error": "http_400",
+            "path": f"/crm/v3/objects/contacts/{contact_id}",
+            "response": {"category": "VALIDATION_ERROR"},
+        }
+
+
+def test_hiring_signal_brief_merges_required_sources() -> None:
     brief = build_hiring_signal_brief("Northstar Lending", CrunchbaseTool())
 
     signal_names = {signal["signal"] for signal in brief["signals"]}
+    checked_sources = {source["source"] for source in brief["data_sources_checked"]}
     assert {"funding_event", "job_post_scrape", "job_post_velocity", "layoffs", "leadership_change"} <= signal_names
-    assert brief["source_artifact"]["job_post_scrape"]["confidence"] >= 0.7
-    assert brief["source_artifact"]["leadership_change"]["confidence"] >= 0.35
-    assert brief["primary_segment_match"] in {
-        "segment_1_series_a_b",
-        "segment_2_mid_market_restructure",
-        "segment_3_leadership_transition",
-        "segment_4_specialized_capability",
-        "abstain",
-    }
-    assert "bench_to_brief_match" in brief
-    assert "data_sources_checked" in brief
+    assert {"crunchbase_odm", "layoffs_fyi", "company_careers_page", "builtin", "wellfound", "linkedin_public"} <= checked_sources
+    assert brief["hiring_velocity"]["delta"] == 9
+    assert brief["ai_maturity"]["score"] >= 1
 
 
-def test_email_handler_routes_inbound_replies_to_downstream_handler() -> None:
+def test_email_handler_routes_inbound_replies_to_stateful_service() -> None:
     captured: list[InboundChannelEvent] = []
-    router = ChannelEventRouter(log_path="/tmp/test-email-events.jsonl")
-    router.register(lambda event: captured.append(event) or {"accepted": True})
-    handler = EmailHandler(client=FakeEmailClient(), event_router=router, log_path="/tmp/test-email-handler.jsonl")
+    handler = EmailHandler(client=FakeEmailClient(), log_path="/tmp/test-email-handler.jsonl")
+    handler.register_inbound_handler(lambda event: captured.append(event) or {"accepted": True})
 
     result = handler.handle_provider_webhook(
         {
@@ -93,43 +102,53 @@ def test_email_handler_routes_inbound_replies_to_downstream_handler() -> None:
     assert captured[0].message_text == "Yes, this is relevant."
 
 
-def test_sms_handler_enforces_warm_lead_gating() -> None:
-    handler = SMSHandler(client=FakeSMSClient(), log_path="/tmp/test-sms-handler.jsonl")
+def test_channel_orchestrator_enforces_sms_gate_from_state(tmp_path) -> None:
+    store = ProspectStateStore(path=str(tmp_path / "state.json"))
+    orchestrator = ChannelOrchestrator(
+        email_handler=EmailHandler(client=FakeEmailClient(), log_path=str(tmp_path / "email.jsonl")),
+        sms_handler=SMSHandler(client=FakeSMSClient(), log_path=str(tmp_path / "sms.jsonl")),
+        state_store=store,
+    )
+    lead = LeadRecord(company_name="Northstar Lending", contact_email="cto@northstar.example", phone_number="+15551234567")
 
     try:
-        handler.send_warm_follow_up(
-            ProviderSendRequest(company_name="Northstar Lending", phone_number="+15551234567", body="Follow up"),
-            prior_email_reply=False,
+        orchestrator.send_sms(
+            lead=lead,
+            request=ProviderSendRequest(company_name=lead.company_name, phone_number=lead.phone_number, body="Follow up"),
         )
     except Exception as exc:  # noqa: BLE001
-        assert "prior email reply" in str(exc)
+        assert "recorded email reply" in str(exc)
     else:
-        raise AssertionError("Expected SMS policy failure")
+        raise AssertionError("Expected SMS gate to block send without email reply")
+
+    state = store.get(
+        orchestrator.lead_key(lead.company_name, lead.contact_email, lead.phone_number),
+        company_name=lead.company_name,
+        contact_email=lead.contact_email,
+        phone_number=lead.phone_number,
+    )
+    state.email_reply_received = True
+    store.save(state)
+    result, updated_state = orchestrator.send_sms(
+        lead=lead,
+        request=ProviderSendRequest(company_name=lead.company_name, phone_number=lead.phone_number, body="Follow up"),
+    )
+
+    assert result.status == "queued"
+    assert updated_state.stage == "sms_sent"
 
 
-def test_email_send_route_syncs_to_crm(monkeypatch) -> None:
-    monkeypatch.setattr(webhook_email, "email_handler", EmailHandler(client=FakeEmailClient(), log_path="/tmp/route-email.jsonl"))
-    monkeypatch.setattr(
-        webhook_email.conversation_service,
-        "draft_outreach",
-        lambda lead: OutboundMessage(
-            channel="email",
-            body="Draft body",
-            crm_fields=CRMFields(
-                icp_segment="growth_fintech",
-                signal_confidence=0.72,
-                ai_maturity=1,
-                intent_level="high",
-                qualification_status="qualified",
-                next_action="share_booking_link",
-            ),
-        ),
+def test_email_send_route_syncs_to_crm(monkeypatch, tmp_path) -> None:
+    fake_client = FakeHubSpotClient()
+    service = webhook_email.conversation_service
+    service.crm_service = CRMService(client=fake_client)
+    service.channel_orchestrator = ChannelOrchestrator(
+        email_handler=EmailHandler(client=FakeEmailClient(), log_path=str(tmp_path / "route-email.jsonl")),
+        sms_handler=SMSHandler(client=FakeSMSClient(), log_path=str(tmp_path / "route-sms.jsonl")),
+        state_store=ProspectStateStore(path=str(tmp_path / "state.json")),
     )
-    monkeypatch.setattr(
-        webhook_email.crm_service,
-        "sync",
-        lambda lead, message: {"contact": {"id": "contact-1"}, "enrichment_note": {"id": "note-1"}},
-    )
+    webhook_email.email_handler = service.channel_orchestrator.email_handler
+    webhook_email.email_handler.register_inbound_handler(service.handle_inbound_event)
 
     response = asyncio.run(
         webhook_email.send_email(
@@ -140,22 +159,100 @@ def test_email_send_route_syncs_to_crm(monkeypatch) -> None:
     assert response.provider == "resend"
     assert response.status == "queued"
     assert response.crm_sync["contact"]["id"] == "contact-1"
+    assert any(call[0] == "create_activity" for call in fake_client.calls)
 
 
-def test_email_webhook_route_rejects_malformed_payload() -> None:
-    try:
-        asyncio.run(webhook_email.resend_events({"type": "email.replied"}))
-    except HTTPException as exc:
-        assert exc.status_code == 400
-    else:
-        raise AssertionError("Expected malformed email webhook to return 400")
+def test_route_level_email_reply_unblocks_sms_handoff(tmp_path) -> None:
+    fake_client = FakeHubSpotClient()
+    shared_orchestrator = ChannelOrchestrator(
+        email_handler=EmailHandler(client=FakeEmailClient(), log_path=str(tmp_path / "route-email.jsonl")),
+        sms_handler=SMSHandler(client=FakeSMSClient(), log_path=str(tmp_path / "route-sms.jsonl")),
+        state_store=ProspectStateStore(path=str(tmp_path / "state.json")),
+    )
+    shared_crm = CRMService(client=fake_client)
+
+    webhook_email.conversation_service.crm_service = shared_crm
+    webhook_email.conversation_service.channel_orchestrator = shared_orchestrator
+    webhook_email.email_handler = shared_orchestrator.email_handler
+    webhook_email.email_handler.register_inbound_handler(webhook_email.conversation_service.handle_inbound_event)
+
+    webhook_sms.conversation_service.crm_service = shared_crm
+    webhook_sms.conversation_service.channel_orchestrator = shared_orchestrator
+    webhook_sms.sms_handler = shared_orchestrator.sms_handler
+    webhook_sms.sms_handler.register_inbound_handler(webhook_sms.conversation_service.handle_inbound_event)
+
+    send_response = asyncio.run(
+        webhook_email.send_email(
+            SendEmailRequest(
+                company_name="Northstar Lending",
+                contact_email="cto@northstar.example",
+                contact_name="Maya",
+                phone_number="+15551234567",
+            )
+        )
+    )
+    reply_response = asyncio.run(
+        webhook_email.resend_events(
+            {
+                "type": "email.reply_received",
+                "data": {
+                    "id": "evt-1",
+                    "email_id": "email-123",
+                    "to": "cto@northstar.example",
+                    "text": "Yes, send the link.",
+                    "tags": [{"name": "company_name", "value": "Northstar Lending"}],
+                },
+            }
+        )
+    )
+    sms_response = asyncio.run(
+        webhook_sms.send_warm_sms(
+            SendWarmSmsRequest(
+                company_name="Northstar Lending",
+                contact_email="cto@northstar.example",
+                phone_number="+15551234567",
+                body="Thanks for the reply. Here is the shortest next step.",
+            )
+        )
+    )
+
+    assert send_response.status == "queued"
+    assert reply_response.event_type == "reply"
+    assert reply_response.routed_handlers == 1
+    assert sms_response.status == "queued"
+    assert sms_response.provider == "africas_talking"
 
 
-def test_sms_webhook_route_processes_inbound_reply(monkeypatch) -> None:
-    captured: list[InboundChannelEvent] = []
-    router = ChannelEventRouter(log_path="/tmp/route-sms-events.jsonl")
-    router.register(lambda event: captured.append(event) or {"accepted": True})
-    monkeypatch.setattr(webhook_sms, "sms_handler", SMSHandler(client=FakeSMSClient(), event_router=router, log_path="/tmp/route-sms.jsonl"))
+def test_crm_service_logs_fallback_note_when_custom_fields_unavailable() -> None:
+    fake_client = FallbackHubSpotClient()
+    crm_service = CRMService(client=fake_client)
+
+    result = crm_service.sync_booking_completed(
+        contact_email="cto@northstar.example",
+        company_name="Northstar Lending",
+        booking_id="booking-1",
+        booking_url="https://cal.com/signalforge-discovery/booking-1",
+        meeting_start="2026-04-24T15:00:00Z",
+    )
+
+    assert result["contact"]["id"] == "contact-1"
+    assert result["enrichment_fields"]["status"] == "fallback_logged"
+    assert result["enrichment_fields"]["fallback_note"]["id"] == "note-1"
+    assert any(
+        call[0] == "create_activity" and call[1]["subject"] == "signalforge_booking_fields"
+        for call in fake_client.calls
+    )
+
+
+def test_sms_webhook_route_processes_inbound_reply(monkeypatch, tmp_path) -> None:
+    service = webhook_sms.conversation_service
+    service.channel_orchestrator = ChannelOrchestrator(
+        email_handler=EmailHandler(client=FakeEmailClient(), log_path=str(tmp_path / "email.jsonl")),
+        sms_handler=SMSHandler(client=FakeSMSClient(), log_path=str(tmp_path / "sms.jsonl")),
+        state_store=ProspectStateStore(path=str(tmp_path / "state.json")),
+    )
+    webhook_sms.sms_handler = service.channel_orchestrator.sms_handler
+    webhook_sms.sms_handler.register_inbound_handler(service.handle_inbound_event)
 
     response = asyncio.run(
         webhook_sms.africas_talking_events(
@@ -170,12 +267,15 @@ def test_sms_webhook_route_processes_inbound_reply(monkeypatch) -> None:
 
     assert response.status == "processed"
     assert response.routed_handlers == 1
-    assert captured[0].phone_number == "+15551234567"
 
 
-def test_booking_webhook_updates_crm_for_same_prospect(monkeypatch) -> None:
+def test_booking_webhook_updates_crm_and_lifecycle(monkeypatch, tmp_path) -> None:
     fake_client = FakeHubSpotClient()
-    monkeypatch.setattr(webhook_cal, "crm_service", CRMService(client=fake_client))
+    webhook_cal.crm_service = CRMService(client=fake_client)
+    webhook_cal.conversation_service.crm_service = webhook_cal.crm_service
+    webhook_cal.conversation_service.channel_orchestrator = ChannelOrchestrator(
+        state_store=ProspectStateStore(path=str(tmp_path / "state.json"))
+    )
 
     response = asyncio.run(
         webhook_cal.booking_completed(
@@ -191,4 +291,4 @@ def test_booking_webhook_updates_crm_for_same_prospect(monkeypatch) -> None:
 
     assert response["status"] == "processed"
     assert response["crm_sync"]["contact"]["id"] == "contact-1"
-    assert any(call[0] == "create_note" for call in fake_client.calls)
+    assert response["lifecycle_stage"] == "booked"

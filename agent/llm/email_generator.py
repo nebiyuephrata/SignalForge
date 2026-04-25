@@ -11,6 +11,13 @@ from agent.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+CLAIM_LIMITS = {
+    "high": 3,
+    "medium": 2,
+    "low": 1,
+}
+
+
 def generate_outreach_email(
     hiring_signal_brief: dict[str, object],
     competitor_gap_brief: dict[str, object],
@@ -22,40 +29,33 @@ def generate_outreach_email(
     company_name = str(hiring_signal_brief.get("company_name", "this company"))
     confidence = confidence_level or compute_global_confidence(hiring_signal_brief)
     claim_catalog = build_claim_catalog(hiring_signal_brief, competitor_gap_brief)
-    structured_signals = hiring_signal_brief.get("signals", [])
-    if not claim_catalog:
+    allowed_claims = claim_catalog[: CLAIM_LIMITS[confidence]]
+
+    if not allowed_claims:
         return generate_deterministic_fallback_email(
             hiring_signal_brief,
             competitor_gap_brief,
             confidence_level=confidence,
-            reason="no_claims",
+            reason="no_grounded_claims",
         )
 
-    if confidence == "low" and (not isinstance(structured_signals, list) or len(structured_signals) == 0):
+    if confidence == "low":
         return generate_deterministic_fallback_email(
             hiring_signal_brief,
             competitor_gap_brief,
             confidence_level=confidence,
-            reason="no_structured_signals",
-        )
-
-    if confidence == "low" and len(claim_catalog) <= 2:
-        return generate_deterministic_fallback_email(
-            hiring_signal_brief,
-            competitor_gap_brief,
-            confidence_level=confidence,
-            reason="low_value",
+            reason="weak_confidence_default",
         )
 
     llm_client = client or OpenRouterClient()
     system_prompt = _build_system_prompt(confidence, strict_mode)
-    user_prompt = _build_user_prompt(company_name, confidence, claim_catalog)
+    user_prompt = _build_user_prompt(company_name, confidence, allowed_claims)
     try:
         response = llm_client.chat_json(
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             prompt_name="generate_outreach_email_strict" if strict_mode else "generate_outreach_email",
-            temperature=0.35 if confidence == "high" else 0.4 if confidence == "medium" else 0.45,
+            temperature=0.32 if confidence == "high" else 0.38,
             metadata={"company_name": company_name, "confidence_level": confidence},
             strict_mode=strict_mode,
         )
@@ -66,9 +66,16 @@ def generate_outreach_email(
             competitor_gap_brief,
             confidence_level=confidence,
             reason="llm_error",
+            reason_detail={
+                "error": str(exc),
+                "trace_id": exc.trace_id,
+                "trace_url": exc.trace_url,
+                "prompt_name": exc.prompt_name,
+                "model_attempts": exc.model_attempts,
+            },
         )
 
-    return _normalize_email_output(response, confidence, claim_catalog)
+    return _normalize_email_output(response=response, confidence_level=confidence, claim_catalog=allowed_claims)
 
 
 def build_claim_catalog(
@@ -76,61 +83,66 @@ def build_claim_catalog(
     competitor_gap_brief: dict[str, object],
 ) -> list[dict[str, Any]]:
     catalog: list[dict[str, Any]] = []
-    for signal in hiring_signal_brief.get("signals", []):
+    signals = hiring_signal_brief.get("signals", [])
+    for signal in signals:
         if not isinstance(signal, dict):
             continue
         signal_name = str(signal.get("signal", ""))
         signal_confidence = float(signal.get("confidence", 0.0))
-        if signal_name == "leadership_change" and signal_confidence < 0.5:
-            continue
         value = signal.get("value", {})
-        if signal_name == "funding_event":
+        if signal_name == "funding_event" and signal_confidence >= 0.5:
             catalog.append(
                 {
                     "id": "funding_event",
                     "type": "funding",
                     "confidence": signal_confidence,
-                    "statement": f"{value['round']} on {value['date']} ({value['days_since_event']} days ago)",
+                    "statement": f"{value['round']} on {value['date']} ({value['days_since_event']} days ago).",
                 }
             )
-        elif signal_name == "job_post_velocity":
+        if signal_name == "job_post_velocity" and signal_confidence >= 0.55:
             catalog.append(
                 {
                     "id": "job_post_velocity",
                     "type": "hiring",
                     "confidence": signal_confidence,
                     "statement": (
-                        f"Open roles moved from {value['open_roles_60_days_ago']} to "
-                        f"{value['open_roles_current']} in 60 days."
+                        f"Open roles moved from {value['open_roles_60_days_ago']} to {value['open_roles_current']} over the last 60 days."
                     ),
                 }
             )
-        elif signal_name == "layoffs":
-            evidence = signal.get("evidence", [])
-            if evidence:
-                catalog.append(
-                    {
-                        "id": "layoffs",
-                        "type": "hiring",
-                        "confidence": signal_confidence,
-                        "statement": str(evidence[0]),
-                    }
-                )
+        if signal_name == "leadership_change" and signal_confidence >= 0.6 and signal.get("evidence"):
+            catalog.append(
+                {
+                    "id": "leadership_change",
+                    "type": "leadership",
+                    "confidence": signal_confidence,
+                    "statement": str(signal["evidence"][0]),
+                }
+            )
+        if signal_name == "layoffs" and signal_confidence >= 0.7 and signal.get("evidence"):
+            catalog.append(
+                {
+                    "id": "layoffs",
+                    "type": "restructure",
+                    "confidence": signal_confidence,
+                    "statement": str(signal["evidence"][0]),
+                }
+            )
 
-    ai_signal = hiring_signal_brief.get("ai_maturity_score", {})
+    ai_signal = hiring_signal_brief.get("ai_maturity", {})
     if isinstance(ai_signal, dict):
         catalog.append(
             {
                 "id": "ai_maturity",
                 "type": "ai_maturity",
                 "confidence": float(ai_signal.get("confidence", 0.0)),
-                "statement": f"AI maturity score is {ai_signal.get('value', 0)}.",
+                "statement": f"AI maturity score is {ai_signal.get('score', 0)}.",
             }
         )
 
     primary_segment_match = str(hiring_signal_brief.get("primary_segment_match", "")).strip()
     segment_confidence = float(hiring_signal_brief.get("segment_confidence", 0.0) or 0.0)
-    if primary_segment_match:
+    if primary_segment_match and primary_segment_match != "abstain":
         catalog.append(
             {
                 "id": "primary_segment_match",
@@ -165,69 +177,56 @@ def build_claim_catalog(
         )
         catalog.append(
             {
-                "id": "peer_average_ai_maturity",
+                "id": "distribution_position",
                 "type": "competitor_gap",
                 "confidence": float(competitor_gap_brief.get("confidence", 0.0)),
                 "statement": (
-                    f"Peer average AI maturity is {competitor_gap_brief.get('peer_average_ai_maturity', 0)} "
-                    f"while the target is {competitor_gap_brief.get('target_ai_maturity', 0)}."
+                    f"Prospect distribution position is {competitor_gap_brief.get('distribution_position', {}).get('label', 'unknown')} "
+                    f"with peer average AI maturity {competitor_gap_brief.get('peer_average_ai_maturity', 0)}."
                 ),
             }
         )
-        for index, practice in enumerate(competitor_gap_brief.get("top_quartile_practices", [])[:3], start=1):
-            catalog.append(
-                {
-                    "id": f"top_practice_{index}",
-                    "type": "competitor_gap",
-                    "confidence": float(competitor_gap_brief.get("confidence", 0.0)),
-                    "statement": f"Top-quartile practice: {practice}.",
-                }
-            )
-        for index, finding in enumerate(competitor_gap_brief.get("gap_findings", [])[:2], start=1):
+        for index, finding in enumerate(competitor_gap_brief.get("gap_findings", [])[:3], start=1):
             if not isinstance(finding, dict):
                 continue
             catalog.append(
                 {
                     "id": f"gap_finding_{index}",
                     "type": "competitor_gap",
-                    "confidence": 0.8 if finding.get("confidence") == "high" else 0.6,
+                    "confidence": 0.85 if finding.get("confidence") == "high" else 0.65,
                     "statement": f"Gap finding: {finding.get('practice')}. Prospect state: {finding.get('prospect_state')}",
                 }
             )
 
-    return [claim for claim in catalog if claim["statement"]]
+    catalog = [claim for claim in catalog if str(claim["statement"]).strip()]
+    catalog.sort(key=lambda claim: float(claim["confidence"]), reverse=True)
+    return catalog
 
 
 def _build_system_prompt(confidence_level: str, strict_mode: bool) -> str:
     tone_rule = {
-        "high": "Use assertive, specific language, but only for claims directly supported by the provided signals.",
-        "medium": "Use cautious, suggestive language such as 'it looks like' or 'we may be seeing'.",
-        "low": "Use exploratory, question-based language and avoid hard claims.",
+        "high": "Use precise language but never move beyond the listed claims.",
+        "medium": "Use directional language such as 'it looks like' and avoid hard certainty.",
+        "low": "Use exploratory, question-led language and avoid declarative claims.",
     }[confidence_level]
     strict_instruction = (
-        "You are in strict repair mode. Use no more than two claims, keep the language conservative, and prefer questions."
+        "You are repairing a previous draft. Use at most one claim and prefer a calibration question."
         if strict_mode
         else "Keep the note concise and executive-level."
     )
     return (
         "You are generating B2B outreach for Tenacious via SignalForge. "
-        "Never fabricate or infer any fact not listed in the provided claims. "
-        "Reference only the available structured claims. "
-        "If unsure, ask instead of asserting. "
-        "Follow the Tenacious style guide: be direct, grounded, honest, professional, and non-condescending. "
+        "Never fabricate or infer facts beyond the listed claims. "
+        "Reference only the allowed claim ids. "
+        "If uncertainty is visible, preserve it instead of smoothing it away. "
         "Subject lines must start with Request, Question, Context, or Follow-up and stay under 60 characters. "
-        "Keep the body under 120 words and avoid offshore-vendor cliches. "
+        "Keep the body under 120 words and avoid generic outsourcing language. "
         f"{tone_rule} {strict_instruction} "
-        "Return JSON with keys: subject, body, claims_used. "
-        "claims_used must be a list of claim ids selected from the allowed claims."
+        "Return JSON with keys: subject, body, claims_used."
     )
 
 
-def _build_user_prompt(
-    company_name: str,
-    confidence_level: str,
-    claim_catalog: list[dict[str, Any]],
-) -> str:
+def _build_user_prompt(company_name: str, confidence_level: str, claim_catalog: list[dict[str, Any]]) -> str:
     claim_lines = "\n".join(
         f"- {claim['id']} (confidence={claim['confidence']:.2f}): {claim['statement']}" for claim in claim_catalog
     )
@@ -238,14 +237,14 @@ def _build_user_prompt(
         f"Tenacious style reference:\n{load_style_guide()[:2200]}\n\n"
         "Allowed claims:\n"
         f"{claim_lines}\n\n"
-        "Write one outreach email under 120 words. "
-        "Use only the allowed claims. "
-        "If confidence is low, make the body question-led and exploratory. "
-        "If segment match is abstain or confidence is below 0.6, avoid a segment-specific pitch."
+        "Write one email using only the allowed claims. "
+        "Do not mention unnamed competitors. "
+        "If the confidence is medium, keep the tone careful and avoid saying the prospect 'clearly' needs anything."
     )
 
 
 def _normalize_email_output(
+    *,
     response: LLMClientResponse,
     confidence_level: str,
     claim_catalog: list[dict[str, Any]],
@@ -277,11 +276,21 @@ def generate_deterministic_fallback_email(
     *,
     confidence_level: str | None = None,
     reason: str,
+    reason_detail: dict[str, object] | None = None,
 ) -> dict[str, object]:
     company_name = str(hiring_signal_brief.get("company_name", "this company"))
     confidence = confidence_level or compute_global_confidence(hiring_signal_brief)
-    company = {"company_name": company_name}
-    fallback = generate_fallback_email(company, hiring_signal_brief, competitor_gap_brief)
+    if confidence == "low":
+        fallback = {
+            "subject": f"Question: {company_name} signal check",
+            "body": (
+                f"I'm not confident enough to make a hard claim about {company_name} from the available data. "
+                "Is hiring capacity, compliance workload, or AI operations a live priority right now?"
+            ),
+        }
+    else:
+        company = {"company_name": company_name}
+        fallback = generate_fallback_email(company, hiring_signal_brief, competitor_gap_brief)
     return {
         "subject": fallback["subject"],
         "body": fallback["body"],
@@ -295,5 +304,5 @@ def generate_deterministic_fallback_email(
         "cost_details": {},
         "latency_ms": 0,
         "cached": False,
-        "prompt_snapshot": {"fallback_reason": reason},
+        "prompt_snapshot": {"fallback_reason": reason, "fallback_reason_detail": reason_detail or {}},
     }

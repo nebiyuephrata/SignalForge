@@ -18,6 +18,21 @@ logger = get_logger(__name__)
 class OpenRouterClientError(RuntimeError):
     """Raised when OpenRouter generation fails."""
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        trace_id: str | None = None,
+        trace_url: str | None = None,
+        prompt_name: str | None = None,
+        model_attempts: list[dict[str, str]] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.trace_id = trace_id
+        self.trace_url = trace_url
+        self.prompt_name = prompt_name
+        self.model_attempts = model_attempts or []
+
 
 @dataclass
 class LLMClientResponse:
@@ -80,6 +95,7 @@ class OpenRouterClient:
         trace_id = self._create_trace_id()
         trace_url = self._trace_url(trace_id)
         last_error: Exception | None = None
+        model_attempts: list[dict[str, str]] = []
 
         for model_name in (self.settings.openrouter_model, self.settings.openrouter_fallback_model):
             for attempt in range(3):
@@ -137,6 +153,13 @@ class OpenRouterClient:
                         return result
                 except Exception as exc:  # noqa: BLE001
                     last_error = exc
+                    model_attempts.append(
+                        {
+                            "model": model_name,
+                            "attempt": str(attempt + 1),
+                            "error": str(exc),
+                        }
+                    )
                     logger.warning(
                         "OpenRouter request failed for model=%s attempt=%s prompt=%s: %s",
                         model_name,
@@ -147,7 +170,13 @@ class OpenRouterClient:
                     if attempt == 2:
                         break
 
-        raise OpenRouterClientError(f"OpenRouter generation failed: {last_error}") from last_error
+        raise OpenRouterClientError(
+            f"OpenRouter generation failed: {last_error}",
+            trace_id=trace_id,
+            trace_url=trace_url,
+            prompt_name=prompt_name,
+            model_attempts=model_attempts,
+        ) from last_error
 
     def _post(self, payload: dict[str, Any]) -> httpx.Response:
         headers = {

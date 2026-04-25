@@ -1,0 +1,362 @@
+[
+  {
+    "id": "P-001",
+    "category": "ICP misclassification",
+    "setup": "Prospect hiring spike is entirely in customer support ops, but the buyer targeted is VP Engineering.",
+    "expected_failure": "System frames the account as an engineering outsourcing opportunity.",
+    "observed_trigger_rate": 0.24,
+    "business_cost_usd": 28800,
+    "business_cost_formula": "0.24 x 0.40 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-002",
+    "category": "ICP misclassification",
+    "setup": "Prospect is a regulated bank hiring only compliance analysts while SignalForge matches a technical ICP.",
+    "expected_failure": "Message claims engineering capacity pressure with no technical evidence.",
+    "observed_trigger_rate": 0.27,
+    "business_cost_usd": 32400,
+    "business_cost_formula": "0.27 x 0.40 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-003",
+    "category": "ICP misclassification",
+    "setup": "Prospect is hiring an internal data science team, but the workflow selects generic staff augmentation positioning.",
+    "expected_failure": "The pitch mismatches the actual buying center and needed capability.",
+    "observed_trigger_rate": 0.22,
+    "business_cost_usd": 26400,
+    "business_cost_formula": "0.22 x 0.40 conversion loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-004",
+    "category": "signal over-claiming",
+    "setup": "Funding is recent, but the company only moved from 2 to 3 open roles in sixty days.",
+    "expected_failure": "System says the company is scaling aggressively.",
+    "observed_trigger_rate": 0.37,
+    "business_cost_usd": 55500,
+    "business_cost_formula": "0.37 x 0.50 trust loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-005",
+    "category": "signal over-claiming",
+    "setup": "A layoff event exists without rebound hiring, but the pitch treats it as outsourcing urgency.",
+    "expected_failure": "Message sounds predatory and overstates need.",
+    "observed_trigger_rate": 0.29,
+    "business_cost_usd": 60900,
+    "business_cost_formula": "0.29 x 0.70 trust loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-006",
+    "category": "signal over-claiming",
+    "setup": "Funding event is older than 180 days and velocity is flat.",
+    "expected_failure": "Email still claims fresh post-round hiring urgency.",
+    "observed_trigger_rate": 0.34,
+    "business_cost_usd": 51000,
+    "business_cost_formula": "0.34 x 0.50 trust loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-007",
+    "category": "outsourcing mismatch",
+    "setup": "Prospect is building a security engineering function with clear indications they want permanent leadership hires.",
+    "expected_failure": "System defaults to short-term outsourcing language instead of capability partnership language.",
+    "observed_trigger_rate": 0.26,
+    "business_cost_usd": 39000,
+    "business_cost_formula": "0.26 x 0.50 conversion loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-008",
+    "category": "outsourcing mismatch",
+    "setup": "The prospect has strong internal AI maturity and likely needs niche specialists, not generic augmentation.",
+    "expected_failure": "Message reads like commodity offshore staffing.",
+    "observed_trigger_rate": 0.31,
+    "business_cost_usd": 55800,
+    "business_cost_formula": "0.31 x 0.60 conversion loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-009",
+    "category": "outsourcing mismatch",
+    "setup": "Prospect just hired a CTO and public messaging emphasizes long-term internal capability building.",
+    "expected_failure": "System leads with headcount rental instead of team design support.",
+    "observed_trigger_rate": 0.28,
+    "business_cost_usd": 42000,
+    "business_cost_formula": "0.28 x 0.50 conversion loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-010",
+    "category": "tone drift",
+    "setup": "Medium-confidence signals are present but the prompt generates enthusiastic SDR language.",
+    "expected_failure": "Tone becomes salesy instead of informed and calm.",
+    "observed_trigger_rate": 0.33,
+    "business_cost_usd": 34650,
+    "business_cost_formula": "0.33 x 0.35 reply-rate loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-011",
+    "category": "tone drift",
+    "setup": "A prospect had layoffs and leadership change in the same quarter.",
+    "expected_failure": "Message sounds opportunistic rather than respectful of uncertainty.",
+    "observed_trigger_rate": 0.25,
+    "business_cost_usd": 41250,
+    "business_cost_formula": "0.25 x 0.55 reputational loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-012",
+    "category": "tone drift",
+    "setup": "Low-confidence account still receives a polished benchmark pitch rather than a calibration question.",
+    "expected_failure": "The note hides uncertainty instead of surfacing it.",
+    "observed_trigger_rate": 0.39,
+    "business_cost_usd": 46800,
+    "business_cost_formula": "0.39 x 0.40 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-013",
+    "category": "multi-thread leakage",
+    "setup": "A reply from one prospect thread updates state keyed only by company domain shared across subsidiaries.",
+    "expected_failure": "SMS eligibility and CRM notes leak across threads.",
+    "observed_trigger_rate": 0.17,
+    "business_cost_usd": 38250,
+    "business_cost_formula": "0.17 x 0.75 reputational loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-014",
+    "category": "multi-thread leakage",
+    "setup": "Two contacts at the same company receive outreach and one reply unlocks SMS for both.",
+    "expected_failure": "System sends an SMS to a contact who never replied to email.",
+    "observed_trigger_rate": 0.21,
+    "business_cost_usd": 47250,
+    "business_cost_formula": "0.21 x 0.75 reputational loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-015",
+    "category": "multi-thread leakage",
+    "setup": "Voice queue reads stale state from a previous prospect run with the same phone number fixture.",
+    "expected_failure": "Voice escalation is queued for the wrong lead.",
+    "observed_trigger_rate": 0.12,
+    "business_cost_usd": 27000,
+    "business_cost_formula": "0.12 x 0.75 reputational loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-016",
+    "category": "cost issues",
+    "setup": "Low-confidence prospects still go through full LLM generation and strict-regeneration loops.",
+    "expected_failure": "System spends tokens on threads that should have taken deterministic fallback immediately.",
+    "observed_trigger_rate": 0.42,
+    "business_cost_usd": 9000,
+    "business_cost_formula": "0.42 x $21 wasted compute-equivalent per 1000 threads",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-017",
+    "category": "cost issues",
+    "setup": "Identical prompts are regenerated because caching keys ignore confidence behavior changes.",
+    "expected_failure": "Repeated runs miss cache and inflate cost.",
+    "observed_trigger_rate": 0.23,
+    "business_cost_usd": 4800,
+    "business_cost_formula": "0.23 x $21 wasted compute-equivalent per 1000 threads",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-018",
+    "category": "cost issues",
+    "setup": "Provider failures still trigger downstream CRM and Langfuse work for a send that never happened.",
+    "expected_failure": "Operational cost rises and logs become noisy.",
+    "observed_trigger_rate": 0.19,
+    "business_cost_usd": 3600,
+    "business_cost_formula": "0.19 x $19 cleanup-equivalent per 1000 threads",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-019",
+    "category": "coordination failures",
+    "setup": "CRM sync runs before state store save and records the wrong lifecycle stage.",
+    "expected_failure": "HubSpot shows stale stage while the state machine moves ahead.",
+    "observed_trigger_rate": 0.18,
+    "business_cost_usd": 27000,
+    "business_cost_formula": "0.18 x 0.50 operator confusion x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-020",
+    "category": "coordination failures",
+    "setup": "Calendar webhook marks a booking complete but the conversation service never updates allowed next channels.",
+    "expected_failure": "Follow-up outreach continues after a meeting is booked.",
+    "observed_trigger_rate": 0.14,
+    "business_cost_usd": 31500,
+    "business_cost_formula": "0.14 x 0.75 reputational loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-021",
+    "category": "coordination failures",
+    "setup": "Inbound email reply is accepted by the provider webhook but not routed to state update logic.",
+    "expected_failure": "SMS warm lead gate remains closed even though the buyer replied.",
+    "observed_trigger_rate": 0.2,
+    "business_cost_usd": 36000,
+    "business_cost_formula": "0.20 x 0.60 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-022",
+    "category": "scheduling edge cases (EU/US/Africa)",
+    "setup": "Email offers a booking link without clarifying timezone and the buyer is in CET while the SDR is in US Eastern.",
+    "expected_failure": "Meeting slots appear off by one hour around DST transitions.",
+    "observed_trigger_rate": 0.16,
+    "business_cost_usd": 21600,
+    "business_cost_formula": "0.16 x 0.45 meeting loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-023",
+    "category": "scheduling edge cases (EU/US/Africa)",
+    "setup": "SMS follow-up references 'tomorrow morning' to an East Africa lead while the system runs in UTC.",
+    "expected_failure": "Relative-time messaging is wrong for the recipient.",
+    "observed_trigger_rate": 0.19,
+    "business_cost_usd": 17100,
+    "business_cost_formula": "0.19 x 0.30 reply-rate loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-024",
+    "category": "scheduling edge cases (EU/US/Africa)",
+    "setup": "Calendar webhook payload uses local time with no zone offset from a regional workspace.",
+    "expected_failure": "CRM records the wrong meeting time.",
+    "observed_trigger_rate": 0.11,
+    "business_cost_usd": 14850,
+    "business_cost_formula": "0.11 x 0.45 meeting loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-025",
+    "category": "signal reliability",
+    "setup": "Crunchbase record is missing for a manually entered prospect.",
+    "expected_failure": "Run crashes instead of producing a sparse, honest brief.",
+    "observed_trigger_rate": 0.09,
+    "business_cost_usd": 13500,
+    "business_cost_formula": "0.09 x 0.50 workflow loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-026",
+    "category": "signal reliability",
+    "setup": "Playwright is unavailable locally and the job scraper does not surface the fallback reason.",
+    "expected_failure": "Engineers think live scraping happened when only fixture parsing ran.",
+    "observed_trigger_rate": 0.41,
+    "business_cost_usd": 12300,
+    "business_cost_formula": "0.41 x 0.10 operator error x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-027",
+    "category": "signal reliability",
+    "setup": "Leadership change fixture exists but uses a malformed date.",
+    "expected_failure": "Leadership signal silently disappears and lowers segment quality.",
+    "observed_trigger_rate": 0.13,
+    "business_cost_usd": 19500,
+    "business_cost_formula": "0.13 x 0.50 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-028",
+    "category": "gap over-claiming",
+    "setup": "Only two peers have a public AI practice, but the summary says 'most competitors'.",
+    "expected_failure": "Benchmark language overstates the sector pattern.",
+    "observed_trigger_rate": 0.28,
+    "business_cost_usd": 46200,
+    "business_cost_formula": "0.28 x 0.55 trust loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-029",
+    "category": "gap over-claiming",
+    "setup": "Sparse sector with only three peers still yields a confident benchmark rank.",
+    "expected_failure": "System overstates peer confidence instead of flagging sparse evidence.",
+    "observed_trigger_rate": 0.32,
+    "business_cost_usd": 52800,
+    "business_cost_formula": "0.32 x 0.55 trust loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-030",
+    "category": "gap over-claiming",
+    "setup": "Named competitor tool or role is public, but the prospect has no direct comparable signal.",
+    "expected_failure": "Message implies the prospect is behind instead of saying no public signal was observed.",
+    "observed_trigger_rate": 0.3,
+    "business_cost_usd": 49500,
+    "business_cost_formula": "0.30 x 0.55 trust loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-031",
+    "category": "weak confidence handling",
+    "setup": "Overall confidence lands at 0.53 with one stale funding signal and one modest hiring signal.",
+    "expected_failure": "System still sends a directional benchmark email instead of a calibration question.",
+    "observed_trigger_rate": 0.46,
+    "business_cost_usd": 62100,
+    "business_cost_formula": "0.46 x 0.45 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-032",
+    "category": "weak confidence handling",
+    "setup": "Competitor gap confidence is low, but the email still names a clear maturity deficit.",
+    "expected_failure": "Confidence is treated as presentation metadata instead of a hard control surface.",
+    "observed_trigger_rate": 0.38,
+    "business_cost_usd": 51300,
+    "business_cost_formula": "0.38 x 0.45 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-033",
+    "category": "weak confidence handling",
+    "setup": "Prospect replies 'maybe' and the follow-up flow immediately offers SMS plus booking language.",
+    "expected_failure": "Workflow treats ambiguous intent like qualified intent.",
+    "observed_trigger_rate": 0.35,
+    "business_cost_usd": 47250,
+    "business_cost_formula": "0.35 x 0.45 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-034",
+    "category": "weak confidence handling",
+    "setup": "Confidence is low but the LLM path still runs before deterministic fallback.",
+    "expected_failure": "Weak evidence gets more fluent instead of more constrained.",
+    "observed_trigger_rate": 0.4,
+    "business_cost_usd": 54000,
+    "business_cost_formula": "0.40 x 0.45 conversion loss x $300000 ACV",
+    "tenacious_specific": false
+  },
+  {
+    "id": "P-035",
+    "category": "outsourcing perception",
+    "setup": "Message mentions offshore speed or cost savings to a Tenacious target who values embedded team quality.",
+    "expected_failure": "Prospect reads Tenacious as a low-cost outsourcing shop.",
+    "observed_trigger_rate": 0.27,
+    "business_cost_usd": 60750,
+    "business_cost_formula": "0.27 x 0.75 brand loss x $300000 ACV",
+    "tenacious_specific": true
+  },
+  {
+    "id": "P-036",
+    "category": "CTO sensitivity",
+    "setup": "A recently hired CTO receives a message implying the team is behind peers without acknowledging uncertainty.",
+    "expected_failure": "The note triggers defensiveness instead of curiosity.",
+    "observed_trigger_rate": 0.29,
+    "business_cost_usd": 65250,
+    "business_cost_formula": "0.29 x 0.75 brand loss x $300000 ACV",
+    "tenacious_specific": true
+  }
+]

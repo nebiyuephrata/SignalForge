@@ -8,6 +8,8 @@ from agent.llm.email_generator import build_claim_catalog
 from agent.utils.trace_logger import append_jsonl_log
 
 NUMERIC_TOKEN_PATTERN = re.compile(r"\b\d+(?:\.\d+)?(?:-\d+-\d+)?\b")
+ASSERTIVE_PHRASE_PATTERN = re.compile(r"\b(clearly|definitely|obviously|aggressively|certainly)\b", re.IGNORECASE)
+HEDGE_PATTERN = re.compile(r"\b(looks like|may|might|directionally|appears|seems)\b", re.IGNORECASE)
 
 
 def validate_email_claims(
@@ -25,14 +27,17 @@ def validate_email_claims(
         claims_used = []
     unsupported_claim_ids = [claim_id for claim_id in claims_used if claim_id not in allowed_claim_ids]
 
-    body = str(email_output.get("body", ""))
+    body = str(email_output.get("body", "")).strip()
+    confidence_level = str(email_output.get("confidence_level", "")).strip() or "low"
     unexpected_numeric_tokens = sorted(token for token in _extract_numeric_tokens(body) if token not in allowed_numeric_tokens)
-    valid = not unsupported_claim_ids and not unexpected_numeric_tokens
+    confidence_tone_mismatch = _confidence_tone_mismatch(body=body, confidence_level=confidence_level)
 
+    valid = not unsupported_claim_ids and not unexpected_numeric_tokens and not confidence_tone_mismatch
     report: dict[str, Any] = {
         "valid": valid,
         "unsupported_claim_ids": unsupported_claim_ids,
         "unexpected_numeric_tokens": unexpected_numeric_tokens,
+        "confidence_tone_mismatch": confidence_tone_mismatch,
         "claims_used": claims_used,
     }
     if valid:
@@ -48,6 +53,14 @@ def _extract_numeric_tokens(text: str) -> set[str]:
     return set(NUMERIC_TOKEN_PATTERN.findall(text))
 
 
+def _confidence_tone_mismatch(*, body: str, confidence_level: str) -> bool:
+    if confidence_level == "low":
+        return "?" not in body or bool(ASSERTIVE_PHRASE_PATTERN.search(body))
+    if confidence_level == "medium":
+        return bool(ASSERTIVE_PHRASE_PATTERN.search(body)) and not HEDGE_PATTERN.search(body)
+    return False
+
+
 def _log_validation_failure(email_output: dict[str, Any], report: dict[str, Any]) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     append_jsonl_log(
@@ -57,3 +70,4 @@ def _log_validation_failure(email_output: dict[str, Any], report: dict[str, Any]
             "validation_report": report,
         },
     )
+

@@ -1,119 +1,95 @@
 # Target Failure Mode
 
-## Name
+## Selected Failure
 
-`Signal Over-Claiming Under Medium Confidence`
+`weak confidence handling`
 
-## Why It Matters In The Tenacious Context
+This is the highest-ROI failure for SignalForge to suppress because it is the earliest control-surface error in the pipeline. When weak evidence is not translated into cautious behavior, every downstream step becomes noisier:
 
-Tenacious is not selling a commodity email sequence. It is trying to win trust with technical buyers by showing that it understands when hiring pressure is real, when AI maturity is lagging, and when outside help might be timely. In that context, the most damaging failure is not silence - it is sounding precise when the evidence only supports a directional read.
+- the prompt becomes too fluent
+- the claim set grows too large
+- SMS may be offered too early
+- booking links appear before confidence is earned
+- CRM records inflated intent
 
-CTOs and VP Engineering leaders can spot exaggerated hiring claims immediately:
+## Root Cause
 
-- "You are hiring aggressively"
-- "Recent funding means your team is scaling now"
-- "You clearly need outside capacity"
+The root cause is not "the model sounds too confident." The root cause is that evidence strength is treated as descriptive metadata instead of an execution constraint.
 
-If those claims are even slightly off, the system loses the one thing it is supposed to create: credibility.
+In other words:
 
-## Why This Is The Highest-ROI Failure
+- signal confidence is computed
+- but if the system still sends medium-style or high-style outreach on low evidence, the score did not actually control behavior
 
-This failure sits at the intersection of:
+That is why the current repository now routes confidence through a dedicated calibration layer before generation and channel handoff.
 
-- high business frequency
-- high revenue loss
-- direct relevance to the current architecture
-- tractable mechanism fixes
+## Arithmetic
 
-It is more important than generic tone drift because tone can be forgiven. False specificity usually cannot.
+From [failure_taxonomy.md](./failure_taxonomy.md):
 
-It is more important than pure cost pathology because wasted tokens are recoverable; broken trust in a high-ACV outbound thread usually is not.
+- `weak confidence handling`
+  - `average_trigger_rate = 0.40`
+  - `average_business_cost_usd = $53,662.50`
+  - `expected_loss_index = 0.40 x 53,662.50 = 21,330.84`
 
-It is more important than future multi-turn issues because it already exists in the first-touch path and directly affects conversion.
+Single-thread mental model:
 
-## Expected Frequency
+- Assume a representative Tenacious ACV of `$300,000`
+- Assume weak confidence handling causes a `45%` conversion loss once a shaky claim or premature CTA appears
+- Assume the failure triggers on `40%` of affected weak-evidence threads
 
-Using the signal over-claiming group (`P-004` to `P-007`):
+Expected downside per affected weak-evidence thread:
 
-- average trigger rate: `0.34`
+- `0.40 x 0.45 x $300,000 = $54,000`
 
-This means roughly one in three relevant prospect generations can drift into over-assertion if controls are loose, especially around:
+That aligns closely with the probe-library average of `$53,662.50`.
 
-- stale funding
-- tiny role growth
-- layoffs without rebound evidence
-- weak AI maturity signals
+## Comparison To Alternatives
 
-## Dollar Impact Calculation
+Alternative 1: `signal over-claiming`
 
-Use the signal over-claiming category average:
+- `average_trigger_rate = 0.33`
+- `average_business_cost_usd = $55,800.00`
+- `expected_loss_index = 18,600.00`
 
-- average business cost: `$54,240`
-- average trigger rate: `0.34`
+Why it loses:
 
-Expected downside at modest scale:
+- It is slightly less frequent.
+- Much of it is a downstream manifestation of the same calibration problem.
+- Fixing confidence handling should reduce a meaningful portion of signal over-claiming automatically.
 
-- `100` medium-confidence outbound threads x `$54,240` expected loss x `0.34` trigger exposure is not the right way to compound thread-level expected value because each probe already encodes trigger-adjusted loss
-- more practically: at `100` affected threads, aggregate expected downside is roughly `100 x $54,240 = $5.424M` in expected pipeline damage across comparable opportunities
+Alternative 2: `coordination failures`
 
-For a single-thread mental model:
+- `average_trigger_rate = 0.17`
+- `average_business_cost_usd = $31,500.00`
+- `expected_loss_index = 5,460.00`
 
-- a false hiring assertion can easily create a `30%-60%` disengagement probability
-- applied against a `$240K-$480K` realistic Tenacious opportunity, expected loss lands quickly in the `$50K-$70K` band
+Why it loses:
 
-That is why this failure dominates ROI: it is frequent enough to matter and expensive enough to hurt.
+- It still matters, especially around CRM and booking sync.
+- But the expected-loss index is far smaller.
+- Coordination bugs harm workflow integrity; weak confidence handling harms both trust and workflow quality at once.
 
-## Why Fixing It Improves Conversion
+Alternative 3: `outsourcing perception`
 
-Fixing this failure does three things at once:
+- `average_trigger_rate = 0.27`
+- `average_business_cost_usd = $60,750.00`
+- `expected_loss_index = 16,402.50`
 
-1. It increases reply trust
+Why it loses:
 
-   Buyers are more likely to engage when the system says:
-   - "It looks like..."
-   - "Is that directionally right?"
-   instead of pretending certainty.
+- Brand damage per event is high.
+- But it is narrower in scope than calibration failure.
+- Better confidence control also reduces this category by suppressing over-eager outsourcing language on weak signals.
 
-2. It improves differentiation
+## Why This Has The Highest ROI
 
-   SignalForge's pitch is not "we also send emails." It is "we know when to assert and when to ask." Over-claiming destroys that edge.
+`weak confidence handling` has the best improvement leverage because one mechanism can reduce failures in multiple adjacent categories:
 
-3. It reduces downstream contamination
+- `signal over-claiming`
+- `gap over-claiming`
+- `tone drift`
+- `outsourcing perception`
+- parts of `coordination failures` where premature channel escalation is the symptom
 
-   Once the first email is wrong, later qualification, booking, and CRM scoring become noisy. Fixing the first-touch truth boundary improves the whole funnel.
-
-## Mechanism Design Implications
-
-This failure mode points directly to the next mechanism work:
-
-1. Stronger confidence-to-tone mapping
-
-   Medium confidence should default to careful language unless at least two independent strong signals agree.
-
-2. Structured claim budgeting
-
-   Cap the number of asserted claims in medium-confidence emails.
-
-3. Explicit stale-signal suppression
-
-   Funding older than the target window should not be framed as current urgency.
-
-4. Mixed-signal contradiction handling
-
-   Hiring growth plus layoffs should force balanced language, never "aggressive hiring."
-
-5. Claim validator hardening
-
-   The guardrail should detect exaggerated paraphrases, not just unsupported numbers or claim ids.
-
-## Bottom Line
-
-If SignalForge fixes only one thing next, it should fix `signal over-claiming under medium confidence`.
-
-That is the single best ROI move because it:
-
-- protects trust with technical buyers
-- reduces high-ACV thread loss
-- improves conversion quality
-- strengthens the system's core differentiator
-- fits the current architecture cleanly
+That is why SignalForge now treats confidence as a hard gating layer instead of a cosmetic label.

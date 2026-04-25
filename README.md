@@ -1,559 +1,242 @@
 # SignalForge
 
-SignalForge is a production-oriented B2B outbound intelligence system for Tenacious Consulting. It turns structured hiring and market signals into grounded outreach, then carries the thread through qualification and booking without inventing facts.
+SignalForge is a production-oriented B2B outbound intelligence system for Tenacious. It ingests a prospect, enriches deterministic public signals, builds structured briefs, constrains LLM behavior behind confidence and claim validation, routes follow-up across channels, syncs lifecycle data to CRM and calendar systems, and evaluates failure modes with adversarial probes.
 
-The current system is intentionally built around one discipline: `prove before you persuade`.
+The design rule is simple: `the model is never the source of truth`.
 
-## Executive Summary
+## System Overview
 
-SignalForge currently provides:
+SignalForge follows this runtime order:
 
-- a deterministic enrichment pipeline over local synthetic data
-- structured hiring and competitor-gap briefs
-- a confidence engine that controls tone
-- an OpenRouter-backed email generation layer with claim validation
-- provider-backed channel handlers for email and SMS
-- CRM and booking callback plumbing
-- a FastAPI backend for single-run and batch evaluation
-- adversarial probes for business-risk-focused evaluation
+1. `Input`
+2. `Enrichment`
+3. `Briefs`
+4. `Decision`
+5. `Channels`
+6. `CRM / Calendar`
+7. `Observability`
+8. `Evaluation`
 
-The repo is designed to be evaluation-ready before it is automation-heavy.
+In code, that means:
 
-## Product Goal
+- deterministic prospect enrichment in `agent/tools` and `agent/signals`
+- structured artifacts in `hiring_signal_brief.json` and `competitor_gap_brief.json`
+- confidence calibration in `agent/core/confidence.py`
+- outbound generation in `agent/llm/email_generator.py`
+- centralized handoff state in `agent/core/channel_orchestrator.py`
+- HubSpot and Cal.com lifecycle writes in `backend/services`
+- JSONL and Langfuse instrumentation in `logs/` and `agent/llm/client.py`
+- adversarial probe analysis in `probes/` and `eval/`
 
-For Tenacious, the job is not to blast generic outbound. The job is to identify credible hiring pressure, frame a relevant talent or advisory angle, and earn a discovery call with a technical buyer such as a CTO or VP Engineering.
-
-SignalForge is optimized around:
-
-- signal grounding
-- confidence-aware messaging
-- hallucination resistance
-- traceability
-- low operating cost per prospect
-
-## System Architecture
+## Architecture
 
 ```text
-                        +-----------------------+
-                        |   Local Datasets      |
-                        |  crunchbase_sample    |
-                        |  layoffs.csv          |
-                        +-----------+-----------+
-                                    |
-                                    v
-                    +---------------+---------------+
-                    |    Deterministic Enrichment   |
-                    |  CrunchbaseTool               |
-                    |  layoffs loader               |
-                    |  peer selection               |
-                    +---------------+---------------+
-                                    |
-                   +----------------+----------------+
-                   |                                 |
-                   v                                 v
-        +----------+-----------+         +-----------+----------+
-        | Hiring Signal Brief  |         | Competitor Gap Brief |
-        | funding              |         | peer AI maturity     |
-        | job velocity         |         | top practices        |
-        | layoffs              |         | benchmark summary    |
-        | AI maturity          |         +-----------+----------+
-        +----------+-----------+                     |
-                   |                                 |
-                   +----------------+----------------+
-                                    |
-                                    v
-                       +------------+------------+
-                       | Confidence Engine       |
-                       | low / medium / high     |
-                       +------------+------------+
-                                    |
-                                    v
-                     +--------------+---------------+
-                     | LLM Email Generation Layer   |
-                     | OpenRouter client            |
-                     | confidence-aware prompt      |
-                     | claim validator              |
-                     | deterministic fallback       |
-                     +--------------+---------------+
-                                    |
-                                    v
-                     +--------------+---------------+
-                     | Orchestrator / API Layer     |
-                     | /run-prospect                |
-                     | /run-prospect/scenarios      |
-                     | /run-prospect/batch          |
-                     +--------------+---------------+
-                                    |
-                                    v
-                     +--------------+---------------+
-                     | Outputs / Evaluation         |
-                     | JSON artifacts               |
-                     | JSONL traces                 |
-                     | adversarial probe library    |
-                     +------------------------------+
+Input
+  -> Crunchbase / job scrape / layoffs / leadership detection
+  -> hiring_signal_brief.json
+  -> competitor_gap_brief.json
+  -> confidence calibration layer
+  -> guarded email generation
+  -> claim + tone validation
+  -> channel orchestration
+  -> HubSpot + Cal.com sync
+  -> JSONL + Langfuse traces
+  -> adversarial evaluation
 ```
 
-## Repository Structure
+Key implementation boundaries:
 
-```text
-agent/
-  core/         orchestration, confidence, routing
-  signals/      hiring signals, AI maturity, competitor gap logic
-  tools/        local data loaders and deterministic enrichers
-  llm/          OpenRouter client and email generation
-  guards/       claim validation and outbound safety checks
-  channels/     email and SMS provider clients, webhook handlers, event routing
-  crm/          HubSpot write path and enrichment-note sync
-  calendar/     booking link generation and callback support
-  utils/        config, tracing, logging
+- `agent/signals/hiring_signals.py` is the authoritative hiring brief builder.
+- `agent/signals/competitor_gap.py` is the authoritative peer-benchmark builder.
+- `agent/core/confidence.py` is the authoritative confidence-to-behavior mapping.
+- `agent/guards/claim_validator.py` is the authoritative post-generation validation layer.
+- `agent/core/channel_orchestrator.py` is the authoritative email -> SMS -> voice handoff layer.
 
-backend/
-  routes/       FastAPI endpoints
-  services/     run orchestration and API-facing service layer
-  schemas.py    request and response contracts
+## Pinned Dependencies
 
-frontend/       React + Vite dashboard for signals, email output, and peers
-data/           local synthetic prospect and layoffs data
-eval/           adversarial scenarios and evaluation harness
-probes/         production-grade probe library and failure analysis
-scripts/        local execution helpers
-tests/          regression and LLM-layer tests
-outputs/        generated artifacts for latest and scenario runs
-logs/           append-only JSONL run logs
-```
+SignalForge uses the pinned versions in [requirements.txt](./requirements.txt):
 
-## Core Runtime Flow
+- `fastapi==0.115.0`
+- `uvicorn==0.30.1`
+- `pydantic==2.8.2`
+- `pydantic-settings==2.3.4`
+- `httpx==0.27.0`
+- `langchain==0.3.0`
+- `langfuse==2.44.0`
+- `redis==5.0.7`
+- `sqlalchemy==2.0.32`
+- `python-dotenv==1.0.1`
+- `pyyaml==6.0.2`
+- `playwright==1.52.0`
+- `pytest==8.3.2`
 
-The active working path is:
+## Environment Variables
 
-`Input -> Enrichment -> Hiring Signal Brief -> Competitor Gap Brief -> Confidence -> LLM Email -> Claim Validation -> Reply -> Qualification -> Booking`
+Copy `.env.example` if you have one locally, or create `.env` manually. These are the runtime variables SignalForge reads from `agent/utils/config.py`.
 
-Default synthetic prospect:
+Core app:
 
-- `Northstar Lending`
+- `APP_NAME`: FastAPI application name.
+- `APP_ENV`: environment label used by logs and Langfuse.
+- `APP_HOST`: backend bind host.
+- `APP_PORT`: backend bind port.
+- `LOG_LEVEL`: logger verbosity.
+- `FRONTEND_ORIGINS`: comma-separated allowed CORS origins.
 
-Default API response shape:
+LLM:
 
-```json
-{
-  "company": "Northstar Lending",
-  "hiring_signal_brief": {},
-  "competitor_gap_brief": {},
-  "email": {
-    "subject": "string",
-    "body": "string"
-  },
-  "confidence": "low|medium|high",
-  "trace_id": "string"
-}
-```
+- `OPENROUTER_API_KEY`: required for live LLM generation.
+- `OPENROUTER_BASE_URL`: OpenRouter endpoint.
+- `OPENROUTER_MODEL`: primary model for structured email generation.
+- `OPENROUTER_FALLBACK_MODEL`: secondary model if the primary fails.
+- `OPENROUTER_TIMEOUT_SECONDS`: request timeout for the LLM gateway.
+- `OPENROUTER_MAX_TOKENS`: hard completion cap.
+- `OPENAI_API_KEY`: reserved for future direct OpenAI adapters.
+- `ANTHROPIC_API_KEY`: reserved for future Anthropic adapters.
 
-## Technology Stack
+Email / SMS:
 
-### Backend
+- `RESEND_API_KEY`: required for live outbound email.
+- `RESEND_API_BASE_URL`: Resend REST endpoint.
+- `RESEND_FROM_EMAIL`: default sender identity.
+- `RESEND_REPLY_TO`: reply target placed on outbound mail.
+- `RESEND_WEBHOOK_SECRET`: reserved for webhook signature verification.
+- `AFRICAS_TALKING_API_KEY`: required for live outbound SMS.
+- `AFRICAS_TALKING_USERNAME`: Africa's Talking account name.
+- `AFRICAS_TALKING_BASE_URL`: Africa's Talking REST endpoint.
+- `AFRICAS_TALKING_WEBHOOK_SECRET`: reserved for webhook verification.
 
-- `FastAPI` for the API surface
-- `Pydantic v2` for typed request and response contracts
-- `Uvicorn` for local serving
-- `Python 3.12+`
+CRM / calendar:
 
-### Frontend
+- `HUBSPOT_ACCESS_TOKEN`: preferred HubSpot private app token for live contact and activity writes.
+- `HUBSPOT_API_KEY`: legacy fallback used only when `HUBSPOT_ACCESS_TOKEN` is not set.
+- `HUBSPOT_BASE_URL`: HubSpot REST endpoint.
+- `CALCOM_API_KEY`: reserved for future authenticated Cal.com actions.
+- `CALCOM_BASE_URL`: base URL used to generate booking links.
+- `CALCOM_BOOKING_SLUG`: public booking slug used in outreach.
+- `CALCOM_WEBHOOK_SECRET`: reserved for webhook verification.
 
-- `React` with `Vite`
-- `TanStack Query` for async data fetching and cache control
-- `Tailwind CSS` for the UI system
-- `Lucide React` for iconography
-- lightweight custom data visualization for peer comparison
+Observability / infrastructure:
 
-### Intelligence Layer
+- `LANGFUSE_PUBLIC_KEY`: enables remote trace export when paired with the secret key.
+- `LANGFUSE_SECRET_KEY`: enables remote trace export when paired with the public key.
+- `LANGFUSE_HOST`: Langfuse host URL.
+- `REDIS_URL`: reserved for future distributed lifecycle state.
+- `DATABASE_URL`: reserved for future durable workflow state.
 
-- deterministic enrichment over local datasets
-- rule-based AI maturity scoring
-- confidence-aware orchestration
-- `OpenRouter` as the LLM gateway
-- `deepseek/deepseek-chat` as the default generation model
-- `qwen/qwen3-32b` as fallback
+## Local Run Instructions
 
-### Observability and Evaluation
-
-- JSON artifacts in `outputs/`
-- JSONL run logs in `logs/`
-- `Langfuse` hooks for trace and cost instrumentation
-- adversarial scenario runner in `eval/`
-- business-risk-focused probe pack in `probes/`
-
-### Planned / Stubbed Integrations
-
-- `Resend` for outbound email delivery and inbound reply / bounce events
-- `HubSpot` for contact upsert and enrichment-note logging
-- `Cal.com` for booking links and completed-booking callbacks
-- `Africa's Talking` for warm-lead SMS and inbound reply routing
-
-These paths are now implemented in code. In this local environment there is no HubSpot MCP server available, so the repo currently uses the HubSpot HTTP API boundary instead of MCP for writes.
-
-## Design Principles
-
-SignalForge follows a few hard rules:
-
-- never fabricate signals
-- never overstate weak evidence
-- prefer asking over asserting when confidence is low
-- keep deterministic logic where deterministic logic is enough
-- make every prospect run inspectable after the fact
-
-This is especially important for Tenacious, where one wrong hiring claim can kill a high-value thread instantly.
-
-## How Confidence Works
-
-SignalForge reduces the structured brief into a global confidence label:
-
-- `high`: strong, recent, internally consistent signals
-- `medium`: some evidence, but not enough for aggressive claims
-- `low`: incomplete, stale, or contradictory signals
-
-Confidence controls prompt tone:
-
-- `high` -> assertive and specific
-- `medium` -> careful and directional
-- `low` -> exploratory and question-led
-
-## Claim Validation
-
-Every LLM-generated email is checked against the available structured claims.
-
-Current protections include:
-
-- only using claims present in the generated claim catalog
-- rejecting unsupported numeric language
-- regeneration in strict mode if a mismatch is detected
-- deterministic fallback if claim validation still fails
-
-This is the main anti-hallucination boundary in the current architecture.
-
-## Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/nebiyuephrata/SignalForge.git
-cd SignalForge
-```
-
-### 2. Create a virtual environment
+1. Create a Python environment.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install dependencies
+2. Install dependencies.
 
 ```bash
-pip install -r requirements.txt
+.venv/bin/pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
+3. Optional but recommended: install Playwright Chromium.
 
 ```bash
-cp .env.example .env
+.venv/bin/python -m playwright install chromium
 ```
 
-Minimum useful configuration:
-
-```env
-APP_NAME=SignalForge
-APP_ENV=development
-APP_HOST=127.0.0.1
-APP_PORT=8000
-LOG_LEVEL=INFO
-
-OPENROUTER_API_KEY=your_openrouter_key
-OPENROUTER_MODEL=deepseek/deepseek-chat
-OPENROUTER_FALLBACK_MODEL=qwen/qwen3-32b
-OPENROUTER_TIMEOUT_SECONDS=30
-OPENROUTER_MAX_TOKENS=300
-```
-
-Optional integrations:
-
-- `LANGFUSE_PUBLIC_KEY`
-- `LANGFUSE_SECRET_KEY`
-- `LANGFUSE_HOST`
-- `RESEND_API_KEY`
-- `HUBSPOT_API_KEY`
-- `CALCOM_API_KEY`
-- `CALCOM_BASE_URL`
-- `CALCOM_BOOKING_SLUG`
-- `CALCOM_WEBHOOK_SECRET`
-- `AFRICAS_TALKING_API_KEY`
-- `AFRICAS_TALKING_BASE_URL`
-- `AFRICAS_TALKING_WEBHOOK_SECRET`
-- `RESEND_FROM_EMAIL`
-- `RESEND_REPLY_TO`
-- `RESEND_WEBHOOK_SECRET`
-
-## Running the Backend
-
-Start the API locally:
+4. Start the backend.
 
 ```bash
-uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+.venv/bin/uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Health check:
+5. Optional: start the frontend.
 
 ```bash
-curl -sS http://127.0.0.1:8000/health
-```
-
-## Running the Frontend
-
-From the `frontend/` directory:
-
-```bash
-cp .env.example .env
+cd frontend
 npm install
 npm run dev
 ```
 
-The dashboard runs at:
-
-```text
-http://127.0.0.1:5173
-```
-
-If your backend is not on the default port, set:
-
-```env
-VITE_API_BASE_URL=http://127.0.0.1:8000
-```
-
-## API Endpoints
-
-### Run the default prospect
+6. Run a default prospect.
 
 ```bash
 curl -sS -X POST http://127.0.0.1:8000/run-prospect
 ```
 
-### Run a named adversarial scenario
-
-```bash
-curl -sS -X POST http://127.0.0.1:8000/run-prospect \
-  -H 'Content-Type: application/json' \
-  -d '{"scenario_name":"weak_confidence"}'
-```
-
-### Run a direct company override
-
-```bash
-curl -sS -X POST http://127.0.0.1:8000/run-prospect \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Quiet Current Bank","reply_text":"No, not a priority"}'
-```
-
-### List adversarial scenarios
-
-```bash
-curl -sS http://127.0.0.1:8000/run-prospect/scenarios
-```
-
-### Run the compact batch evaluation
+7. Run the batch adversarial suite.
 
 ```bash
 curl -sS http://127.0.0.1:8000/run-prospect/batch
 ```
 
-## Operational Channel Endpoints
-
-### Draft an email for a lead
+8. Run tests.
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/email/draft \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example"}'
+uv run --with pytest pytest -q
 ```
 
-### Send an outbound email through Resend
+## Local Run Order
 
-```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/email/send \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example"}'
-```
+When you want a clean end-to-end local check, use this order:
 
-### Receive inbound Resend events
+1. Install dependencies.
+2. Install Playwright browsers if you want live DOM parsing.
+3. Start the backend.
+4. Run `/run-prospect`.
+5. Check `outputs/` and `logs/`.
+6. Exercise `/webhooks/email/send`.
+7. Post an inbound email webhook to `/webhooks/email/resend/events`.
+8. Exercise `/webhooks/sms/send-warm` only after the lifecycle store shows an email reply.
+9. Post a booking webhook to `/webhooks/cal/booking-completed`.
+10. Run the adversarial suite and inspect `outputs/adversarial_batch_summary.json`.
 
-```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/email/resend/events \
-  -H 'Content-Type: application/json' \
-  -d '{"type":"email.replied","data":{"email_id":"email-123","to":"cto@northstar.example","text":"Interested","tags":[{"name":"company_name","value":"Northstar Lending"}]}}'
-```
+## Output Artifacts
 
-### Send a warm-lead SMS through Africa's Talking
+SignalForge writes inspectable artifacts to `outputs/` and `logs/`:
 
-SignalForge treats SMS as a warm channel only. A prior email reply must be acknowledged in the request.
-
-```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/sms/send-warm \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Northstar Lending","phone_number":"+15551234567","body":"Following up here after your note.","prior_email_reply":true}'
-```
-
-### Receive inbound Africa's Talking replies
-
-```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/sms/africas-talking/events \
-  -H 'Content-Type: application/json' \
-  -d '{"id":"sms-1","from":"+15551234567","text":"Let us talk next week","company_name":"Northstar Lending"}'
-```
-
-### Receive a completed Cal.com booking callback
-
-```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/cal/booking-completed \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example","booking_id":"booking-1","booking_url":"https://cal.com/signalforge-discovery/booking-1","meeting_start":"2026-04-24T15:00:00Z"}'
-```
-
-## Local Execution Scripts
-
-Run the default prospect from Python:
-
-```bash
-python3 scripts/run_prospect.py
-```
-
-Run the adversarial scenarios:
-
-```bash
-python3 scripts/run_adversarial_cases.py
-```
-
-Run the compact batch summary:
-
-```bash
-python3 scripts/run_batch_summary.py
-```
-
-## Generated Artifacts
-
-Each prospect run writes machine-readable artifacts into `outputs/`:
-
-- `hiring_signal_brief.json`
-- `competitor_gap_brief.json`
-- `email.json`
-- `draft_email.json`
-- `full_prospect_run.json`
-- scenario-specific output files such as `weak_confidence_full_run.json`
-- `adversarial_results.json`
-- `adversarial_batch_summary.json`
-
-Append-only run logging:
-
+- `outputs/hiring_signal_brief.json`
+- `outputs/competitor_gap_brief.json`
+- `outputs/email.json`
+- `outputs/channel_plan.json`
+- `outputs/full_prospect_run.json`
+- `outputs/verified_run.json`
+- `outputs/confidence_comparison.json`
+- `outputs/probe_results.json`
+- `outputs/adversarial_batch_summary.json`
 - `logs/prospect_runs.jsonl`
-- `eval/logs/trace_log.jsonl`
-- `eval/logs/score_log.json`
+- `logs/conversation_events.jsonl`
+- `logs/claim_validation_failures.jsonl`
 
-## Evaluation Assets
+## Verified Execution
 
-SignalForge includes two layers of evaluation:
+SignalForge now ships with a checked real-execution artifact:
 
-### 1. Executable adversarial scenarios
+- [outputs/verified_run.json](./outputs/verified_run.json)
+- [docs/evidence/real_run.md](./docs/evidence/real_run.md)
 
-Located in:
+The current verified run proves a real end-to-end execution path and records the actual outcome:
 
-- [eval/adversarial_cases.py](eval/adversarial_cases.py)
-- [eval/run_adversarial.py](eval/run_adversarial.py)
+- the pipeline executed successfully
+- the OpenRouter path was attempted
+- the live model call failed with DNS resolution errors in this environment
+- deterministic fallback preserved a grounded final email
 
-Current scenarios include:
+Related evaluation artifacts:
 
-- `conflicting_signals`
-- `no_hiring_signals`
-- `weak_confidence`
+- [outputs/confidence_comparison.json](./outputs/confidence_comparison.json)
+- [docs/evaluation/confidence_analysis.md](./docs/evaluation/confidence_analysis.md)
+- [outputs/probe_results.json](./outputs/probe_results.json)
 
-### 2. Probe-driven failure analysis
+## Known Local Constraints
 
-Located in:
+The repository ships with explicit fallbacks rather than pretending live integrations always exist:
 
-- [probes/probe_library.md](probes/probe_library.md)
-- [probes/failure_taxonomy.md](probes/failure_taxonomy.md)
-- [probes/target_failure_mode.md](probes/target_failure_mode.md)
+- job scraping falls back to local fixture parsing when Playwright is unavailable
+- OpenRouter failures fall back to deterministic email generation
+- HubSpot writes fall back to structured offline results when both `HUBSPOT_ACCESS_TOKEN` and `HUBSPOT_API_KEY` are missing
+- Langfuse export is skipped when the host is unreachable
+- live BuiltIn / Wellfound / LinkedIn scraping is intentionally marked as a TODO in source attribution because the current repo uses offline fixtures
 
-This layer is aimed at production risk, not just unit correctness.
-
-## Rubric Coverage Notes
-
-### Outbound email handler
-
-- Provider: `Resend`
-- Outbound send path: implemented
-- Inbound reply / bounce webhook: implemented
-- Downstream interface: handler-level callback registration through the channel event router
-- Error handling: malformed payloads return `400`, failed sends return structured failure objects, bounces are logged as explicit events
-
-### SMS handler
-
-- Provider: `Africa's Talking`
-- Outbound SMS: implemented
-- Inbound replies: implemented
-- Warm-lead gating: enforced in code
-- Downstream routing: inbound replies emit channel events to registered handlers
-
-### CRM and calendar integration
-
-- HubSpot write path: implemented via HTTP API client in this environment
-- Enrichment data: written as structured CRM note content including ICP segment, signal data, and enrichment timestamp
-- Cal.com booking path: callable from agent code
-- Booking callback to CRM update: implemented
-
-### Signal enrichment pipeline
-
-- Crunchbase fixture loader: implemented
-- Job-post scraping via Playwright: implemented with a fixture fallback if the browser runtime is unavailable locally
-- layoffs.fyi CSV parsing: implemented
-- leadership change detection: implemented from synthetic company records
-- merged structured artifact with confidences: exposed in `hiring_signal_brief.source_artifact`
-
-## Current Status
-
-Working today:
-
-- deterministic enrichment
-- four-source signal artifact with confidence scores
-- structured brief generation
-- confidence-aware OpenRouter email generation
-- claim validation
-- FastAPI execution path
-- frontend dashboard over the live API
-- Resend send path plus inbound email webhook
-- Africa's Talking warm-SMS path plus inbound SMS webhook
-- HubSpot contact and enrichment-note sync
-- Cal.com booking callback to CRM update
-- run logging and artifact emission
-- adversarial evaluation pack
-
-Not yet fully wired into the live path:
-
-- multi-turn conversational orchestration
-
-## Recommended Next Steps
-
-1. add the frontend dashboard over the existing API
-2. wire Resend into a guarded outbound send path
-3. connect HubSpot writeback and activity logging
-4. make Langfuse tracing first-class in deployment
-5. turn the markdown probe library into executable scored probes
-
-## Professional Notes
-
-This repo is intentionally local-first and evaluation-heavy. That is by design.
-
-Before a system like this is trusted to automate outbound at scale, it should prove:
-
-- that its claims stay inside evidence bounds
-- that its tone follows confidence
-- that its failure modes are visible
-- that its cost profile is controlled
-
-SignalForge is built to make those properties inspectable.
+See [HANDOFF_NOTES.md](./HANDOFF_NOTES.md) for the exact next steps on those gaps and [DIRECTORY_INDEX.md](./DIRECTORY_INDEX.md) for the repository map.

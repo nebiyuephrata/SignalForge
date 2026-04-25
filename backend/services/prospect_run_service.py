@@ -61,6 +61,7 @@ class ProspectRunService:
         )
         write_json(str(self.repo_root / "outputs" / f"{artifact_slug}_email.json"), result["email"])
         write_json(str(self.repo_root / "outputs" / f"{artifact_slug}_draft_email.json"), result["email"])
+        write_json(str(self.repo_root / "outputs" / f"{artifact_slug}_channel_plan.json"), result["channel_plan"])
         write_json(str(self.repo_root / "outputs" / f"{artifact_slug}_full_run.json"), result)
 
         # Keep the original stable filenames for the latest run.
@@ -68,6 +69,7 @@ class ProspectRunService:
         write_json(str(self.repo_root / "outputs" / "competitor_gap_brief.json"), result["competitor_gap_brief"])
         write_json(str(self.repo_root / "outputs" / "email.json"), result["email"])
         write_json(str(self.repo_root / "outputs" / "draft_email.json"), result["email"])
+        write_json(str(self.repo_root / "outputs" / "channel_plan.json"), result["channel_plan"])
         write_json(str(self.repo_root / "outputs" / "full_prospect_run.json"), result)
 
         append_jsonl_log(
@@ -85,6 +87,7 @@ class ProspectRunService:
                 "reply_text": result["reply_text"],
                 "qualification": result["qualification"],
                 "booking": result["booking"],
+                "channel_plan": result["channel_plan"],
             },
         )
         return result

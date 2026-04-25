@@ -1,0 +1,13 @@
+.git
+.gitignore
+.venv
+.pytest_cache
+frontend/node_modules
+frontend/dist
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+.DS_Store
+tenacious_sales_data/__MACOSX
