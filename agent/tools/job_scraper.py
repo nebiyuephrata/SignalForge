@@ -6,6 +6,7 @@ from typing import Any
 
 from agent.core.models import SourceAttribution
 from agent.tools.crunchbase_tool import CrunchbaseTool
+from agent.tools.robots_policy import PublicPageRobotsPolicy
 
 
 ROLE_PATTERN = re.compile(r'data-role-title="([^"]+)"')
@@ -22,9 +23,10 @@ class JobScraper:
 
     def __init__(self, crunchbase_tool: CrunchbaseTool | None = None) -> None:
         self.crunchbase_tool = crunchbase_tool or CrunchbaseTool()
+        self.robots_policy = PublicPageRobotsPolicy()
 
     def scrape_company_jobs(self, company_name: str) -> dict[str, Any]:
-        company = self.crunchbase_tool.get_company_by_name(company_name)
+        company = self.crunchbase_tool.lookup_company_record(company_name)
         if company is None:
             return self._empty_result(
                 company_name,
@@ -66,11 +68,14 @@ class JobScraper:
         }
 
     def _scrape_company_careers_page(self, company: dict[str, object]) -> dict[str, Any]:
+        robots_decision = self.robots_policy.decision_for("company_careers_page")
         career_page_path = str(company.get("career_page_path", "")).strip()
         if not career_page_path:
             source = SourceAttribution(
                 source="company_careers_page",
                 status="no_data",
+                public_only=robots_decision.public_only,
+                respects_robots_txt=robots_decision.respects_robots_txt,
                 confidence=0.2,
                 detail="No public company careers fixture was configured.",
                 fallback_todo="Add a real public careers URL and fixture for this company.",
@@ -90,6 +95,8 @@ class JobScraper:
             source = SourceAttribution(
                 source="company_careers_page",
                 status="error",
+                public_only=robots_decision.public_only,
+                respects_robots_txt=robots_decision.respects_robots_txt,
                 confidence=0.0,
                 detail=f"Configured careers fixture is missing: {fixture_path}",
                 fallback_todo="Restore the local fixture or point the company record at a valid public URL.",
@@ -109,6 +116,8 @@ class JobScraper:
                 source="company_careers_page",
                 status="success",
                 source_url=f"https://{company['domain']}/careers",
+                public_only=robots_decision.public_only,
+                respects_robots_txt=robots_decision.respects_robots_txt,
                 confidence=0.9 if playwright_result["role_titles"] else 0.35,
                 detail="Scraped the public careers fixture with Playwright in headless mode.",
             )
@@ -125,6 +134,8 @@ class JobScraper:
             source="company_careers_page",
             status="fallback",
             source_url=f"https://{company['domain']}/careers",
+            public_only=robots_decision.public_only,
+            respects_robots_txt=robots_decision.respects_robots_txt,
             confidence=0.72 if roles else 0.25,
             detail="Used deterministic fixture parsing because Playwright was unavailable locally.",
             fallback_todo="Install Playwright browsers with `python -m playwright install chromium` for live DOM parsing.",
@@ -141,6 +152,7 @@ class JobScraper:
         }
 
     def _scrape_public_board(self, company: dict[str, object], *, source_name: str) -> dict[str, Any]:
+        robots_decision = self.robots_policy.decision_for(source_name)
         source_urls = {
             "builtin": f"https://builtin.com/company/{str(company['company_name']).lower().replace(' ', '-')}",
             "wellfound": f"https://wellfound.com/company/{str(company['company_name']).lower().replace(' ', '-')}",
@@ -148,10 +160,12 @@ class JobScraper:
         }
         source = SourceAttribution(
             source=source_name,
-            status="skipped",
+            status="skipped" if not robots_decision.allowed else "fallback",
             source_url=source_urls[source_name],
+            public_only=robots_decision.public_only,
+            respects_robots_txt=robots_decision.respects_robots_txt,
             confidence=0.0,
-            detail="Live public-page scraping is disabled in the offline training environment.",
+            detail=robots_decision.reason,
             fallback_todo=(
                 "Add the real public board URL to the company fixture, fetch robots.txt, and run the existing Playwright path only when access is allowed."
             ),
@@ -160,7 +174,7 @@ class JobScraper:
             "open_roles": 0,
             "role_titles": [],
             "confidence": 0.0,
-            "evidence": [f"{source_name} was skipped because only offline fixtures are available in this repository."],
+            "evidence": [f"{source_name} was skipped because {robots_decision.reason.lower()}"],
             "source_object": source,
         }
 
@@ -192,4 +206,3 @@ class JobScraper:
             "evidence": [reason],
             "source_artifact": {},
         }
-

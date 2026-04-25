@@ -37,6 +37,43 @@ class WeightedJustification(BaseModel):
     source_url: str | None = None
 
 
+class AIMaturitySignalInput(BaseModel):
+    signal: Literal[
+        "ai_adjacent_open_roles",
+        "named_ai_ml_leadership",
+        "github_org_activity",
+        "executive_commentary",
+        "modern_data_ml_stack",
+        "strategic_communications",
+    ]
+    weight: Literal["high", "medium", "low"]
+    points_awarded: int = Field(ge=0)
+    detected: bool
+    raw_value: str
+    confidence: Literal["high", "medium", "low"]
+    source_url: str | None = None
+    justification: str
+
+
+class AIMaturitySignalInputs(BaseModel):
+    ai_adjacent_open_roles: AIMaturitySignalInput
+    named_ai_ml_leadership: AIMaturitySignalInput
+    github_org_activity: AIMaturitySignalInput
+    executive_commentary: AIMaturitySignalInput
+    modern_data_ml_stack: AIMaturitySignalInput
+    strategic_communications: AIMaturitySignalInput
+
+    def ordered(self) -> list[AIMaturitySignalInput]:
+        return [
+            self.ai_adjacent_open_roles,
+            self.named_ai_ml_leadership,
+            self.github_org_activity,
+            self.executive_commentary,
+            self.modern_data_ml_stack,
+            self.strategic_communications,
+        ]
+
+
 class AIMaturityAssessment(BaseModel):
     score: int = Field(ge=0, le=3)
     confidence: float = Field(ge=0.0, le=1.0)
@@ -247,4 +284,3 @@ class LeadLifecycleState(BaseModel):
     @property
     def sms_allowed(self) -> bool:
         return self.email_reply_received
-

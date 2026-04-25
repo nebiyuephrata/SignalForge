@@ -9,15 +9,20 @@ REFERENCE_DATE = date(2026, 4, 23)
 
 
 class LayoffsTool:
+    """layoffs.fyi CSV parser with explicit empty-history handling."""
+
     def __init__(self, dataset_path: str | None = None) -> None:
         if dataset_path is None:
             dataset_path = str(Path(__file__).resolve().parents[2] / "data" / "layoffs.csv")
         self.dataset_path = dataset_path
 
     @lru_cache(maxsize=1)
-    def load_dataset(self) -> list[dict[str, str]]:
+    def parse_layoffs_fyi_csv(self) -> list[dict[str, str]]:
         with open(self.dataset_path, "r", encoding="utf-8") as handle:
             return list(csv.DictReader(handle))
+
+    def load_dataset(self) -> list[dict[str, str]]:
+        return self.parse_layoffs_fyi_csv()
 
     def get_recent_layoffs(
         self,
@@ -27,7 +32,7 @@ class LayoffsTool:
     ) -> list[dict[str, str]]:
         matches: list[dict[str, str]] = []
         normalized = company_name.strip().lower()
-        for row in self.load_dataset():
+        for row in self.parse_layoffs_fyi_csv():
             if row["company_name"].strip().lower() != normalized:
                 continue
             reported_at = datetime.strptime(row["reported_at"], "%Y-%m-%d").date()

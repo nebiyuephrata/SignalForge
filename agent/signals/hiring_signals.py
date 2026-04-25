@@ -32,7 +32,7 @@ def build_hiring_signal_brief(
     job_scraper: JobScraper | None = None,
     as_of_date: date = REFERENCE_DATE,
 ) -> dict[str, object]:
-    company = crunchbase_tool.get_company_by_name(company_name)
+    company = crunchbase_tool.lookup_company_record(company_name)
     layoffs_tool = layoffs_tool or LayoffsTool()
     leadership_tool = leadership_tool or LeadershipChangeTool(crunchbase_tool)
     job_scraper = job_scraper or JobScraper(crunchbase_tool)
@@ -51,6 +51,11 @@ def build_hiring_signal_brief(
     recent_leadership_changes = leadership_tool.get_recent_changes(company_name, as_of_date=as_of_date)
     job_post_scrape = job_scraper.scrape_company_jobs(company_name)
     ai_maturity = build_ai_maturity_assessment(company, role_titles=list(job_post_scrape.get("role_titles", [])))
+    recent_funding_event = crunchbase_tool.lookup_recent_funding_event(
+        company_name,
+        lookback_days=180,
+        as_of_date=as_of_date,
+    )
 
     funding_days = _days_since(str(company["funding_date"]), as_of_date)
     open_roles_current = int(job_post_scrape.get("open_roles", 0) or company.get("open_roles_current", 0) or 0)
@@ -68,9 +73,17 @@ def build_hiring_signal_brief(
             "date": company["funding_date"],
             "days_since_event": funding_days,
             "source_url": f"https://www.crunchbase.com/organization/{str(company_name).lower().replace(' ', '-')}",
+            "within_180_day_window": bool(recent_funding_event),
         },
         confidence=0.95 if funding_days <= 180 else 0.3,
-        evidence=[f"{company['last_funding_round']} on {company['funding_date']} ({funding_days} days ago)."],
+        evidence=[
+            f"{company['last_funding_round']} on {company['funding_date']} ({funding_days} days ago).",
+            (
+                "Funding event falls within the 180-day buying-window filter."
+                if recent_funding_event
+                else "Funding event is older than the 180-day buying-window filter."
+            ),
+        ],
         sources=["crunchbase_odm"],
     )
     job_scrape_signal = EvidenceSignal(
