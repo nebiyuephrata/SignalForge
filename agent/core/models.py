@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 def utc_now_iso() -> str:
@@ -323,6 +323,15 @@ class LeadLifecycleState(BaseModel):
     activities: list[LifecycleActivity] = Field(default_factory=list)
     last_inbound_message: str | None = None
     updated_at: str = Field(default_factory=utc_now_iso)
+
+    @field_validator("stage", mode="before")
+    @classmethod
+    def normalize_legacy_stage(cls, value: object) -> object:
+        if isinstance(value, str):
+            normalized = value.strip().upper()
+            if normalized:
+                return normalized
+        return value
 
     @property
     def sms_allowed(self) -> bool:

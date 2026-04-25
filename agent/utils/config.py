@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "deepseek/deepseek-chat"
+    openrouter_model: str = "anthropic/claude-sonnet-4.5"
     openrouter_fallback_model: str = "qwen/qwen3-32b"
     openrouter_timeout_seconds: int = 20
     openrouter_max_tokens: int = 220

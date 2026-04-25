@@ -188,8 +188,8 @@ If provider credentials are missing, SignalForge degrades safely: LLM email gene
 
 - `OPENROUTER_API_KEY`: live model access
 - `OPENROUTER_BASE_URL`: OpenRouter endpoint
-- `OPENROUTER_MODEL`: primary model
-- `OPENROUTER_FALLBACK_MODEL`: secondary model
+- `OPENROUTER_MODEL`: primary model, defaulting to `anthropic/claude-sonnet-4.5`
+- `OPENROUTER_FALLBACK_MODEL`: secondary model, defaulting to `qwen/qwen3-32b`
 - `OPENROUTER_TIMEOUT_SECONDS`: timeout for model calls
 - `OPENROUTER_MAX_TOKENS`: token cap
 - `LANGFUSE_PUBLIC_KEY`: Langfuse public key
