@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -8,6 +9,15 @@ from pydantic import BaseModel, Field
 
 def utc_now_iso() -> str:
     return datetime.now(UTC).isoformat()
+
+
+class LifecycleStage(str, Enum):
+    NEW = "NEW"
+    EMAILED = "EMAILED"
+    REPLIED = "REPLIED"
+    QUALIFIED = "QUALIFIED"
+    BOOKED = "BOOKED"
+    CLOSED = "CLOSED"
 
 
 class SourceAttribution(BaseModel):
@@ -235,6 +245,44 @@ class ConfidenceBehavior(BaseModel):
     require_post_generation_validation: bool = True
 
 
+class ChannelPlan(BaseModel):
+    primary_channel: Literal["email"]
+    sms_gate: str
+    whatsapp_gate: str
+    voice_gate: str
+    allowed_channels_after_reply: list[str] = Field(default_factory=list)
+
+
+class GeneratedEmailArtifact(BaseModel):
+    subject: str
+    body: str
+
+
+class WebsiteVisitEvent(BaseModel):
+    company_name: str
+    page_visited: str
+    timestamp: str
+    contact_email: str | None = None
+    session_id: str | None = None
+    source: str = "website"
+
+
+class WebsiteBehaviorSignal(BaseModel):
+    visit_count: int = Field(ge=0)
+    recent_pages: list[str] = Field(default_factory=list)
+    last_visit_at: str | None = None
+    follow_up_recommended: bool = False
+    confidence: float = Field(ge=0.0, le=1.0, default=0.0)
+
+
+class LinkedInSignalArtifact(BaseModel):
+    hiring_posts: list[str] = Field(default_factory=list)
+    leadership_changes: list[str] = Field(default_factory=list)
+    company_activity_signals: list[str] = Field(default_factory=list)
+    confidence: float = Field(ge=0.0, le=1.0, default=0.0)
+    source_attribution: SourceAttribution
+
+
 class ConfidenceAssessment(BaseModel):
     numeric_score: float = Field(ge=0.0, le=1.0)
     level: Literal["low", "medium", "high"]
@@ -245,7 +293,7 @@ class ConfidenceAssessment(BaseModel):
 
 
 class LifecycleActivity(BaseModel):
-    channel: Literal["email", "sms", "voice", "calendar", "system"]
+    channel: Literal["email", "sms", "voice", "calendar", "system", "website", "whatsapp"]
     direction: Literal["outbound", "inbound", "system"]
     event_type: str
     detail: str
@@ -259,28 +307,31 @@ class LeadLifecycleState(BaseModel):
     company_name: str
     contact_email: str | None = None
     phone_number: str | None = None
-    stage: Literal[
-        "new",
-        "enriched",
-        "email_sent",
-        "email_replied",
-        "sms_sent",
-        "sms_replied",
-        "voice_queued",
-        "booked",
-    ] = "new"
+    stage: LifecycleStage = LifecycleStage.NEW
     qualification_status: str = "unknown"
     intent_level: str = "low"
     next_action: str = "research"
     booking_url: str | None = None
     crm_contact_id: str | None = None
+    confidence_score: float = Field(ge=0.0, le=1.0, default=0.0)
     email_reply_received: bool = False
     sms_reply_received: bool = False
     booking_completed: bool = False
+    website_visits_count: int = Field(ge=0, default=0)
+    last_website_page: str | None = None
+    last_website_visit_at: str | None = None
     activities: list[LifecycleActivity] = Field(default_factory=list)
     last_inbound_message: str | None = None
     updated_at: str = Field(default_factory=utc_now_iso)
 
     @property
     def sms_allowed(self) -> bool:
-        return self.email_reply_received
+        return self.email_reply_received and self.confidence_score >= 0.6
+
+    @property
+    def whatsapp_allowed(self) -> bool:
+        return self.email_reply_received and self.confidence_score >= 0.6
+
+    @property
+    def booking_ready(self) -> bool:
+        return self.stage in {LifecycleStage.QUALIFIED, LifecycleStage.REPLIED} and self.confidence_score >= 0.6

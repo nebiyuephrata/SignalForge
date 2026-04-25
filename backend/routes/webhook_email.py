@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from agent.briefs.brief_schema import LeadRecord
 from agent.channels.channel_schema import MalformedWebhookError
 from agent.channels.email.email_handler import EmailHandler
+from agent.utils.trace_logger import append_jsonl_log
 from backend.schemas import ProviderSendResponse, SendEmailRequest, WebhookResponse
 from backend.services.conversation_service import ConversationService
 
@@ -39,10 +40,25 @@ async def send_email(request: SendEmailRequest) -> ProviderSendResponse:
 
 @router.post("/resend/events", response_model=WebhookResponse)
 async def resend_events(payload: dict[str, object]) -> WebhookResponse:
+    append_jsonl_log("logs/webhook_events.jsonl", {"route": "/webhooks/email/resend/events", "phase": "received", "payload": payload})
     try:
         result = email_handler.handle_provider_webhook(payload)
         body = result.model_dump()
         body["event"] = result.event.model_dump() if result.event else None
+        append_jsonl_log(
+            "logs/webhook_events.jsonl",
+            {
+                "route": "/webhooks/email/resend/events",
+                "phase": "processed",
+                "status": result.status,
+                "detail": result.detail,
+                "event": body.get("event"),
+            },
+        )
         return WebhookResponse(**body)
     except MalformedWebhookError as exc:
+        append_jsonl_log(
+            "logs/webhook_events.jsonl",
+            {"route": "/webhooks/email/resend/events", "phase": "validation_error", "error": str(exc), "payload": payload},
+        )
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     app_host: str = "0.0.0.0"
     app_port: int = 8000
+    base_url: str = Field(default="http://0.0.0.0:10000", validation_alias=AliasChoices("BASE_URL"))
     log_level: str = "INFO"
     frontend_origins: str = "http://127.0.0.1:5173,http://localhost:5173"
 
@@ -30,10 +31,13 @@ class Settings(BaseSettings):
     africas_talking_username: str = "sandbox"
     africas_talking_base_url: str = "https://api.africastalking.com/version1"
     africas_talking_webhook_secret: str = ""
-    hubspot_api_key: str = ""
+    whatsapp_api_key: str = ""
+    whatsapp_base_url: str = "https://api.twilio.com/whatsapp"
+    whatsapp_webhook_secret: str = ""
+    hubspot_api_key: str = Field(default="", validation_alias=AliasChoices("HUBSPOT_API_KEY"))
     hubspot_access_token: str = ""
     hubspot_base_url: str = "https://api.hubapi.com"
-    calcom_api_key: str = ""
+    calcom_api_key: str = Field(default="", validation_alias=AliasChoices("CALCOM_API_KEY", "CAL_API_KEY"))
     calcom_base_url: str = "https://cal.com"
     calcom_booking_slug: str = "signalforge-discovery"
     calcom_webhook_secret: str = ""
@@ -48,6 +52,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://signalforge:signalforge@localhost:5432/signalforge"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    @property
+    def public_base_url(self) -> str:
+        return self.base_url.rstrip("/")
 
 
 @lru_cache(maxsize=1)

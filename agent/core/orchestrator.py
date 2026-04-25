@@ -4,11 +4,13 @@ from statistics import mean
 
 from agent.calendar.cal_client import CalClient
 from agent.core.confidence import ConfidenceCalibrationLayer
+from agent.core.models import ChannelPlan
 from agent.guards.claim_validator import validate_email_claims
 from agent.llm.email_generator import generate_deterministic_fallback_email, generate_outreach_email
 from agent.signals.competitor_gap import build_competitor_gap_brief
 from agent.signals.hiring_signals import build_hiring_signal_brief
 from agent.tools.crunchbase_tool import CrunchbaseTool
+from agent.utils.trace_logger import append_jsonl_log
 
 SYNTHETIC_COMPANY_NAME = "Northstar Lending"
 SYNTHETIC_REPLY = (
@@ -30,7 +32,7 @@ class SignalForgeOrchestrator:
         *,
         contact_email: str | None = None,
     ) -> dict[str, object]:
-        company = self.crunchbase_tool.get_company_by_name(company_name) or {
+        company = self.crunchbase_tool.lookup_company_record(company_name) or {
             "company_name": company_name,
             "domain": "unknown",
             "industry": "unknown",
@@ -94,7 +96,7 @@ class SignalForgeOrchestrator:
                 should_attach=booking["should_book"],
             ),
         }
-        return {
+        result = {
             "as_of_date": hiring_signal_brief["as_of_date"],
             "company": company_name,
             "company_profile": company,
@@ -110,13 +112,34 @@ class SignalForgeOrchestrator:
             "reply_text": inbound_reply,
             "qualification": qualification,
             "booking": booking,
-            "channel_plan": {
-                "primary_channel": "email",
-                "sms_gate": "requires_recorded_email_reply",
-                "voice_gate": "requires_sms_reply_or_manual_operator_decision",
-                "allowed_channels_after_reply": ["sms", "calendar"],
-            },
+            "channel_plan": ChannelPlan(
+                primary_channel="email",
+                sms_gate="requires_recorded_email_reply_and_confidence_gte_0_6",
+                whatsapp_gate="requires_recorded_email_reply_and_confidence_gte_0_6",
+                voice_gate="requires_sms_reply_or_manual_operator_decision",
+                allowed_channels_after_reply=["sms", "whatsapp", "calendar"],
+            ).model_dump(),
         }
+        append_jsonl_log(
+            "logs/orchestrator_runs.jsonl",
+            {
+                "company_name": company_name,
+                "contact_email": contact_email,
+                "reply_text": inbound_reply,
+                "input_signals": hiring_signal_brief.get("signals", []),
+                "competitor_gap_summary": competitor_gap_brief.get("gap_summary"),
+                "confidence_score": result["confidence_assessment"]["numeric_score"],
+                "confidence_level": result["confidence"],
+                "generation_decision": {
+                    "mode": "fallback" if str(email_output.get("model")) == "deterministic-fallback" else "llm",
+                    "model": email_output.get("model"),
+                    "fallback_reason": email_output.get("prompt_snapshot", {}).get("fallback_reason"),
+                },
+                "channel_decision": result["channel_plan"],
+                "booking_url": booking_url,
+            },
+        )
+        return result
 
     def run_scenario(
         self,

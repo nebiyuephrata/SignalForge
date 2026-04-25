@@ -127,7 +127,7 @@ class DemoFlowService:
         conversation_service = ConversationService(crm_service=crm_service, channel_orchestrator=orchestrator)
 
         send_result, crm_sync, drafted = conversation_service.send_email(lead=lead)
-        reply_state = conversation_service.channel_orchestrator.process_inbound_event(
+        reply_result = conversation_service.handle_inbound_event(
             InboundChannelEvent(
                 channel="email",
                 provider="resend",
@@ -139,20 +139,13 @@ class DemoFlowService:
                 external_id=f"demo-reply-{session_id}",
             )
         )
-        reply_crm_sync = crm_service.sync_inbound_event(
-            lead=lead,
-            lifecycle_state=reply_state,
-            event=InboundChannelEvent(
-                channel="email",
-                provider="resend",
-                event_type="reply",
-                company_name=lead.company_name,
-                contact_email=lead.contact_email,
-                phone_number=lead.phone_number,
-                message_text=selected_reply,
-                external_id=f"demo-reply-{session_id}",
-            ),
+        reply_state = conversation_service.channel_orchestrator.state_store.get(
+            orchestrator.lead_key(lead.company_name, lead.contact_email, lead.phone_number),
+            company_name=lead.company_name,
+            contact_email=lead.contact_email,
+            phone_number=lead.phone_number,
         )
+        reply_crm_sync = reply_result["crm_sync"]
 
         sms_body = (
             "Thanks for the quick reply. I pulled a short discovery step so we can compare "
@@ -216,7 +209,7 @@ class DemoFlowService:
                 "provider": "resend",
                 "event_type": "reply",
                 "message_text": selected_reply,
-                "allowed_next_channels": orchestrator.allowed_next_channels(reply_state),
+                "allowed_next_channels": list(reply_result["allowed_next_channels"]),
                 "crm_activity_id": reply_crm_sync.get("activity_log", {}).get("id"),
             },
             "sms_follow_up": {
@@ -225,7 +218,7 @@ class DemoFlowService:
                 "crm_activity_id": sms_crm_sync.get("activity_log", {}).get("id"),
             },
             "lifecycle": {
-                "current_stage": booked_state.stage,
+                "current_stage": booked_state.stage.value,
                 "booking_completed": booked_state.booking_completed,
                 "allowed_next_channels": orchestrator.allowed_next_channels(booked_state),
                 "activities": [activity.model_dump() for activity in booked_state.activities],
@@ -318,7 +311,7 @@ class DemoFlowService:
             "signalforge_intent_level": crm_properties.get("signalforge_intent_level") or "high",
             "signalforge_qualification_status": crm_properties.get("signalforge_qualification_status") or "qualified",
             "signalforge_next_action": crm_properties.get("signalforge_next_action") or "share_booking_link",
-            "signalforge_stage": crm_properties.get("signalforge_stage") or "booked",
+            "signalforge_stage": crm_properties.get("signalforge_stage") or "BOOKED",
             "signalforge_booking_url": crm_properties.get("signalforge_booking_url") or "",
             "signalforge_booking_event_type": crm_properties.get("signalforge_booking_event_type") or "Tenacious discovery call",
             "signalforge_last_booking_start": crm_properties.get("signalforge_last_booking_start") or "",

@@ -9,6 +9,7 @@ class RunProspectRequest(BaseModel):
     company_name: str | None = Field(default=None)
     reply_text: str | None = Field(default=None)
     scenario_name: str | None = Field(default=None)
+    contact_email: str | None = Field(default=None)
 
 
 class AvailableScenariosResponse(BaseModel):
@@ -68,6 +69,24 @@ class ProspectDemoFlowResponse(BaseModel):
     crm_sync: dict[str, object]
 
 
+class DemoRunLiveRequest(BaseModel):
+    company_name: str
+    contact_email: str | None = None
+    reply_text: str | None = None
+
+
+class DemoRunLiveResponse(BaseModel):
+    company: str
+    hiring_signal_brief: dict[str, object]
+    competitor_gap_brief: dict[str, object]
+    generated_email: ProspectEmail
+    channel_plan: dict[str, object]
+    confidence_score: float
+    confidence_level: str
+    trace_id: str | None = None
+    trace_url: str | None = None
+
+
 class DraftChannelRequest(BaseModel):
     lead: dict[str, Any]
 
@@ -89,6 +108,29 @@ class SendWarmSmsRequest(BaseModel):
     contact_email: str | None = None
     body: str
     prior_email_reply: bool = False
+
+
+class SendWarmWhatsAppRequest(BaseModel):
+    company_name: str
+    phone_number: str
+    contact_email: str | None = None
+    body: str
+
+
+class WebsiteVisitRequest(BaseModel):
+    company_name: str = Field(alias="company")
+    page_visited: str
+    timestamp: str
+    contact_email: str | None = None
+    session_id: str | None = None
+
+
+class WebsiteVisitResponse(BaseModel):
+    status: str
+    lifecycle_stage: str
+    follow_up_recommended: bool
+    allowed_next_channels: list[str]
+    crm_sync: dict[str, Any]
 
 
 class ProviderSendResponse(BaseModel):

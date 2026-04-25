@@ -5,6 +5,7 @@ from agent.channels.channel_schema import InboundChannelEvent, ProviderSendReque
 from agent.channels.email.email_handler import EmailHandler
 from agent.channels.sms.sms_handler import SMSHandler
 from agent.core.channel_orchestrator import ChannelOrchestrator
+from agent.core.models import LifecycleStage
 from agent.core.state_manager import ProspectStateStore
 from backend.services.conversation_service import ConversationService
 from backend.services.crm_service import CRMService
@@ -78,9 +79,9 @@ def test_end_to_end_flow(tmp_path) -> None:
     assert send_result.status == "queued"
     assert drafted.crm_fields.ai_maturity >= 0
     assert crm_sync["contact"]["id"] == "contact-e2e"
-    assert fake_hubspot.updates[-1]["properties"]["signalforge_stage"] == "email_sent"
+    assert fake_hubspot.updates[-1]["properties"]["signalforge_stage"] == "EMAILED"
 
-    inbound_state = service.channel_orchestrator.process_inbound_event(
+    inbound_response = service.handle_inbound_event(
         InboundChannelEvent(
             channel="email",
             provider="resend",
@@ -88,11 +89,21 @@ def test_end_to_end_flow(tmp_path) -> None:
             company_name=lead.company_name,
             contact_email=lead.contact_email,
             phone_number=lead.phone_number,
-            message_text="Yes, send the link.",
+            message_text=(
+                "Yes, that's directionally right. We're adding AI operations capacity this quarter "
+                "and would be open to a 20-minute call next week."
+            ),
         )
     )
+    inbound_state = service.channel_orchestrator.state_store.get(
+        service.channel_orchestrator.lead_key(lead.company_name, lead.contact_email, lead.phone_number),
+        company_name=lead.company_name,
+        contact_email=lead.contact_email,
+        phone_number=lead.phone_number,
+    )
 
-    assert inbound_state.stage == "email_replied"
+    assert inbound_response["lifecycle_stage"] == "QUALIFIED"
+    assert inbound_state.stage == LifecycleStage.QUALIFIED
     assert inbound_state.booking_url
 
     sms_result, sms_crm_sync = service.send_warm_sms(
@@ -101,7 +112,7 @@ def test_end_to_end_flow(tmp_path) -> None:
     )
 
     assert sms_result.status == "queued"
-    assert fake_hubspot.updates[-1]["properties"]["signalforge_stage"] == "sms_sent"
+    assert fake_hubspot.updates[-1]["properties"]["signalforge_stage"] == "QUALIFIED"
     assert "booking_url" in sms_crm_sync["activity_log"]["id"] or sms_crm_sync["activity_log"]["id"].startswith("activity-")
 
     booked_state = service.channel_orchestrator.process_inbound_event(
@@ -124,7 +135,7 @@ def test_end_to_end_flow(tmp_path) -> None:
         meeting_start="2026-04-24T15:00:00Z",
     )
 
-    assert booked_state.stage == "booked"
+    assert booked_state.stage == LifecycleStage.BOOKED
     assert booking_sync["contact"]["id"] == "contact-e2e"
     assert any(activity["channel"] == "email" for activity in fake_hubspot.activities)
     assert any(activity["channel"] == "sms" for activity in fake_hubspot.activities)

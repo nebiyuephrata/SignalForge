@@ -11,9 +11,11 @@ from agent.core.models import (
     FundingEvent,
     HiringSignalBrief,
     HiringVelocity,
+    LinkedInSignalArtifact,
     LayoffEvent,
     LeadershipChangeEvent,
     SourceAttribution,
+    WebsiteBehaviorSignal,
 )
 from agent.signals.ai_maturity import build_ai_maturity_assessment
 from agent.signals.segment_classifier import classify_primary_segment
@@ -22,6 +24,8 @@ from agent.tools.crunchbase_tool import CrunchbaseTool
 from agent.tools.job_scraper import JobScraper
 from agent.tools.layoffs_tool import LayoffsTool, REFERENCE_DATE
 from agent.tools.leadership_tool import LeadershipChangeTool
+from agent.tools.linkedin_signal import LinkedInSignalTool
+from agent.tools.website_signal import WebsiteSignalStore
 
 
 def build_hiring_signal_brief(
@@ -30,12 +34,16 @@ def build_hiring_signal_brief(
     layoffs_tool: LayoffsTool | None = None,
     leadership_tool: LeadershipChangeTool | None = None,
     job_scraper: JobScraper | None = None,
+    linkedin_signal_tool: LinkedInSignalTool | None = None,
+    website_signal_store: WebsiteSignalStore | None = None,
     as_of_date: date = REFERENCE_DATE,
 ) -> dict[str, object]:
     company = crunchbase_tool.lookup_company_record(company_name)
     layoffs_tool = layoffs_tool or LayoffsTool()
     leadership_tool = leadership_tool or LeadershipChangeTool(crunchbase_tool)
     job_scraper = job_scraper or JobScraper(crunchbase_tool)
+    linkedin_signal_tool = linkedin_signal_tool or LinkedInSignalTool(crunchbase_tool)
+    website_signal_store = website_signal_store or WebsiteSignalStore()
 
     if company is None:
         brief = _build_missing_company_brief(company_name=company_name, as_of_date=as_of_date)
@@ -50,6 +58,8 @@ def build_hiring_signal_brief(
     recent_layoffs = layoffs_tool.get_recent_layoffs(company_name, as_of_date=as_of_date)
     recent_leadership_changes = leadership_tool.get_recent_changes(company_name, as_of_date=as_of_date)
     job_post_scrape = job_scraper.scrape_company_jobs(company_name)
+    linkedin_signals = linkedin_signal_tool.extract_company_signals(company_name)
+    website_behavior = website_signal_store.behavioral_signal(company_name=company_name)
     ai_maturity = build_ai_maturity_assessment(company, role_titles=list(job_post_scrape.get("role_titles", [])))
     recent_funding_event = crunchbase_tool.lookup_recent_funding_event(
         company_name,
@@ -134,6 +144,29 @@ def build_hiring_signal_brief(
         ),
         sources=["linkedin_public", "company_team_page"],
     )
+    linkedin_activity_signal = EvidenceSignal(
+        signal="linkedin_activity",
+        value=linkedin_signals.model_dump(),
+        confidence=linkedin_signals.confidence,
+        evidence=linkedin_signals.hiring_posts[:1] + linkedin_signals.leadership_changes[:1] + linkedin_signals.company_activity_signals[:2]
+        if linkedin_signals.confidence
+        else ["No LinkedIn/public activity signal was inferred from the deterministic fixture."],
+        sources=["linkedin_public"],
+    )
+    website_signal = EvidenceSignal(
+        signal="website_behavior",
+        value=website_behavior.model_dump() if website_behavior else {"visit_count": 0, "recent_pages": []},
+        confidence=website_behavior.confidence if website_behavior else 0.0,
+        evidence=(
+            [
+                f"{website_behavior.visit_count} recent website visits detected.",
+                f"Recent pages: {', '.join(website_behavior.recent_pages)}.",
+            ]
+            if website_behavior
+            else ["No recent website visit signal was recorded."]
+        ),
+        sources=["website_visit"],
+    )
 
     primary_segment_match, segment_confidence = classify_primary_segment(
         company=company,
@@ -156,19 +189,18 @@ def build_hiring_signal_brief(
         velocity_signal=job_velocity_signal,
         company=company,
     )
-    overall_confidence = round(
-        mean(
-            [
-                funding_signal.confidence,
-                job_scrape_signal.confidence,
-                job_velocity_signal.confidence,
-                layoffs_signal.confidence,
-                leadership_signal.confidence,
-                ai_maturity.confidence,
-            ]
-        ),
-        2,
-    )
+    confidence_inputs = [
+        funding_signal.confidence,
+        job_scrape_signal.confidence,
+        job_velocity_signal.confidence,
+        layoffs_signal.confidence,
+        leadership_signal.confidence,
+        linkedin_activity_signal.confidence,
+        ai_maturity.confidence,
+    ]
+    if website_behavior:
+        confidence_inputs.append(website_signal.confidence)
+    overall_confidence = round(mean(confidence_inputs), 2)
 
     brief = HiringSignalBrief(
         company_name=company_name,
@@ -227,8 +259,18 @@ def build_hiring_signal_brief(
             company=company,
             job_post_scrape=job_post_scrape,
             leadership_detected=bool(recent_leadership_changes),
+            linkedin_signals=linkedin_signals,
+            website_behavior=website_behavior,
         ),
-        signals=[funding_signal, job_scrape_signal, job_velocity_signal, layoffs_signal, leadership_signal],
+        signals=[
+            funding_signal,
+            job_scrape_signal,
+            job_velocity_signal,
+            layoffs_signal,
+            leadership_signal,
+            linkedin_activity_signal,
+            *([website_signal] if website_behavior else []),
+        ],
         overall_confidence=overall_confidence,
         uncertainty_flags=uncertainty_flags,
         source_artifact={
@@ -237,6 +279,8 @@ def build_hiring_signal_brief(
             "job_post_velocity": job_velocity_signal.model_dump(),
             "layoffs": layoffs_signal.model_dump(),
             "leadership_change": leadership_signal.model_dump(),
+            "linkedin_activity": linkedin_activity_signal.model_dump(),
+            **({"website_behavior": website_signal.model_dump()} if website_behavior else {}),
             "ai_maturity": ai_maturity.model_dump(),
         },
     )
@@ -377,6 +421,8 @@ def _data_sources_checked(
     company: dict[str, object],
     job_post_scrape: dict[str, object],
     leadership_detected: bool,
+    linkedin_signals: LinkedInSignalArtifact,
+    website_behavior: WebsiteBehaviorSignal | None,
 ) -> list[SourceAttribution]:
     source_artifact = job_post_scrape.get("source_artifact", {})
     company_page_source = SourceAttribution.model_validate(
@@ -417,6 +463,19 @@ def _data_sources_checked(
             source_url=f"https://{company['domain']}/team",
             confidence=0.8 if leadership_detected else 0.45,
             detail="Leadership changes were read from public company fixture data.",
+        ),
+        linkedin_signals.source_attribution,
+        *(
+            [
+                SourceAttribution(
+                    source="website_visit",
+                    status="success",
+                    confidence=website_behavior.confidence,
+                    detail=f"Website behavior signal derived from {website_behavior.visit_count} recent visits.",
+                )
+            ]
+            if website_behavior
+            else []
         ),
     ]
 

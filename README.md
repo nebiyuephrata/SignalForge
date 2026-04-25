@@ -172,6 +172,7 @@ cd ..
 ### 4. Environment variables
 
 Create `.env` from `.env.example` when available. SignalForge reads settings from `agent/utils/config.py`.
+If provider credentials are missing, SignalForge degrades safely: LLM email generation falls back to deterministic copy, CRM writes return explicit offline fallback payloads, and channel sends return structured provider failures instead of raising opaque exceptions.
 
 #### Core app
 
@@ -179,6 +180,7 @@ Create `.env` from `.env.example` when available. SignalForge reads settings fro
 - `APP_ENV`: environment label
 - `APP_HOST`: bind host
 - `APP_PORT`: bind port
+- `BASE_URL`: public URL for the deployed backend, used for deployment-safe examples and public callbacks
 - `LOG_LEVEL`: logger level
 - `FRONTEND_ORIGINS`: allowed frontend origins, comma-separated
 
@@ -255,7 +257,7 @@ Relevant files:
 
 #### Cal.com integration
 
-- `CALCOM_API_KEY`: reserved for future authenticated actions
+- `CAL_API_KEY`: reserved for future authenticated actions
 - `CALCOM_BASE_URL`: public booking base URL
 - `CALCOM_BOOKING_SLUG`: discovery call slug
 - `CALCOM_WEBHOOK_SECRET`: reserved for webhook verification
@@ -287,7 +289,7 @@ When a new engineer wants the least surprising local bootstrap, use this order:
 4. Start the backend:
 
 ```bash
-.venv/bin/uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+.venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 10000
 ```
 
 5. Start the frontend in a second shell:
@@ -300,25 +302,33 @@ npm run dev
 6. Verify health:
 
 ```bash
-curl -sS http://127.0.0.1:8000/health
+curl -sS "$BASE_URL/health"
 ```
 
 7. Run a prospect:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/run-prospect
+curl -sS -X POST "$BASE_URL/run-prospect"
 ```
 
 8. Run the rubric-friendly synthetic lifecycle:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/run-prospect/demo-flow
+curl -sS -X POST "$BASE_URL/run-prospect/demo-flow"
 ```
 
-9. If you want the multi-channel path manually:
+9. Run the public validation demo endpoint:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/email/send \
+curl -sS -X POST "$BASE_URL/demo/run-live" \
+  -H 'Content-Type: application/json' \
+  -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example"}'
+```
+
+10. If you want the multi-channel path manually:
+
+```bash
+curl -sS -X POST "$BASE_URL/webhooks/email/send" \
   -H 'Content-Type: application/json' \
   -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example","contact_name":"Maya","phone_number":"+15551234567"}'
 ```
@@ -326,7 +336,7 @@ curl -sS -X POST http://127.0.0.1:8000/webhooks/email/send \
 Then post an inbound reply:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/email/resend/events \
+curl -sS -X POST "$BASE_URL/webhooks/email/resend/events" \
   -H 'Content-Type: application/json' \
   -d '{"type":"email.reply_received","data":{"id":"evt-1","email_id":"email-123","to":"cto@northstar.example","text":"Yes, send the link.","tags":[{"name":"company_name","value":"Northstar Lending"}]}}'
 ```
@@ -334,7 +344,7 @@ curl -sS -X POST http://127.0.0.1:8000/webhooks/email/resend/events \
 Then SMS warm follow-up:
 
 ```bash
-curl -sS -X POST http://127.0.0.1:8000/webhooks/sms/send-warm \
+curl -sS -X POST "$BASE_URL/webhooks/sms/send-warm" \
   -H 'Content-Type: application/json' \
   -d '{"company_name":"Northstar Lending","contact_email":"cto@northstar.example","phone_number":"+15551234567","body":"Thanks for the reply. Here is the shortest next step."}'
 ```

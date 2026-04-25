@@ -3,8 +3,9 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
+from backend.routes import demo as demo_route
 from backend.routes import run_prospect as run_prospect_route
-from backend.schemas import RunProspectRequest
+from backend.schemas import DemoRunLiveRequest, RunProspectRequest
 
 
 def test_list_scenarios_returns_known_cases() -> None:
@@ -57,7 +58,7 @@ def test_run_prospect_demo_flow_returns_traceable_lifecycle(monkeypatch) -> None
             "email_send": {"status": "queued"},
             "reply_event": {"event_type": "reply"},
             "sms_follow_up": {"status": "queued"},
-            "lifecycle": {"current_stage": "booked"},
+            "lifecycle": {"current_stage": "BOOKED"},
             "hubspot_record": {"contact_id": "demo-contact-1"},
             "calcom_booking": {"booking_id": "demo-booking-1"},
             "crm_sync": {"email_send": {"contact": {"id": "demo-contact-1"}}},
@@ -67,8 +68,51 @@ def test_run_prospect_demo_flow_returns_traceable_lifecycle(monkeypatch) -> None
     response = asyncio.run(run_prospect_route.run_prospect_demo_flow())
 
     assert response.prospect_identity["company_name"] == "Northstar Lending"
-    assert response.lifecycle["current_stage"] == "booked"
+    assert response.lifecycle["current_stage"] == "BOOKED"
     assert response.calcom_booking["booking_id"] == "demo-booking-1"
+
+
+def test_run_live_demo_endpoint_returns_typed_artifacts(monkeypatch) -> None:
+    monkeypatch.setattr(
+        demo_route.service,
+        "run",
+        lambda **_: {
+            "company": "Northstar Lending",
+            "hiring_signal_brief": {"summary": "Signals grounded."},
+            "competitor_gap_brief": {"gap_summary": "Peers are ahead on AI ops hiring."},
+            "generated_email": {"subject": "Quick thought for Northstar Lending", "body": "Body"},
+            "channel_plan": {"primary_channel": "email", "allowed_channels_after_reply": ["sms", "whatsapp", "calendar"]},
+            "confidence_score": 0.82,
+            "confidence_level": "high",
+            "trace_id": "trace-1",
+            "trace_url": "https://example.com/traces/trace-1",
+        },
+    )
+
+    response = asyncio.run(
+        demo_route.run_live_demo(DemoRunLiveRequest(company_name="Northstar Lending"))
+    )
+
+    assert response.company == "Northstar Lending"
+    assert response.generated_email.subject
+    assert response.channel_plan["primary_channel"] == "email"
+
+
+def test_run_live_demo_endpoint_falls_back_on_exception(monkeypatch) -> None:
+    monkeypatch.setattr(
+        demo_route.service.orchestrator,
+        "run_single_prospect",
+        lambda **_: (_ for _ in ()).throw(RuntimeError("upstream failed")),
+    )
+
+    response = asyncio.run(
+        demo_route.run_live_demo(DemoRunLiveRequest(company_name="Northstar Lending"))
+    )
+
+    assert response.company == "Northstar Lending"
+    assert response.generated_email.subject
+    assert response.confidence_score == 0.0
+    assert response.channel_plan["primary_channel"] == "email"
 
 
 def test_batch_endpoint_returns_compact_summary(monkeypatch) -> None:

@@ -37,6 +37,7 @@ class ProspectRunService:
         company_name: str | None = None,
         reply_text: str | None = None,
         scenario_name: str | None = None,
+        contact_email: str | None = None,
     ) -> dict[str, object]:
         if scenario_name:
             case = get_adversarial_case(scenario_name)
@@ -51,6 +52,7 @@ class ProspectRunService:
             result = self.orchestrator.run_single_prospect(
                 company_name=company_name or self.orchestrator.crunchbase_tool.list_companies()[0]["company_name"],
                 reply_text=reply_text,
+                contact_email=contact_email,
             )
 
         artifact_slug = self._artifact_slug(result)

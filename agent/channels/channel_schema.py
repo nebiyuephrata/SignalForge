@@ -18,7 +18,7 @@ class ProviderSendRequest(BaseModel):
 
 
 class ProviderSendResult(BaseModel):
-    channel: Literal["email", "sms"]
+    channel: Literal["email", "sms", "whatsapp"]
     provider: str
     status: Literal["queued", "sent", "failed", "skipped"]
     destination: str
@@ -30,7 +30,7 @@ class ProviderSendResult(BaseModel):
 
 class InboundChannelEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: uuid4().hex)
-    channel: Literal["email", "sms", "calendar"]
+    channel: Literal["email", "sms", "calendar", "website", "whatsapp"]
     provider: str
     event_type: str
     company_name: str | None = None
@@ -45,7 +45,7 @@ class InboundChannelEvent(BaseModel):
 class WebhookProcessingResult(BaseModel):
     status: Literal["processed", "ignored", "error"]
     provider: str
-    channel: Literal["email", "sms", "calendar"]
+    channel: Literal["email", "sms", "calendar", "website", "whatsapp"]
     event_type: str
     routed_handlers: int = 0
     detail: str = ""

@@ -27,5 +27,6 @@ class CalClient:
                 if value
             }
         )
-        url = f"{self.settings.calcom_base_url.rstrip('/')}/{booking_slug}"
+        booking_base_url = (self.settings.calcom_base_url or self.settings.public_base_url).rstrip("/")
+        url = f"{booking_base_url}/{booking_slug}"
         return f"{url}?{query}" if query else url

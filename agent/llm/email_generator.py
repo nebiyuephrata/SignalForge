@@ -205,8 +205,8 @@ def build_claim_catalog(
 
 def _build_system_prompt(confidence_level: str, strict_mode: bool) -> str:
     tone_rule = {
-        "high": "Use precise language but never move beyond the listed claims.",
-        "medium": "Use directional language such as 'it looks like' and avoid hard certainty.",
+        "high": "Use precise, direct assertions, but never move beyond the listed claims.",
+        "medium": "Use cautious phrasing such as 'it looks like' or 'it may be' and avoid hard certainty.",
         "low": "Use exploratory, question-led language and avoid declarative claims.",
     }[confidence_level]
     strict_instruction = (
@@ -239,7 +239,8 @@ def _build_user_prompt(company_name: str, confidence_level: str, claim_catalog: 
         f"{claim_lines}\n\n"
         "Write one email using only the allowed claims. "
         "Do not mention unnamed competitors. "
-        "If the confidence is medium, keep the tone careful and avoid saying the prospect 'clearly' needs anything."
+        "If the confidence is medium, keep the tone careful and avoid saying the prospect 'clearly' needs anything. "
+        "If the confidence is high, you may use direct but grounded assertions."
     )
 
 

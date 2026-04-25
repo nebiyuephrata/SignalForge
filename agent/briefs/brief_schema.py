@@ -46,6 +46,6 @@ class CRMFields(BaseModel):
 
 
 class OutboundMessage(BaseModel):
-    channel: Literal["email", "sms", "voice"]
+    channel: Literal["email", "sms", "voice", "whatsapp"]
     body: str
     crm_fields: CRMFields

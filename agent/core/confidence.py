@@ -6,8 +6,8 @@ from agent.core.models import ConfidenceAssessment, ConfidenceBehavior, Competit
 
 
 THRESHOLDS = {
-    "high": 0.78,
-    "medium": 0.55,
+    "high": 0.8,
+    "medium": 0.6,
     "low": 0.0,
 }
 
@@ -102,7 +102,7 @@ class ConfidenceCalibrationLayer:
                 tone="assertive",
                 max_claims=3,
                 allow_booking_link=True,
-                allow_sms=False,
+                allow_sms=True,
                 require_question_led_copy=False,
             )
         if level == "medium":
@@ -110,7 +110,7 @@ class ConfidenceCalibrationLayer:
                 tone="directional",
                 max_claims=2,
                 allow_booking_link=True,
-                allow_sms=False,
+                allow_sms=True,
                 require_question_led_copy=False,
             )
         return ConfidenceBehavior(

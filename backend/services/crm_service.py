@@ -91,6 +91,24 @@ class CRMService:
             },
         ) if email else {"status": "skipped", "reason": "missing_contact_email"}
         contact_id = str(contact_response.get("id", "")) or lifecycle_state.crm_contact_id or ""
+        enrichment_write = (
+            self._write_signalforge_enrichment(
+                contact_id=contact_id,
+                properties={
+                    "signalforge_stage": lifecycle_state.stage.value,
+                    "signalforge_next_action": lifecycle_state.next_action,
+                    "signalforge_qualification_status": lifecycle_state.qualification_status,
+                    "signalforge_intent_level": lifecycle_state.intent_level,
+                    "signalforge_last_event_at": datetime.now(timezone.utc).isoformat(),
+                    "signalforge_last_website_page": lifecycle_state.last_website_page or "",
+                    "signalforge_last_website_visit_at": lifecycle_state.last_website_visit_at or "",
+                    "signalforge_website_visits_count": lifecycle_state.website_visits_count,
+                },
+                fallback_subject="signalforge_inbound_fields",
+            )
+            if contact_id
+            else {"status": "skipped", "reason": "missing_contact_id"}
+        )
         note = (
             self.client.create_activity(
                 contact_id=contact_id,
@@ -101,7 +119,7 @@ class CRMService:
             if contact_id
             else {"status": "skipped", "reason": "missing_contact_id"}
         )
-        return {"contact": contact_response, "activity_log": note}
+        return {"contact": contact_response, "enrichment_fields": enrichment_write, "activity_log": note}
 
     def sync_booking_completed(
         self,
@@ -127,6 +145,7 @@ class CRMService:
                     "signalforge_booking_url": booking_url,
                     "signalforge_booking_event_type": "Tenacious discovery call",
                     "signalforge_last_booking_start": meeting_start,
+                    "signalforge_stage": "BOOKED",
                     "signalforge_last_event_at": datetime.now(timezone.utc).isoformat(),
                 },
                 fallback_subject="signalforge_booking_fields",
@@ -204,9 +223,12 @@ class CRMService:
             "signalforge_intent_level": outbound_message.crm_fields.intent_level,
             "signalforge_qualification_status": outbound_message.crm_fields.qualification_status,
             "signalforge_next_action": outbound_message.crm_fields.next_action,
-            "signalforge_stage": lifecycle_state.stage,
+            "signalforge_stage": lifecycle_state.stage.value,
             "signalforge_booking_url": lifecycle_state.booking_url or "",
             "signalforge_last_event_at": datetime.now(timezone.utc).isoformat(),
+            "signalforge_last_website_page": lifecycle_state.last_website_page or "",
+            "signalforge_last_website_visit_at": lifecycle_state.last_website_visit_at or "",
+            "signalforge_website_visits_count": lifecycle_state.website_visits_count,
         }
 
     def _write_signalforge_enrichment(

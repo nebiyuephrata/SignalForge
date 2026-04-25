@@ -313,6 +313,21 @@ class HubSpotClient:
                 "type": "string",
                 "fieldType": "text",
             },
+            "signalforge_last_website_page": {
+                "label": "SignalForge Last Website Page",
+                "type": "string",
+                "fieldType": "text",
+            },
+            "signalforge_last_website_visit_at": {
+                "label": "SignalForge Last Website Visit At",
+                "type": "string",
+                "fieldType": "text",
+            },
+            "signalforge_website_visits_count": {
+                "label": "SignalForge Website Visits Count",
+                "type": "number",
+                "fieldType": "number",
+            },
         }
         definition = definitions.get(property_name)
         if definition is None:

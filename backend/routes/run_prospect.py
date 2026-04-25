@@ -33,6 +33,7 @@ async def run_prospect(request: RunProspectRequest | None = None) -> ProspectRun
             company_name=payload.company_name,
             reply_text=payload.reply_text,
             scenario_name=payload.scenario_name,
+            contact_email=payload.contact_email,
         ))
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
