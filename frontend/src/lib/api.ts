@@ -1,6 +1,8 @@
-import type { BatchRunResponse, ProspectRunResponse, ScenarioListResponse } from "../types";
+import type { BatchRunResponse, DemoFlowResponse, ProspectRunResponse, ScenarioListResponse } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ??
+  (typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:8000");
 
 async function parseResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
@@ -44,6 +46,19 @@ export async function runProspect(payload?: {
   reply_text?: string;
 }): Promise<ProspectRunResponse> {
   const response = await fetch(`${API_BASE_URL}/run-prospect`, {
+    method: "POST",
+    headers: payload ? { "Content-Type": "application/json" } : undefined,
+    body: payload ? JSON.stringify(payload) : undefined,
+  });
+  return parseResponse(response);
+}
+
+export async function runDemoFlow(payload?: {
+  company_name?: string;
+  scenario_name?: string;
+  reply_text?: string;
+}): Promise<DemoFlowResponse> {
+  const response = await fetch(`${API_BASE_URL}/run-prospect/demo-flow`, {
     method: "POST",
     headers: payload ? { "Content-Type": "application/json" } : undefined,
     body: payload ? JSON.stringify(payload) : undefined,

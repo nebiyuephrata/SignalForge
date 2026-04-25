@@ -7,18 +7,21 @@ import {
   ArrowUpRight,
   Bot,
   Building2,
+  CalendarCheck2,
   CheckCircle2,
   Copy,
   LoaderCircle,
+  MailCheck,
   RefreshCw,
   Rocket,
   Search,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   UsersRound,
 } from "lucide-react";
-import { API_BASE_URL, fetchBatchSummary, fetchHealth, fetchScenarios, runProspect } from "./lib/api";
-import type { Confidence, ProspectRunResponse } from "./types";
+import { API_BASE_URL, fetchBatchSummary, fetchHealth, fetchScenarios, runDemoFlow, runProspect } from "./lib/api";
+import type { Confidence, DemoFlowResponse, ProspectRunResponse } from "./types";
 
 type RunMode = "default" | "scenario" | "company";
 
@@ -57,9 +60,18 @@ function App() {
   const prospectMutation = useMutation({
     mutationFn: runProspect,
   });
+  const demoFlowMutation = useMutation({
+    mutationFn: runDemoFlow,
+  });
 
   const currentResult = prospectMutation.data;
-  const requestError = prospectMutation.error instanceof Error ? prospectMutation.error.message : null;
+  const currentDemoFlow = demoFlowMutation.data;
+  const requestError =
+    prospectMutation.error instanceof Error
+      ? prospectMutation.error.message
+      : demoFlowMutation.error instanceof Error
+        ? demoFlowMutation.error.message
+        : null;
 
   const peersChartData = useMemo(() => {
     if (!currentResult) {
@@ -83,7 +95,7 @@ function App() {
           ? { scenario_name: scenarioName, reply_text: replyText }
           : { company_name: companyName, reply_text: replyText };
 
-    await prospectMutation.mutateAsync(payload);
+    await Promise.all([prospectMutation.mutateAsync(payload), demoFlowMutation.mutateAsync(payload)]);
   }
 
   async function handleCopyTrace(traceId: string) {
@@ -104,7 +116,7 @@ function App() {
               </div>
               <h1 className="text-3xl font-semibold text-white md:text-4xl">Outbound signal intelligence, inspected in one place.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300 md:text-[15px]">
-                Run a prospect, inspect the evidence chain, compare peer maturity, and watch the confidence-aware system decide whether to assert or ask.
+                Run a prospect, inspect the evidence chain, and show the same synthetic buyer moving from first email through reply, qualification, CRM sync, and booking.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[420px]">
@@ -224,12 +236,12 @@ function App() {
             <button
               type="button"
               onClick={() => void handleRun()}
-              disabled={prospectMutation.isPending}
+              disabled={prospectMutation.isPending || demoFlowMutation.isPending}
               className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-sky-400 px-4 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {prospectMutation.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
-              {runLabel}
-            </button>
+                  {prospectMutation.isPending || demoFlowMutation.isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ArrowUpRight className="h-4 w-4" />}
+                  {runLabel}
+                </button>
 
             {requestError ? (
               <div className="mt-4 rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-3 text-sm text-rose-100">
@@ -419,11 +431,160 @@ function App() {
                   </article>
                 </section>
 
+                {currentDemoFlow ? (
+                  <section className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+                    <article className="panel rounded-lg p-5 md:p-6">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <p className="label">End-to-end prospect flow</p>
+                          <h3 className="mt-1 text-xl font-semibold text-white">Single synthetic prospect, fully traceable</h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-400">
+                            Session started {formatDateTime(currentDemoFlow.session_started_at)}. The same prospect identity, conversation ID, and booking URL are carried across every stage below.
+                          </p>
+                        </div>
+                        <Badge tone={currentDemoFlow.lifecycle.booking_completed ? "high" : "medium"}>
+                          {currentDemoFlow.lifecycle.current_stage}
+                        </Badge>
+                      </div>
+
+                      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <MiniArtifact
+                          icon={<MailCheck className="h-4 w-4" />}
+                          label="Prospect"
+                          primary={currentDemoFlow.prospect_identity.contact_name}
+                          secondary={currentDemoFlow.prospect_identity.contact_email}
+                        />
+                        <MiniArtifact
+                          icon={<ShieldCheck className="h-4 w-4" />}
+                          label="Conversation ID"
+                          primary={truncateMiddle(currentDemoFlow.prospect_identity.conversation_id, 24)}
+                          secondary={currentDemoFlow.prospect_identity.company_name}
+                        />
+                        <MiniArtifact
+                          icon={<CheckCircle2 className="h-4 w-4" />}
+                          label="Qualification"
+                          primary={currentDemoFlow.qualification.qualification_status}
+                          secondary={currentDemoFlow.qualification.intent_level}
+                        />
+                        <MiniArtifact
+                          icon={<CalendarCheck2 className="h-4 w-4" />}
+                          label="Booking"
+                          primary={formatDateTime(currentDemoFlow.calcom_booking.meeting_start)}
+                          secondary={currentDemoFlow.calcom_booking.event_type}
+                        />
+                      </div>
+
+                      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        <LifecycleStep
+                          icon={<MailCheck className="h-4 w-4" />}
+                          title="Outbound email"
+                          detail={currentDemoFlow.email_send.detail}
+                          meta={`${currentDemoFlow.email_send.provider} · ${currentDemoFlow.email_send.external_id ?? "n/a"}`}
+                        />
+                        <LifecycleStep
+                          icon={<CheckCircle2 className="h-4 w-4" />}
+                          title="Prospect reply"
+                          detail={currentDemoFlow.reply_event.message_text}
+                          meta={currentDemoFlow.reply_event.allowed_next_channels.join(" -> ")}
+                        />
+                        <LifecycleStep
+                          icon={<Smartphone className="h-4 w-4" />}
+                          title="Warm SMS follow-up"
+                          detail={currentDemoFlow.sms_follow_up.body}
+                          meta={`${currentDemoFlow.sms_follow_up.provider} · ${currentDemoFlow.sms_follow_up.external_id ?? "n/a"}`}
+                        />
+                        <LifecycleStep
+                          icon={<CalendarCheck2 className="h-4 w-4" />}
+                          title="Confirmed booking"
+                          detail={currentDemoFlow.calcom_booking.booking_url}
+                          meta={formatDateTime(currentDemoFlow.calcom_booking.confirmed_at)}
+                        />
+                      </div>
+
+                      <div className="mt-5 rounded-lg border border-white/10 bg-slate-950/50 p-4">
+                        <div className="mb-3">
+                          <p className="label">Lifecycle timeline</p>
+                          <h4 className="mt-1 text-base font-semibold text-white">Recorded stage continuity</h4>
+                        </div>
+                        <div className="space-y-3">
+                          {currentDemoFlow.lifecycle.activities.map((activity) => (
+                            <div key={`${activity.recorded_at}-${activity.channel}-${activity.event_type}`} className="grid gap-2 rounded-md border border-white/8 bg-white/[0.03] px-3 py-3 md:grid-cols-[110px_120px_minmax(0,1fr)]">
+                              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-sky-200">{activity.channel}</div>
+                              <div className="text-sm text-slate-300">{activity.event_type}</div>
+                              <div className="space-y-1 text-sm text-slate-400">
+                                <div>{activity.detail}</div>
+                                <div>
+                                  {formatDateTime(activity.recorded_at)}
+                                  {activity.external_id ? ` · ${activity.external_id}` : ""}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </article>
+
+                    <div className="space-y-6">
+                      <article className="panel rounded-lg p-5 md:p-6">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="label">HubSpot artifact state</p>
+                            <h3 className="mt-1 text-xl font-semibold text-white">Session-current CRM contact snapshot</h3>
+                          </div>
+                          <Badge tone="high">contact {currentDemoFlow.hubspot_record.contact_id}</Badge>
+                        </div>
+                        <div className="mt-5 space-y-4">
+                          <ArtifactTable
+                            rows={orderedHubSpotFields(currentDemoFlow.hubspot_record.properties)}
+                          />
+                          <div className="rounded-lg border border-white/10 bg-slate-950/55 p-4">
+                            <p className="label">CRM activities</p>
+                            <div className="mt-3 space-y-3">
+                              {currentDemoFlow.hubspot_record.activities.map((activity) => (
+                                <div key={activity.id} className="rounded-md border border-white/8 bg-white/[0.03] px-3 py-3 text-sm text-slate-300">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="font-medium text-white">{activity.subject}</span>
+                                    <span className="text-slate-400">{formatDateTime(activity.recorded_at)}</span>
+                                  </div>
+                                  <div className="mt-2 text-slate-400">{activity.channel}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </article>
+
+                      <article className="panel rounded-lg p-5 md:p-6">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="label">Cal.com booking artifact</p>
+                            <h3 className="mt-1 text-xl font-semibold text-white">Confirmed discovery call</h3>
+                          </div>
+                          <Badge tone="high">confirmed</Badge>
+                        </div>
+                        <div className="mt-5">
+                          <ArtifactTable
+                            rows={[
+                              ["Event type", currentDemoFlow.calcom_booking.event_type],
+                              ["Attendee", currentDemoFlow.calcom_booking.attendee_name],
+                              ["Attendee email", currentDemoFlow.calcom_booking.attendee_email],
+                              ["Meeting start", formatDateTime(currentDemoFlow.calcom_booking.meeting_start)],
+                              ["Confirmed at", formatDateTime(currentDemoFlow.calcom_booking.confirmed_at)],
+                              ["Booking URL", currentDemoFlow.calcom_booking.booking_url],
+                              ["Booking ID", currentDemoFlow.calcom_booking.booking_id],
+                            ]}
+                          />
+                        </div>
+                      </article>
+                    </div>
+                  </section>
+                ) : null}
+
                 <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                   <article className="panel rounded-lg p-5 md:p-6">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="label">Signal breakdown</p>
+                        <p className="label">Hiring signal brief artifact</p>
                         <h3 className="mt-1 text-xl font-semibold text-white">Evidence chain</h3>
                       </div>
                       <Badge tone={currentResult.confidence}>
@@ -477,7 +638,7 @@ function App() {
                   <article className="panel rounded-lg p-5 md:p-6">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="label">Competitor gap</p>
+                        <p className="label">Competitor gap brief artifact</p>
                         <h3 className="mt-1 text-xl font-semibold text-white">Similar companies dashboard</h3>
                       </div>
                       <Badge tone="medium">
@@ -804,6 +965,71 @@ function HintText({ text }: { text: string }) {
   return <p className="text-sm leading-6 text-slate-400">{text}</p>;
 }
 
+function MiniArtifact({
+  icon,
+  label,
+  primary,
+  secondary,
+}: {
+  icon: ReactNode;
+  label: string;
+  primary: string;
+  secondary: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-slate-950/50 p-4">
+      <div className="mb-3 flex items-center gap-2 text-slate-300">
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-sky-200">{icon}</span>
+        <span className="label">{label}</span>
+      </div>
+      <div className="text-sm font-semibold text-white">{primary}</div>
+      <div className="mt-1 text-sm text-slate-400">{secondary}</div>
+    </div>
+  );
+}
+
+function LifecycleStep({
+  icon,
+  title,
+  detail,
+  meta,
+}: {
+  icon: ReactNode;
+  title: string;
+  detail: string;
+  meta: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-slate-950/50 p-4">
+      <div className="mb-3 flex items-center gap-2 text-white">
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-sky-200">{icon}</span>
+        <h4 className="text-sm font-semibold">{title}</h4>
+      </div>
+      <div className="text-sm leading-6 text-slate-300">{detail}</div>
+      <div className="mt-3 text-xs uppercase tracking-[0.12em] text-slate-500">{meta}</div>
+    </div>
+  );
+}
+
+function ArtifactTable({ rows }: { rows: Array<[string, string]> }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-slate-950/55">
+      {rows.map(([label, value], index) => (
+        <div
+          key={label}
+          className={clsx(
+            "grid gap-2 px-4 py-3 text-sm md:grid-cols-[180px_minmax(0,1fr)]",
+            index !== rows.length - 1 ? "border-b border-white/8" : "",
+          )}
+        >
+          <div className="text-slate-400">{label}</div>
+          <div className="break-words text-slate-200">{value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function shortenName(name: string) {
   return name.length <= 16 ? name : `${name.slice(0, 14)}…`;
 }
@@ -838,6 +1064,69 @@ function formatSignalValue(value: Record<string, unknown> | Array<Record<string,
     return `Detected: ${String(value.detected)}`;
   }
   return JSON.stringify(value);
+}
+
+function formatDateTime(value: string) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+  return parsed.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function orderedHubSpotFields(properties: DemoFlowResponse["hubspot_record"]["properties"]): Array<[string, string]> {
+  const preferredOrder = [
+    "company",
+    "firstname",
+    "email",
+    "industry",
+    "signalforge_company_size",
+    "signalforge_last_funding_round",
+    "signalforge_funding_date",
+    "signalforge_job_posts_current",
+    "signalforge_job_posts_60d_ago",
+    "signalforge_recent_layoffs",
+    "signalforge_recent_layoff_date",
+    "signalforge_recent_leadership_change",
+    "signalforge_recent_leadership_date",
+    "signalforge_ai_maturity",
+    "signalforge_ai_maturity_confidence",
+    "signalforge_signal_confidence",
+    "signalforge_intent_level",
+    "signalforge_qualification_status",
+    "signalforge_next_action",
+    "signalforge_stage",
+    "signalforge_booking_url",
+    "signalforge_last_booking_start",
+    "signalforge_last_event_at",
+  ];
+
+  return preferredOrder
+    .filter((key) => key in properties)
+    .map((key) => [formatLabel(key), formatPropertyValue(properties[key])]);
+}
+
+function formatLabel(value: string) {
+  return value.replaceAll("signalforge_", "").replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function formatPropertyValue(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === "") {
+    return "n/a";
+  }
+  if (typeof value === "number") {
+    return String(value);
+  }
+  if (value.includes("T") && value.includes(":")) {
+    return formatDateTime(value);
+  }
+  return value;
 }
 
 export default App;

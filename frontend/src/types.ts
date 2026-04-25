@@ -103,3 +103,87 @@ export interface ProspectRunResponse {
     booking_reason: string;
   };
 }
+
+export interface DemoFlowResponse {
+  session_id: string;
+  session_started_at: string;
+  prospect_identity: {
+    company_name: string;
+    contact_name: string;
+    contact_email: string;
+    phone_number: string;
+    conversation_id: string;
+  };
+  qualification: {
+    qualification_status: string;
+    intent_level: string;
+    next_action: string;
+    allowed_next_channels_after_reply: string[];
+  };
+  email_send: {
+    channel: string;
+    provider: string;
+    status: string;
+    destination: string;
+    external_id?: string | null;
+    detail: string;
+    subject: string;
+    body: string;
+    crm_contact_id?: string | null;
+  };
+  reply_event: {
+    channel: string;
+    provider: string;
+    event_type: string;
+    message_text: string;
+    allowed_next_channels: string[];
+    crm_activity_id?: string | null;
+  };
+  sms_follow_up: {
+    channel: string;
+    provider: string;
+    status: string;
+    destination: string;
+    external_id?: string | null;
+    detail: string;
+    body: string;
+    crm_activity_id?: string | null;
+  };
+  lifecycle: {
+    current_stage: string;
+    booking_completed: boolean;
+    allowed_next_channels: string[];
+    activities: Array<{
+      channel: string;
+      direction: string;
+      event_type: string;
+      detail: string;
+      provider?: string | null;
+      external_id?: string | null;
+      recorded_at: string;
+    }>;
+  };
+  hubspot_record: {
+    contact_id: string;
+    properties: Record<string, string | number | null>;
+    activities: Array<{
+      id: string;
+      contact_id: string;
+      subject: string;
+      body: string;
+      channel: string;
+      recorded_at: string;
+    }>;
+  };
+  calcom_booking: {
+    booking_id: string;
+    booking_url: string;
+    event_type: string;
+    attendee_name: string;
+    attendee_email: string;
+    confirmed_at: string;
+    meeting_start: string;
+    booking_note_id?: string | null;
+  };
+  crm_sync: Record<string, unknown>;
+}

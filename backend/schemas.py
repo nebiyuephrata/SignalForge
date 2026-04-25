@@ -44,12 +44,28 @@ class ProspectRunResponse(BaseModel):
     competitor_gap_brief: dict[str, object]
     email: ProspectEmail
     confidence: str
+    confidence_assessment: dict[str, object] | None = None
     trace_id: str
     trace_url: str | None = None
     claim_validation: dict[str, object] | None = None
     reply_text: str | None = None
     qualification: dict[str, object]
     booking: dict[str, object]
+    channel_plan: dict[str, object] | None = None
+
+
+class ProspectDemoFlowResponse(BaseModel):
+    session_id: str
+    session_started_at: str
+    prospect_identity: dict[str, object]
+    qualification: dict[str, object]
+    email_send: dict[str, object]
+    reply_event: dict[str, object]
+    sms_follow_up: dict[str, object]
+    lifecycle: dict[str, object]
+    hubspot_record: dict[str, object]
+    calcom_booking: dict[str, object]
+    crm_sync: dict[str, object]
 
 
 class DraftChannelRequest(BaseModel):
@@ -60,6 +76,7 @@ class SendEmailRequest(BaseModel):
     company_name: str
     contact_email: str
     contact_name: str | None = None
+    phone_number: str | None = None
     subject: str | None = None
     body: str | None = None
     reply_text: str | None = None

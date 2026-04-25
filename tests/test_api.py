@@ -23,6 +23,7 @@ def test_run_prospect_default_returns_expected_company(tmp_path, monkeypatch) ->
 
     assert response.company == "Northstar Lending"
     assert response.qualification["qualification_status"] == "qualified"
+    assert response.channel_plan["primary_channel"] == "email"
     assert response.email.subject
 
 
@@ -38,6 +39,36 @@ def test_run_prospect_invalid_scenario_returns_404() -> None:
         assert "Unknown scenario" in str(exc.detail)
     else:
         raise AssertionError("Expected HTTPException for invalid scenario")
+
+
+def test_run_prospect_demo_flow_returns_traceable_lifecycle(monkeypatch) -> None:
+    monkeypatch.setattr(
+        run_prospect_route.demo_flow_service,
+        "run",
+        lambda **_: {
+            "session_id": "demo-1",
+            "session_started_at": "2026-04-25T12:00:00Z",
+            "prospect_identity": {
+                "company_name": "Northstar Lending",
+                "contact_email": "northstar.lending@example.com",
+                "conversation_id": "northstar-lending|northstar.lending@example.com|+15551234567",
+            },
+            "qualification": {"qualification_status": "qualified"},
+            "email_send": {"status": "queued"},
+            "reply_event": {"event_type": "reply"},
+            "sms_follow_up": {"status": "queued"},
+            "lifecycle": {"current_stage": "booked"},
+            "hubspot_record": {"contact_id": "demo-contact-1"},
+            "calcom_booking": {"booking_id": "demo-booking-1"},
+            "crm_sync": {"email_send": {"contact": {"id": "demo-contact-1"}}},
+        },
+    )
+
+    response = asyncio.run(run_prospect_route.run_prospect_demo_flow())
+
+    assert response.prospect_identity["company_name"] == "Northstar Lending"
+    assert response.lifecycle["current_stage"] == "booked"
+    assert response.calcom_booking["booking_id"] == "demo-booking-1"
 
 
 def test_batch_endpoint_returns_compact_summary(monkeypatch) -> None:
