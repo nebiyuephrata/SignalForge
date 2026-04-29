@@ -4,6 +4,8 @@ This directory contains reviewer-facing Week 11 report materials derived from th
 
 Key files:
 
+- [interim_submission_report.md](./interim_submission_report.md): polished report version aligned to the interim submission rubrics
+- [rubric_coverage.md](./rubric_coverage.md): quick map from rubric criteria to committed artifacts
 - [week11_status_report.md](./week11_status_report.md): the narrative report aligned to the interim-report rubric
 - [bench_composition.json](./bench_composition.json): machine-readable composition cube
 - [bench_composition_table.md](./bench_composition_table.md): markdown cross-tab used in the report appendix
