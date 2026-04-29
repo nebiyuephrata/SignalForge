@@ -1,19 +1,19 @@
 {
   "total_tasks": 225,
   "splits": {
-    "train": 110,
-    "dev": 70,
-    "held_out": 45
+    "train": 112,
+    "dev": 69,
+    "held_out": 44
   },
   "source_modes": {
-    "programmatic": 180,
-    "hand-authored": 24,
-    "multi-llm-synthesis": 12,
-    "trace-derived": 9
+    "hand-authored": 36,
+    "programmatic": 72,
+    "trace-derived": 69,
+    "multi-llm-synthesis": 48
   },
   "task_types": {
-    "email_grounding": 174,
-    "channel_decision": 48,
-    "qualification_decision": 3
+    "email_grounding": 161,
+    "channel_decision": 41,
+    "qualification_decision": 23
   }
 }

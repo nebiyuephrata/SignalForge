@@ -29,11 +29,11 @@ The decision is also consistent with the failure taxonomy. `weak confidence hand
 
 The benchmark uses the required `50/30/20` split at the partition level:
 
-- `train`: `110` tasks
-- `dev`: `70` tasks
-- `held_out`: `45` tasks
+- `train`: `112` tasks
+- `dev`: `69` tasks
+- `held_out`: `44` tasks
 
-The v0.1 stratification logic is explicit rather than implicit. High-volume `programmatic` tasks populate train and dev so the critic can learn stable, mechanically scorable rules over the repeated Tenacious failure surface. The held-out slice is intentionally originality-heavy: it contains the `trace-derived`, `hand-authored`, and `multi-LLM-synthesis` tasks so the final evaluation is pressure-tested on the most diagnostic and contamination-sensitive examples. This is not the final desired source-mode balance, but it does serve the failure-coverage goal of keeping the sealed slice behaviorally sharper than the training slice.
+The v0.1 stratification logic is explicit rather than implicit. Tasks are first grouped by source family and failure dimension, then distributed across `train`, `dev`, and `held_out` so that every split contains a mix of source modes rather than a single-mode silo. The actual resulting source totals are `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, and `36` `hand-authored`, which is close to the intended `30/30/25/15` shape. The remaining imbalance is a slight underweight on synthesis tasks plus dimension-label drift inside a few rows.
 
 During Week 11, authoring scripts may read train and dev, but may not import held-out examples into training-data formatting or prompt iteration.
 
@@ -50,8 +50,8 @@ The current implementation lives in [generation_scripts/contamination_check.py](
 Current results, reported in prose:
 
 - **N-gram overlap:** `0` held-out/task pairs were flagged at or above the `8`-gram threshold. Maximum observed shared n-gram length was `0`.
-- **Similarity check:** `0` held-out/task pairs were flagged at or above the `0.85` similarity threshold. Maximum observed lexical cosine proxy was `0.4048`.
-- **Time-shift verification:** `21` held-out tasks were marked `repo_artifact_window_requires_manual_review` because they anchor to Week 10 repository artifacts or synthesized public-signal windows, while `24` held-out tasks were marked `not_required_synthetic_or_repo_authored_task`. No task failed time-shift review strongly enough to be dropped in v0.1, but the flagged set is carried forward as the first manual-review queue for v0.2.
+- **Similarity check:** `0` held-out/task pairs were flagged at or above the `0.85` similarity threshold. Maximum observed lexical cosine proxy stayed below threshold across all `44` held-out comparisons.
+- **Time-shift verification:** all `44` held-out tasks are currently marked `repo_artifact_window_requires_manual_review` because they anchor to Week 10 repository artifacts or synthesized public-signal windows. No task failed time-shift review strongly enough to be dropped in v0.1, but the full held-out slice remains the first manual-review queue for v0.2.
 
 Final pass status: **0 contamination violations** on the sealed held-out slice against train.
 

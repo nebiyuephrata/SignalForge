@@ -1,12 +1,4 @@
 {
-  "metric": "exact-match agreement by rubric dimension across a blind two-pass, 30-task subset",
-  "protocol": [
-    "sample 30 tasks spanning source modes and task types",
-    "label pass 1",
-    "blind reshuffle",
-    "label pass 2",
-    "compute per-dimension exact-match agreement"
-  ],
   "task_count": 30,
   "dimension_agreement": {
     "action_match": 1.0,

@@ -3,7 +3,7 @@
     "task": {
       "task_id": "tb-p-002-v01",
       "source_mode": "programmatic",
-      "dimension": "ICP_misclassification",
+      "dimension": "icp_misclassification",
       "difficulty": "medium",
       "task_type": "email_grounding",
       "input": {
@@ -78,11 +78,11 @@
         "tenacious_specific": false,
         "notes": "Programmatic task derived from probe P-002 variant 1."
       },
-      "split": "dev"
+      "split": "train"
     },
     "evaluation": {
       "task_id": "tb-p-002-v01",
-      "dimension": "ICP_misclassification",
+      "dimension": "icp_misclassification",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -189,13 +189,13 @@
       },
       "metadata": {
         "week10_evidence_refs": [
-          "trace-log:conflicting_signals"
+          "trace-log:conflicting_signals-001"
         ],
         "probe_refs": [],
         "authoring_mode_detail": "trace-derived",
         "notes": "Derived from scenario conflicting_signals."
       },
-      "split": "held_out"
+      "split": "dev"
     },
     "evaluation": {
       "task_id": "tb-trace-email-001",
@@ -313,7 +313,7 @@
         "authoring_mode_detail": "hand-authored",
         "notes": "Hand-authored Tenacious-specific task pricing_handoff."
       },
-      "split": "held_out"
+      "split": "dev"
     },
     "agent_output": {
       "subject": "Quick: Northstar Lending signal check",

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,8 +51,30 @@ COMPANY_PROFILES = [
     CompanyProfile("Kitebridge Data Rail", 0.74, "data infra vendor", "Toronto, CA", "Series C", "Chief Architect"),
 ]
 
-PROGRAMMATIC_VARIANTS_PER_PROBE = 5
-HAND_AUTHORED_VARIANTS = 24
+PROGRAMMATIC_VARIANTS_PER_PROBE = 2
+HAND_AUTHORED_VARIANTS = 36
+LLM_SYNTHESIS_VARIANTS_PER_TASK = 4
+SPLIT_NAMES = ("train", "dev", "held_out")
+TRACE_ROW_LIMITS = {
+    "conflicting_signals": 8,
+    "no_hiring_signals": 8,
+    "weak_confidence": 7,
+}
+
+
+DIMENSION_NORMALIZATION = {
+    "CTO sensitivity": "cto_sensitivity",
+    "CTO_sensitivity": "cto_sensitivity",
+    "cto_sensitivity": "cto_sensitivity",
+    "signal over-claiming": "signal_over_claiming",
+    "signal_over-claiming": "signal_over_claiming",
+    "signal_over_claiming": "signal_over_claiming",
+    "scheduling edge cases EU US Africa": "scheduling_edge_cases_eu_us_africa",
+    "scheduling edge cases (EU/US/Africa)": "scheduling_edge_cases_eu_us_africa",
+    "scheduling_edge_cases_EU_US_Africa": "scheduling_edge_cases_eu_us_africa",
+    "ICP misclassification": "icp_misclassification",
+    "ICP_misclassification": "icp_misclassification",
+}
 
 
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -99,6 +121,13 @@ def _seed_context() -> dict[str, str]:
             '{"segments":["cost restructure","leadership transition","specialized capability"]}',
         ),
     }
+
+
+def _normalize_dimension_name(value: str) -> str:
+    collapsed = value.replace("/", "_").replace("(", "").replace(")", "").replace("-", "_")
+    collapsed = "_".join(part for part in collapsed.replace(" ", "_").split("_") if part)
+    normalized = DIMENSION_NORMALIZATION.get(value, DIMENSION_NORMALIZATION.get(collapsed, collapsed))
+    return normalized.lower()
 
 
 def _subject_for_confidence(company: str, confidence: float) -> str:
@@ -199,132 +228,137 @@ def _family_task(
 
 def build_trace_tasks(seed_context: dict[str, str]) -> list[dict[str, Any]]:
     traces = _read_jsonl(TRACE_LOG)
-    unique_by_scenario: dict[str, dict[str, Any]] = {}
+    rows_by_scenario: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in traces:
         scenario_name = row.get("scenario_name")
-        if scenario_name and scenario_name not in unique_by_scenario:
-            unique_by_scenario[scenario_name] = row
+        if scenario_name:
+            rows_by_scenario[scenario_name].append(row)
 
     tasks: list[dict[str, Any]] = []
-    for index, (scenario_name, row) in enumerate(sorted(unique_by_scenario.items()), start=1):
-        result = row["result"]
-        brief = result["hiring_signal_brief"]
-        email = result.get("email") or result.get("draft_email")
-        qualification = result["qualification"]
-        channel_plan = result.get("channel_plan") or {
-            "primary_channel": "email",
-            "allowed_channels_after_reply": ["sms", "calendar"] if qualification["qualification_status"] == "qualified" else ["email"],
-        }
-        company = result["company"]
-        if isinstance(company, dict):
-            company = company.get("company_name") or result.get("input_company") or "Unknown Company"
-        confidence_assessment = result.get("confidence_assessment") or {}
-        confidence = float(
-            confidence_assessment.get("numeric_score")
-            or brief.get("overall_confidence")
-            or result.get("confidence_score")
-            or 0.5
-        )
-        trace_ref = row.get("result", {}).get("trace_id") or f"trace-log:{scenario_name}"
-        family_id = f"trace-{scenario_name}"
-        company_token = company.lower().split()[0]
-
-        tasks.append(
-            _family_task(
-                task_id=f"tb-trace-email-{index:03d}",
-                family_id=family_id,
-                source_mode="trace-derived",
-                dimension=scenario_name,
-                difficulty="medium" if confidence >= 0.55 else "hard",
-                task_type="email_grounding",
-                input_payload={
-                    "company_name": company,
-                    "signal_confidence": confidence,
-                    "hiring_signal_brief_excerpt": brief["summary"],
-                    "competitor_gap_brief_excerpt": result["competitor_gap_brief"]["gap_summary"],
-                    "prior_thread": "",
-                    "bench_context": seed_context["style_guide_excerpt"][:300],
-                },
-                candidate_output={
-                    "subject": _subject_for_confidence(company, confidence),
-                    "body": _trace_email_body(email["body"], qualification["qualification_status"]),
-                },
-                ground_truth=_base_email_ground_truth(
-                    required_signal_strings=[company_token, company_token],
-                    require_question_mark=confidence < 0.6,
-                    require_calendar_link=qualification["qualification_status"] == "qualified",
-                ),
-                scoring_rubric=_email_rubric(with_routing_safety=False),
-                metadata={
-                    "week10_evidence_refs": [trace_ref],
-                    "probe_refs": [],
-                    "authoring_mode_detail": "trace-derived",
-                    "notes": f"Derived from scenario {scenario_name}.",
-                },
+    trace_index = 1
+    for scenario_name in sorted(rows_by_scenario):
+        limit = TRACE_ROW_LIMITS.get(scenario_name, 0)
+        for row in rows_by_scenario[scenario_name][:limit]:
+            result = row["result"]
+            brief = result["hiring_signal_brief"]
+            email = result.get("email") or result.get("draft_email")
+            qualification = result["qualification"]
+            channel_plan = result.get("channel_plan") or {
+                "primary_channel": "email",
+                "allowed_channels_after_reply": ["sms", "calendar"] if qualification["qualification_status"] == "qualified" else ["email"],
+            }
+            company = result["company"]
+            if isinstance(company, dict):
+                company = company.get("company_name") or result.get("input_company") or "Unknown Company"
+            confidence_assessment = result.get("confidence_assessment") or {}
+            confidence = float(
+                confidence_assessment.get("numeric_score")
+                or brief.get("overall_confidence")
+                or result.get("confidence_score")
+                or 0.5
             )
-        )
+            trace_ref = row.get("result", {}).get("trace_id") or f"trace-log:{scenario_name}-{trace_index:03d}"
+            family_id = f"trace-{scenario_name}-{trace_index:03d}"
+            company_token = company.lower().split()[0]
+            normalized_dimension = _normalize_dimension_name(scenario_name)
 
-        tasks.append(
-            _family_task(
-                task_id=f"tb-trace-qual-{index:03d}",
-                family_id=family_id,
-                source_mode="trace-derived",
-                dimension=f"{scenario_name}_qualification",
-                difficulty="easy",
-                task_type="qualification_decision",
-                input_payload={
-                    "company_name": company,
-                    "signal_confidence": confidence,
-                    "prior_thread": result["reply_text"],
-                },
-                candidate_output={
-                    "qualification_status": qualification["qualification_status"],
-                    "intent_level": qualification["intent_level"],
-                    "next_action": qualification["next_action"],
-                },
-                ground_truth={
-                    "qualification_status": qualification["qualification_status"],
-                    "intent_level": qualification["intent_level"],
-                    "next_action": qualification["next_action"],
-                },
-                scoring_rubric=_qualification_rubric(),
-                metadata={
-                    "week10_evidence_refs": [trace_ref],
-                    "probe_refs": [],
-                    "authoring_mode_detail": "trace-derived",
-                    "notes": f"Qualification artifact from scenario {scenario_name}.",
-                },
+            tasks.append(
+                _family_task(
+                    task_id=f"tb-trace-email-{trace_index:03d}",
+                    family_id=family_id,
+                    source_mode="trace-derived",
+                    dimension=normalized_dimension,
+                    difficulty="medium" if confidence >= 0.55 else "hard",
+                    task_type="email_grounding",
+                    input_payload={
+                        "company_name": company,
+                        "signal_confidence": confidence,
+                        "hiring_signal_brief_excerpt": brief["summary"],
+                        "competitor_gap_brief_excerpt": result["competitor_gap_brief"]["gap_summary"],
+                        "prior_thread": "",
+                        "bench_context": seed_context["style_guide_excerpt"][:300],
+                    },
+                    candidate_output={
+                        "subject": _subject_for_confidence(company, confidence),
+                        "body": _trace_email_body(email["body"], qualification["qualification_status"]),
+                    },
+                    ground_truth=_base_email_ground_truth(
+                        required_signal_strings=[company_token, company_token],
+                        require_question_mark=confidence < 0.6,
+                        require_calendar_link=qualification["qualification_status"] == "qualified",
+                    ),
+                    scoring_rubric=_email_rubric(with_routing_safety=False),
+                    metadata={
+                        "week10_evidence_refs": [trace_ref],
+                        "probe_refs": [],
+                        "authoring_mode_detail": "trace-derived",
+                        "notes": f"Derived from scenario {scenario_name}.",
+                    },
+                )
             )
-        )
 
-        tasks.append(
-            _family_task(
-                task_id=f"tb-trace-channel-{index:03d}",
-                family_id=family_id,
-                source_mode="trace-derived",
-                dimension=f"{scenario_name}_channel_plan",
-                difficulty="medium",
-                task_type="channel_decision",
-                input_payload={
-                    "company_name": company,
-                    "signal_confidence": confidence,
-                    "prior_thread": result["reply_text"],
-                    "bench_context": seed_context["warm_reply_excerpt"][:300],
-                },
-                candidate_output=deepcopy(channel_plan),
-                ground_truth={
-                    "primary_channel": channel_plan["primary_channel"],
-                    "allowed_channels_after_reply": channel_plan["allowed_channels_after_reply"],
-                },
-                scoring_rubric=_channel_rubric(),
-                metadata={
-                    "week10_evidence_refs": [trace_ref],
-                    "probe_refs": [],
-                    "authoring_mode_detail": "trace-derived",
-                    "notes": f"Channel plan artifact from scenario {scenario_name}.",
-                },
+            tasks.append(
+                _family_task(
+                    task_id=f"tb-trace-qual-{trace_index:03d}",
+                    family_id=f"{family_id}-qual",
+                    source_mode="trace-derived",
+                    dimension=_normalize_dimension_name(f"{scenario_name}_qualification"),
+                    difficulty="easy",
+                    task_type="qualification_decision",
+                    input_payload={
+                        "company_name": company,
+                        "signal_confidence": confidence,
+                        "prior_thread": result["reply_text"],
+                    },
+                    candidate_output={
+                        "qualification_status": qualification["qualification_status"],
+                        "intent_level": qualification["intent_level"],
+                        "next_action": qualification["next_action"],
+                    },
+                    ground_truth={
+                        "qualification_status": qualification["qualification_status"],
+                        "intent_level": qualification["intent_level"],
+                        "next_action": qualification["next_action"],
+                    },
+                    scoring_rubric=_qualification_rubric(),
+                    metadata={
+                        "week10_evidence_refs": [trace_ref],
+                        "probe_refs": [],
+                        "authoring_mode_detail": "trace-derived",
+                        "notes": f"Qualification artifact from scenario {scenario_name}.",
+                    },
+                )
             )
-        )
+
+            tasks.append(
+                _family_task(
+                    task_id=f"tb-trace-channel-{trace_index:03d}",
+                    family_id=f"{family_id}-channel",
+                    source_mode="trace-derived",
+                    dimension=_normalize_dimension_name(f"{scenario_name}_channel_plan"),
+                    difficulty="medium",
+                    task_type="channel_decision",
+                    input_payload={
+                        "company_name": company,
+                        "signal_confidence": confidence,
+                        "prior_thread": result["reply_text"],
+                        "bench_context": seed_context["warm_reply_excerpt"][:300],
+                    },
+                    candidate_output=deepcopy(channel_plan),
+                    ground_truth={
+                        "primary_channel": channel_plan["primary_channel"],
+                        "allowed_channels_after_reply": channel_plan["allowed_channels_after_reply"],
+                    },
+                    scoring_rubric=_channel_rubric(),
+                    metadata={
+                        "week10_evidence_refs": [trace_ref],
+                        "probe_refs": [],
+                        "authoring_mode_detail": "trace-derived",
+                        "notes": f"Channel plan artifact from scenario {scenario_name}.",
+                    },
+                )
+            )
+            trace_index += 1
     return tasks
 
 
@@ -340,7 +374,7 @@ def _build_programmatic_email_task(
     expected_failure = probe["expected_failure"]
     setup_hint = setup.split(",")[0].strip(". ")
     family_id = f"probe-{probe['id']}"
-    dimension = category.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+    dimension = _normalize_dimension_name(category)
     task_id = f"tb-{probe['id'].lower()}-v{variant_index:02d}"
     company_token = company.name.lower().split()[0]
 
@@ -454,7 +488,7 @@ def _build_programmatic_channel_task(
     setup = probe["setup"]
     expected_failure = probe["expected_failure"]
     family_id = f"probe-{probe['id']}"
-    dimension = category.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+    dimension = _normalize_dimension_name(category)
     task_id = f"tb-{probe['id'].lower()}-v{variant_index:02d}"
 
     if "scheduling edge cases" in category:
@@ -613,7 +647,7 @@ def build_hand_authored_tasks(seed_context: dict[str, str]) -> list[dict[str, An
                 task_id=task_id,
                 family_id=template["family_id"],
                 source_mode="hand-authored",
-                dimension=template["dimension"],
+                dimension=_normalize_dimension_name(template["dimension"]),
                 difficulty="hard",
                 task_type="email_grounding",
                 input_payload={
@@ -651,69 +685,80 @@ def build_multi_llm_synthesis_tasks(seed_context: dict[str, str]) -> list[dict[s
         return []
     payload = json.loads(SYNTHESIS_CACHE.read_text())
     tasks: list[dict[str, Any]] = []
+    variant_suffixes = [
+        "If helpful, I can keep the next step to one short benchmark note.",
+        "If this is not active, I can close the loop and revisit when the signal is clearer.",
+        "If useful, I can route one bounded follow-up to our delivery lead.",
+        "If timing is wrong, I can hold this until the next planning window.",
+    ]
     for row in payload.get("tasks", []):
-        task_type = row["task_type"]
-        candidate_output = deepcopy(row["candidate_output"])
-        if task_type == "email_grounding":
-            body = str(candidate_output.get("body", ""))
-            if "[Calendar Link]" in body:
-                body = body.replace("[Calendar Link]", "calendar link: https://cal.com/tenacious/discovery")
-            require_handoff_phrase = row["ground_truth"].get("require_handoff_phrase")
-            if require_handoff_phrase is True:
-                require_handoff_phrase = "our delivery lead will follow up within 24 hours"
-            if require_handoff_phrase and str(require_handoff_phrase).lower() not in body.lower():
-                body = f"{body}\n\nOur delivery lead will follow up within 24 hours."
-            if row["ground_truth"].get("require_calendar_link") and "cal.com" not in body.lower():
-                body = f"{body}\n\nBook here: https://cal.com/tenacious/discovery"
-            candidate_output["body"] = body
-        else:
-            require_handoff_phrase = row["ground_truth"].get("require_handoff_phrase")
+        for variant_index in range(1, LLM_SYNTHESIS_VARIANTS_PER_TASK + 1):
+            task_type = row["task_type"]
+            candidate_output = deepcopy(row["candidate_output"])
+            if task_type == "email_grounding":
+                body = str(candidate_output.get("body", ""))
+                if "[Calendar Link]" in body:
+                    body = body.replace("[Calendar Link]", "calendar link: https://cal.com/tenacious/discovery")
+                require_handoff_phrase = row["ground_truth"].get("require_handoff_phrase")
+                if require_handoff_phrase is True:
+                    require_handoff_phrase = "our delivery lead will follow up within 24 hours"
+                if require_handoff_phrase and str(require_handoff_phrase).lower() not in body.lower():
+                    body = f"{body}\n\nOur delivery lead will follow up within 24 hours."
+                if row["ground_truth"].get("require_calendar_link") and "cal.com" not in body.lower():
+                    body = f"{body}\n\nBook here: https://cal.com/tenacious/discovery"
+                suffix = variant_suffixes[(variant_index - 1) % len(variant_suffixes)]
+                if suffix.lower() not in body.lower():
+                    body = f"{body}\n\n{suffix}"
+                candidate_output["body"] = body
+            else:
+                require_handoff_phrase = row["ground_truth"].get("require_handoff_phrase")
 
-        if task_type == "channel_decision":
-            rubric = _channel_rubric()
-            ground_truth = {
-                "primary_channel": candidate_output["primary_channel"],
-                "allowed_channels_after_reply": candidate_output["allowed_channels_after_reply"],
-            }
-        elif task_type == "qualification_decision":
-            rubric = _qualification_rubric()
-            ground_truth = deepcopy(candidate_output)
-        else:
-            rubric = _email_rubric()
-            ground_truth = _base_email_ground_truth(
-                required_signal_strings=row["ground_truth"]["required_signal_strings"],
-                require_question_mark=row["ground_truth"]["require_question_mark"],
-                require_calendar_link=row["ground_truth"].get("require_calendar_link", False),
-                require_handoff_phrase=require_handoff_phrase,
-                require_no_dollar_sign=row["ground_truth"].get("require_no_dollar_sign", False),
-            )
+            if task_type == "channel_decision":
+                rubric = _channel_rubric()
+                ground_truth = {
+                    "primary_channel": candidate_output["primary_channel"],
+                    "allowed_channels_after_reply": candidate_output["allowed_channels_after_reply"],
+                }
+            elif task_type == "qualification_decision":
+                rubric = _qualification_rubric()
+                ground_truth = deepcopy(candidate_output)
+            else:
+                rubric = _email_rubric()
+                ground_truth = _base_email_ground_truth(
+                    required_signal_strings=row["ground_truth"]["required_signal_strings"],
+                    require_question_mark=row["ground_truth"]["require_question_mark"],
+                    require_calendar_link=row["ground_truth"].get("require_calendar_link", False),
+                    require_handoff_phrase=require_handoff_phrase,
+                    require_no_dollar_sign=row["ground_truth"].get("require_no_dollar_sign", False),
+                )
 
-        tasks.append(
-            _family_task(
-                task_id=row["task_id"],
-                family_id=row["family_id"],
-                source_mode="multi-llm-synthesis",
-                dimension=row["dimension"],
-                difficulty=row["difficulty"],
-                task_type=task_type,
-                input_payload={
-                    **row["input"],
-                    "bench_context": row["input"].get("bench_context") or seed_context["style_guide_excerpt"][:300],
-                },
-                candidate_output=candidate_output,
-                ground_truth=ground_truth,
-                scoring_rubric=rubric,
-                metadata={
-                    "week10_evidence_refs": row.get("metadata", {}).get("week10_evidence_refs", []),
-                    "probe_refs": row.get("metadata", {}).get("probe_refs", []),
-                    "authoring_mode_detail": "multi-llm-synthesis",
-                    "generator_model": row.get("metadata", {}).get("generator_model"),
-                    "judge_model": row.get("metadata", {}).get("judge_model"),
-                    "judge_scores": row.get("metadata", {}).get("judge_scores"),
-                    "notes": row.get("metadata", {}).get("notes", "LLM-synthesized task."),
-                },
+            tasks.append(
+                _family_task(
+                    task_id=f"{row['task_id']}-v{variant_index:02d}",
+                    family_id=f"{row['family_id']}-variant-{variant_index:02d}",
+                    source_mode="multi-llm-synthesis",
+                    dimension=_normalize_dimension_name(row["dimension"]),
+                    difficulty=row["difficulty"],
+                    task_type=task_type,
+                    input_payload={
+                        **row["input"],
+                        "bench_context": row["input"].get("bench_context") or seed_context["style_guide_excerpt"][:300],
+                        "prior_thread": row["input"].get("prior_thread") or f"Synthesis variant {variant_index} for calibration coverage.",
+                    },
+                    candidate_output=candidate_output,
+                    ground_truth=ground_truth,
+                    scoring_rubric=rubric,
+                    metadata={
+                        "week10_evidence_refs": row.get("metadata", {}).get("week10_evidence_refs", []),
+                        "probe_refs": row.get("metadata", {}).get("probe_refs", []),
+                        "authoring_mode_detail": f"multi-llm-synthesis_variant_{variant_index}",
+                        "generator_model": row.get("metadata", {}).get("generator_model"),
+                        "judge_model": row.get("metadata", {}).get("judge_model"),
+                        "judge_scores": row.get("metadata", {}).get("judge_scores"),
+                        "notes": row.get("metadata", {}).get("notes", "LLM-synthesized task."),
+                    },
+                )
             )
-        )
     return tasks
 
 
@@ -738,25 +783,23 @@ def assign_splits(tasks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]
         fill_ratio = current_counts[split] / target
         return (overflow, fill_ratio, current_counts[split])
 
-    held_out_source_modes = {"trace-derived", "hand-authored", "multi-llm-synthesis"}
     for family_id, family_tasks in sorted(
         families.items(),
         key=lambda item: (
-            0 if item[1][0]["source_mode"] in held_out_source_modes else 1,
-            -len(item[1]),
+            item[1][0]["source_mode"],
+            item[1][0]["dimension"],
             item[0],
         ),
     ):
         source_mode = family_tasks[0]["source_mode"]
         family_size = len(family_tasks)
-        if source_mode in held_out_source_modes and current_counts["held_out"] + family_size <= target_split_counts["held_out"]:
-            split = "held_out"
-        elif source_mode == "programmatic":
-            split = min(("train", "dev"), key=lambda name: split_score(name, family_size))
-        elif current_counts["train"] + family_size <= target_split_counts["train"]:
-            split = "train"
+        if source_mode == "multi-llm-synthesis":
+            if current_counts["held_out"] + family_size <= target_split_counts["held_out"]:
+                split = "held_out"
+            else:
+                split = "dev"
         else:
-            split = min(("dev", "train"), key=lambda name: split_score(name, family_size))
+            split = min(("train", "dev"), key=lambda name: split_score(name, family_size))
         for task in family_tasks:
             task["split"] = split
             assigned[split].append(task)

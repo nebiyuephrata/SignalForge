@@ -49,10 +49,10 @@ def cosine_similarity(left: Counter[str], right: Counter[str]) -> float:
 
 
 def longest_shared_ngram(tokens_a: list[str], tokens_b: list[str], minimum: int) -> int:
-    upper = min(len(tokens_a), len(tokens_b))
-    for n in range(upper, minimum - 1, -1):
-        if ngrams(tokens_a, n) & ngrams(tokens_b, n):
-            return n
+    if len(tokens_a) < minimum or len(tokens_b) < minimum:
+        return 0
+    if ngrams(tokens_a, minimum) & ngrams(tokens_b, minimum):
+        return minimum
     return 0
 
 

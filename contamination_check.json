@@ -4,207 +4,39 @@
   "violations": 0,
   "findings": [
     {
-      "held_out_task_id": "tb-hand-001",
-      "nearest_train_task_id": "tb-p-024-v01",
+      "held_out_task_id": "tb-synth-cto-sensitivity-01-v01",
+      "nearest_train_task_id": "tb-p-023-v01",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2116,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-002",
-      "nearest_train_task_id": "tb-p-011-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3371,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-003",
-      "nearest_train_task_id": "tb-p-011-v04",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2232,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-004",
-      "nearest_train_task_id": "tb-p-011-v05",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2407,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-005",
-      "nearest_train_task_id": "tb-p-001-v04",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3059,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-006",
-      "nearest_train_task_id": "tb-p-003-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3528,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-007",
-      "nearest_train_task_id": "tb-p-030-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2565,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-008",
-      "nearest_train_task_id": "tb-p-030-v02",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2766,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-009",
-      "nearest_train_task_id": "tb-p-030-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.272,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-010",
-      "nearest_train_task_id": "tb-p-021-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1897,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-011",
-      "nearest_train_task_id": "tb-p-032-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.378,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-012",
-      "nearest_train_task_id": "tb-p-011-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.367,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-013",
-      "nearest_train_task_id": "tb-p-024-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2116,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-014",
-      "nearest_train_task_id": "tb-p-011-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3371,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-015",
-      "nearest_train_task_id": "tb-p-011-v04",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2232,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-016",
-      "nearest_train_task_id": "tb-p-011-v05",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2407,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-017",
-      "nearest_train_task_id": "tb-p-001-v04",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3059,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-018",
-      "nearest_train_task_id": "tb-p-003-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3528,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-019",
-      "nearest_train_task_id": "tb-p-030-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2565,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-020",
-      "nearest_train_task_id": "tb-p-030-v02",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2766,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-021",
-      "nearest_train_task_id": "tb-p-030-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.272,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-022",
-      "nearest_train_task_id": "tb-p-021-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1897,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-023",
-      "nearest_train_task_id": "tb-p-032-v03",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.378,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-hand-024",
-      "nearest_train_task_id": "tb-p-011-v01",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.367,
-      "time_shift_check": "not_required_synthetic_or_repo_authored_task",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-synth-cto-sensitivity-01",
-      "nearest_train_task_id": "tb-p-022-v02",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2072,
+      "cosine_similarity": 0.2042,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-cto-sensitivity-02",
+      "held_out_task_id": "tb-synth-cto-sensitivity-01-v02",
+      "nearest_train_task_id": "tb-p-023-v01",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2042,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-cto-sensitivity-01-v03",
+      "nearest_train_task_id": "tb-p-023-v01",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2042,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-cto-sensitivity-01-v04",
+      "nearest_train_task_id": "tb-p-023-v01",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2042,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-cto-sensitivity-02-v01",
       "nearest_train_task_id": "tb-p-014-v01",
       "longest_shared_ngram": 0,
       "cosine_similarity": 0.2075,
@@ -212,154 +44,314 @@
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-outsourcing-mismatch-01",
-      "nearest_train_task_id": "tb-p-014-v04",
-      "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1771,
-      "time_shift_check": "repo_artifact_window_requires_manual_review",
-      "violated": false
-    },
-    {
-      "held_out_task_id": "tb-synth-outsourcing-mismatch-02",
+      "held_out_task_id": "tb-synth-cto-sensitivity-02-v02",
       "nearest_train_task_id": "tb-p-014-v01",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1878,
+      "cosine_similarity": 0.2075,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-pricing-handoff-01",
-      "nearest_train_task_id": "tb-p-024-v02",
+      "held_out_task_id": "tb-synth-cto-sensitivity-02-v03",
+      "nearest_train_task_id": "tb-p-014-v01",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2579,
+      "cosine_similarity": 0.2075,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-pricing-handoff-02",
-      "nearest_train_task_id": "tb-p-032-v04",
+      "held_out_task_id": "tb-synth-cto-sensitivity-02-v04",
+      "nearest_train_task_id": "tb-p-014-v01",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3395,
+      "cosine_similarity": 0.2075,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-scheduling-calibration-01",
-      "nearest_train_task_id": "tb-p-022-v02",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-01-v01",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3825,
+      "cosine_similarity": 0.2671,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-scheduling-calibration-02",
-      "nearest_train_task_id": "tb-p-022-v04",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-01-v02",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.4048,
+      "cosine_similarity": 0.2671,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-signal-overclaiming-01",
-      "nearest_train_task_id": "tb-p-024-v02",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-01-v03",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2328,
+      "cosine_similarity": 0.2671,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-signal-overclaiming-02",
-      "nearest_train_task_id": "tb-p-022-v04",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-01-v04",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1922,
+      "cosine_similarity": 0.2671,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-weak-confidence-01",
-      "nearest_train_task_id": "tb-p-032-v04",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-02-v01",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2996,
+      "cosine_similarity": 0.1973,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-synth-weak-confidence-02",
-      "nearest_train_task_id": "tb-p-022-v04",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-02-v02",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2423,
+      "cosine_similarity": 0.1973,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-channel-001",
-      "nearest_train_task_id": "tb-p-011-v02",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-02-v03",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2154,
+      "cosine_similarity": 0.1973,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-channel-002",
-      "nearest_train_task_id": "tb-p-024-v02",
+      "held_out_task_id": "tb-synth-outsourcing-mismatch-02-v04",
+      "nearest_train_task_id": "tb-trace-qual-002",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2292,
+      "cosine_similarity": 0.1973,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-channel-003",
-      "nearest_train_task_id": "tb-p-034-v05",
+      "held_out_task_id": "tb-synth-pricing-handoff-01-v01",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2811,
+      "cosine_similarity": 0.2646,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-email-001",
-      "nearest_train_task_id": "tb-p-022-v03",
+      "held_out_task_id": "tb-synth-pricing-handoff-01-v02",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3839,
+      "cosine_similarity": 0.2646,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-email-002",
-      "nearest_train_task_id": "tb-p-001-v01",
+      "held_out_task_id": "tb-synth-pricing-handoff-01-v03",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.378,
+      "cosine_similarity": 0.2646,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-email-003",
-      "nearest_train_task_id": "tb-p-001-v02",
+      "held_out_task_id": "tb-synth-pricing-handoff-01-v04",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.3789,
+      "cosine_similarity": 0.2646,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-qual-001",
-      "nearest_train_task_id": "tb-p-011-v02",
+      "held_out_task_id": "tb-synth-pricing-handoff-02-v01",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.1917,
+      "cosine_similarity": 0.398,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-qual-002",
-      "nearest_train_task_id": "tb-p-024-v02",
+      "held_out_task_id": "tb-synth-pricing-handoff-02-v02",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2349,
+      "cosine_similarity": 0.398,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     },
     {
-      "held_out_task_id": "tb-trace-qual-003",
-      "nearest_train_task_id": "tb-p-034-v05",
+      "held_out_task_id": "tb-synth-pricing-handoff-02-v03",
+      "nearest_train_task_id": "tb-p-020-v02",
       "longest_shared_ngram": 0,
-      "cosine_similarity": 0.2892,
+      "cosine_similarity": 0.398,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-pricing-handoff-02-v04",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.398,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-01-v01",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3369,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-01-v02",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3369,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-01-v03",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3369,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-01-v04",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3369,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-02-v01",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3505,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-02-v02",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3505,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-02-v03",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3505,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-scheduling-calibration-02-v04",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3505,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-01-v01",
+      "nearest_train_task_id": "tb-trace-qual-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3166,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-01-v02",
+      "nearest_train_task_id": "tb-trace-qual-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3166,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-01-v03",
+      "nearest_train_task_id": "tb-trace-qual-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3166,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-01-v04",
+      "nearest_train_task_id": "tb-trace-qual-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3166,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-02-v01",
+      "nearest_train_task_id": "tb-p-025-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2033,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-02-v02",
+      "nearest_train_task_id": "tb-p-025-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2033,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-02-v03",
+      "nearest_train_task_id": "tb-p-025-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2033,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-signal-overclaiming-02-v04",
+      "nearest_train_task_id": "tb-p-025-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2033,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-weak-confidence-01-v01",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3129,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-weak-confidence-01-v02",
+      "nearest_train_task_id": "tb-p-020-v02",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.3129,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-weak-confidence-02-v01",
+      "nearest_train_task_id": "tb-trace-email-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2869,
+      "time_shift_check": "repo_artifact_window_requires_manual_review",
+      "violated": false
+    },
+    {
+      "held_out_task_id": "tb-synth-weak-confidence-02-v02",
+      "nearest_train_task_id": "tb-trace-email-002",
+      "longest_shared_ngram": 0,
+      "cosine_similarity": 0.2869,
       "time_shift_check": "repo_artifact_window_requires_manual_review",
       "violated": false
     }

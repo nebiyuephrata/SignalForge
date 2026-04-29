@@ -43,11 +43,11 @@ Current Week 11 artifacts:
 Current benchmark snapshot:
 
 - total tasks: `225`
-- train/dev/held_out: `110 / 70 / 45`
-- source modes: `trace-derived`, `programmatic`, `hand-authored`, `multi-LLM-synthesis`
+- train/dev/held_out: `112 / 69 / 44`
+- source modes: `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, `36` `hand-authored`
 - contamination violations: `0`
-- Path B preference pairs: `110`
-- held-out critic lift: `+33.33pp` over the static heuristic baseline, with `95% CI [15.56, 51.11]`
+- Path B preference pairs: `112`
+- held-out critic lift: `+27.27pp` over the static heuristic baseline, with `95% CI [11.36, 40.91]`
 
 Rebuild commands:
 
@@ -192,9 +192,10 @@ flowchart LR
 The remaining high-level work is publication hardening rather than more system invention:
 
 1. complete the true 24-hour inter-rater rerun for the public release,
-2. rebalance source-mode coverage toward the intended 30/30/25/15 mix,
-3. publish the dataset and critic artifacts on HuggingFace,
-4. finalize the public memo, blog post, and community artifact.
+2. normalize the remaining dimension-label drift in the benchmark rows,
+3. run the intended small-backbone Path B training pass beyond the local linear critic,
+4. publish the dataset and critic artifacts on HuggingFace,
+5. finalize the public memo, blog post, and community artifact.
 
 ## Setup
 

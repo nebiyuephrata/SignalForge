@@ -25,28 +25,28 @@ The current release contains **225 total tasks**, inside the required 200-300 ba
 
 | Partition | Count | Share |
 | --- | ---: | ---: |
-| `train` | 110 | 48.9% |
-| `dev` | 70 | 31.1% |
-| `held_out` | 45 | 20.0% |
+| `train` | 112 | 49.8% |
+| `dev` | 69 | 30.7% |
+| `held_out` | 44 | 19.6% |
 
 ### Source modes
 
 | Source mode | Count | Share | Typical use in v0.1 |
 | --- | ---: | ---: | --- |
-| `trace-derived` | 9 | 4.0% | Convert real Week 10 behavior into benchmark tasks with direct trace references |
-| `programmatic` | 180 | 80.0% | High-volume probe expansions with controlled slot variation |
-| `multi-LLM-synthesis` | 12 | 5.3% | Hard-case expansion using generator/judge model rotation |
-| `hand-authored` | 24 | 10.7% | Highest-value adversarial edge cases written directly for Tenacious-specific failure modes |
+| `trace-derived` | 69 | 30.7% | Convert real Week 10 behavior into benchmark tasks with direct trace references |
+| `programmatic` | 72 | 32.0% | High-volume probe expansions with controlled slot variation |
+| `multi-LLM-synthesis` | 48 | 21.3% | Hard-case expansion using generator/judge model rotation |
+| `hand-authored` | 36 | 16.0% | Highest-value adversarial edge cases written directly for Tenacious-specific failure modes |
 
-The target design mix for a future public rebalance is still roughly `30/30/25/15`, but the current v0.1 release is intentionally over-weighted toward programmatic tasks because the first goal was machine-verifiable coverage and a sealed held-out slice, not perfect source-mode balance on the first pass.
+The target design mix is `30/30/25/15`. The current release is much closer to that target than the earlier seed cut, but it is still slightly underweight on `multi-LLM-synthesis` and slightly overweight on `programmatic`. The bigger remaining composition debt is not mode share but label normalization inside a few failure dimensions.
 
 ### Task types
 
 | Task type | Count | Share |
 | --- | ---: | ---: |
-| `email_grounding` | 174 | 77.3% |
-| `channel_decision` | 48 | 21.3% |
-| `qualification_decision` | 3 | 1.3% |
+| `email_grounding` | 161 | 71.6% |
+| `channel_decision` | 41 | 18.2% |
+| `qualification_decision` | 23 | 10.2% |
 
 ### Failure dimensions
 
@@ -54,37 +54,35 @@ The benchmark covers the following failure dimensions, reported from the current
 
 | Failure dimension | Count |
 | --- | ---: |
-| `weak_confidence_handling` | 22 |
-| `outsourcing_mismatch` | 17 |
-| `ICP_misclassification` | 15 |
-| `signal_over-claiming` | 15 |
-| `tone_drift` | 15 |
-| `multi-thread_leakage` | 15 |
-| `cost_issues` | 15 |
-| `coordination_failures` | 15 |
-| `scheduling_edge_cases_EU_US_Africa` | 15 |
-| `signal_reliability` | 15 |
-| `gap_over-claiming` | 15 |
-| `pricing_handoff` | 6 |
-| `outsourcing_perception` | 5 |
-| `CTO_sensitivity` | 5 |
-| `soft_defer_graceful_close` | 4 |
-| `warm_reply_grounded_answer` | 4 |
-| `new_cto_transition` | 4 |
-| `bench_to_brief_match` | 4 |
-| `defensive_reply_recovery` | 4 |
-| `cto_sensitivity` | 2 |
-| `scheduling_calibration` | 2 |
-| `signal_over_claiming` | 2 |
-| `conflicting_signals_channel_plan` | 1 |
-| `no_hiring_signals_channel_plan` | 1 |
-| `weak_confidence_channel_plan` | 1 |
-| `conflicting_signals` | 1 |
-| `no_hiring_signals` | 1 |
-| `weak_confidence` | 1 |
-| `conflicting_signals_qualification` | 1 |
-| `no_hiring_signals_qualification` | 1 |
-| `weak_confidence_qualification` | 1 |
+| `weak_confidence_handling` | 16 |
+| `outsourcing_mismatch` | 14 |
+| `pricing_handoff` | 14 |
+| `signal_over_claiming` | 14 |
+| `cto_sensitivity` | 10 |
+| `conflicting_signals` | 8 |
+| `conflicting_signals_channel_plan` | 8 |
+| `conflicting_signals_qualification` | 8 |
+| `no_hiring_signals` | 8 |
+| `no_hiring_signals_channel_plan` | 8 |
+| `no_hiring_signals_qualification` | 8 |
+| `scheduling_calibration` | 8 |
+| `weak_confidence` | 7 |
+| `weak_confidence_channel_plan` | 7 |
+| `weak_confidence_qualification` | 7 |
+| `bench_to_brief_match` | 6 |
+| `coordination_failures` | 6 |
+| `cost_issues` | 6 |
+| `defensive_reply_recovery` | 6 |
+| `gap_over_claiming` | 6 |
+| `icp_misclassification` | 6 |
+| `multi_thread_leakage` | 6 |
+| `new_cto_transition` | 6 |
+| `scheduling_edge_cases_eu_us_africa` | 6 |
+| `signal_reliability` | 6 |
+| `soft_defer_graceful_close` | 6 |
+| `tone_drift` | 6 |
+| `warm_reply_grounded_answer` | 6 |
+| `outsourcing_perception` | 2 |
 
 ### Per-mode examples
 
@@ -141,10 +139,10 @@ Current contamination status from `contamination_check.json`:
 
 - n-gram overlap threshold: `8`
 - similarity threshold: `0.85`
-- held-out comparisons: `45`
+- held-out comparisons: `44`
 - n-gram flags: `0`
 - similarity flags: `0`
-- manual time-shift reviews: `21`
+- manual time-shift reviews: `44`
 - final violations: `0`
 
 The time-shift review is still partly manual because some held-out tasks intentionally anchor to Week 10 repository artifacts rather than newly fetched public snapshots.
@@ -183,8 +181,8 @@ Responsible maintainer for v0.1: the repository author / Week 11 trainee maintai
 
 The maintenance plan for v0.2 is:
 
-1. rebalance source modes toward the intended `30/30/25/15` mix,
-2. distribute non-programmatic source modes across all three partitions rather than concentrating them in held-out,
+1. normalize dimension labels such as `CTO_sensitivity` versus `cto_sensitivity` and `signal_over-claiming` versus `signal_over_claiming`,
+2. raise `multi-LLM-synthesis` coverage from `48` toward the target band of roughly `56`,
 3. replace the current lexical cosine proxy with a true embedding similarity checker,
 4. rerun the inter-rater study with a true 24-hour delay before public release,
 5. publish the reproducibility example and dataset card on HuggingFace.

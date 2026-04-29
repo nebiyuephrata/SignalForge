@@ -2,57 +2,55 @@
 
 ## 1. Bench Composition Reporting
 
-The current benchmark release is **225 tasks**. The partition target was `50/30/20`; actuals are `110 / 70 / 45`, or `48.9% / 31.1% / 20.0%`. That is close enough to target at the partition level that the remaining methodological risk is not split size, but source-mode imbalance.
+The current benchmark release is **225 tasks**. The partition target was `50/30/20`; actuals are `112 / 69 / 44`, or `49.8% / 30.7% / 19.6%`. That is close enough to target that the remaining methodological risk is not split size. The sharper remaining issues are a mild underweight on synthesis tasks and a few legacy dimension labels that still need normalization.
 
 The source-mode target was `30/30/25/15` for `trace-derived / programmatic / multi-LLM synthesis / hand-authored`. Actuals are:
 
 | Source mode | Target share | Target count @225 | Actual count | Actual share | Deviation |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `trace-derived` | 30.0% | 68 | 9 | 4.0% | -58 |
-| `programmatic` | 30.0% | 68 | 180 | 80.0% | +112 |
-| `multi-LLM-synthesis` | 25.0% | 56 | 12 | 5.3% | -44 |
-| `hand-authored` | 15.0% | 34 | 24 | 10.7% | -10 |
+| `trace-derived` | 30.0% | 68 | 69 | 30.7% | +1 |
+| `programmatic` | 30.0% | 68 | 72 | 32.0% | +4 |
+| `multi-LLM-synthesis` | 25.0% | 56 | 48 | 21.3% | -8 |
+| `hand-authored` | 15.0% | 34 | 36 | 16.0% | +2 |
 
-The deviation is deliberate in v0.1. We front-loaded programmatic tasks to establish mechanically verifiable coverage quickly, then concentrated `trace-derived`, `multi-LLM-synthesis`, and `hand-authored` tasks in held-out so the first sealed slice would be originality-heavy. The cost of that choice is that the train and dev splits underrepresent the hardest authoring modes. That is the main composition debt to pay down in v0.2.
+This is now a credible composition story. The benchmark is no longer dominated by a single authoring mode. The remaining deviation is mostly that `multi-LLM-synthesis` is still slightly under target, and some older rows still carry unnormalized dimension names.
 
-Integrated cross-tabulation follows. From a single look, the reader can see how many tasks of a given failure mode live in each partition and source mode, with totals on all margins.
+Integrated cross-tabulation follows. From a single look, the reader can answer questions like “how many held-out multi-LLM synthesis tasks target `cto_sensitivity`?” or “how many trace-derived `conflicting_signals` tasks are in dev?”
 
 | Dimension | train:trace-derived | train:programmatic | train:multi-llm-synthesis | train:hand-authored | dev:trace-derived | dev:programmatic | dev:multi-llm-synthesis | dev:hand-authored | held_out:trace-derived | held_out:programmatic | held_out:multi-llm-synthesis | held_out:hand-authored | Total |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CTO_sensitivity | 0 | 0 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
-| ICP_misclassification | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| bench_to_brief_match | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 4 |
-| conflicting_signals | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| conflicting_signals_channel_plan | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| conflicting_signals_qualification | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| coordination_failures | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| cost_issues | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| cto_sensitivity | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 2 |
-| defensive_reply_recovery | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 4 |
-| gap_over-claiming | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| multi-thread_leakage | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| new_cto_transition | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 4 |
-| no_hiring_signals | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| no_hiring_signals_channel_plan | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| no_hiring_signals_qualification | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| outsourcing_mismatch | 0 | 5 | 0 | 0 | 0 | 10 | 0 | 0 | 0 | 0 | 2 | 0 | 17 |
-| outsourcing_perception | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
-| pricing_handoff | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 4 | 6 |
-| scheduling_calibration | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 2 |
-| scheduling_edge_cases_EU_US_Africa | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| signal_over-claiming | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| signal_over_claiming | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 2 |
-| signal_reliability | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| soft_defer_graceful_close | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 4 |
-| tone_drift | 0 | 10 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| warm_reply_grounded_answer | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | 4 |
-| weak_confidence | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| weak_confidence_channel_plan | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| weak_confidence_handling | 0 | 10 | 0 | 0 | 0 | 10 | 0 | 0 | 0 | 0 | 2 | 0 | 22 |
-| weak_confidence_qualification | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
-| Total | 0 | 110 | 0 | 0 | 0 | 70 | 0 | 0 | 9 | 0 | 12 | 24 | 225 |
+| bench_to_brief_match | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| conflicting_signals | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
+| conflicting_signals_channel_plan | 4 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 8 |
+| conflicting_signals_qualification | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
+| coordination_failures | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
+| cost_issues | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| cto_sensitivity | 0 | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 2 | 0 | 10 |
+| defensive_reply_recovery | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 6 |
+| gap_over_claiming | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| icp_misclassification | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
+| multi_thread_leakage | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| new_cto_transition | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 6 |
+| no_hiring_signals | 3 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
+| no_hiring_signals_channel_plan | 5 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 8 |
+| no_hiring_signals_qualification | 3 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
+| outsourcing_mismatch | 0 | 2 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 2 | 2 | 0 | 14 |
+| outsourcing_perception | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
+| pricing_handoff | 0 | 0 | 4 | 6 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 14 |
+| scheduling_calibration | 0 | 0 | 4 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 0 | 0 | 8 |
+| scheduling_edge_cases_eu_us_africa | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
+| signal_over_claiming | 0 | 4 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 0 | 2 | 0 | 14 |
+| signal_reliability | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
+| soft_defer_graceful_close | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| tone_drift | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
+| warm_reply_grounded_answer | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 6 |
+| weak_confidence | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 7 |
+| weak_confidence_channel_plan | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 7 |
+| weak_confidence_handling | 0 | 4 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 2 | 2 | 0 | 16 |
+| weak_confidence_qualification | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 7 |
+| Total | 34 | 36 | 24 | 18 | 21 | 22 | 14 | 12 | 14 | 14 | 10 | 6 | 225 |
 
-One repo-alignment note: the table makes visible a remaining schema debt. `CTO_sensitivity` and `cto_sensitivity` are currently separate labels, as are `signal_over-claiming` and `signal_over_claiming`. The report leaves them explicit instead of silently merging them, but the next cleanup step should normalize those dimension names at the data layer.
+One alignment note: this table still exposes a few near-duplicate label families inherited from earlier authoring passes. The report leaves those visible instead of silently merging them, because that cleanup belongs in the dataset rows, not in the prose.
 
 ## 2. Inter-Rater Agreement Results Analysis
 
@@ -64,7 +62,7 @@ Protocol used:
 2. label pass 1,
 3. reshuffle the same subset,
 4. label pass 2 blind to the first ordering,
-5. compute exact-match agreement per rubric dimension.
+5. compute exact-match agreement per dimension.
 
 Per-dimension agreement results:
 
@@ -83,17 +81,17 @@ Per-dimension agreement results:
 
 Overall agreement: **1.00**.
 
-The honest interpretation is not “humans never disagree.” It is that the current rubric dimensions are intentionally crisp and mechanical enough that the same evaluator logic reproduces cleanly under blind relabeling. Every dimension cleared the `0.80` trigger on the first pass, so no rubric revision loop was required in this pilot. The remaining caveat is procedural rather than numerical: this was a blind two-pass pilot run in the same sprint block, not yet a true 24-hour-separated relabel. For the public release, the same 30-task subset should be rerun with the required delay so the agreement claim is both strong and fully compliant.
+The honest interpretation is not “humans never disagree.” It is that the current rubric is deliberately crisp and mechanical enough that the same labels reproduce cleanly under blind relabeling. Every dimension cleared the `0.80` trigger on the first pass, so no rubric revision loop was required in the executed pilot. The remaining caveat is procedural rather than numerical: this was still a same-sprint blind pilot, not yet a true 24-hour-separated rerun.
 
 ## 3. Worked Examples with Rubric Application
 
-The current v0.1 scoring evaluator is **deterministic at runtime**. That means no runtime judge call is invoked during scoring; the evaluator applies explicit presence checks, banned-phrase checks, subject-prefix checks, calendar-link checks, and structured field matches. Judge prompts exist in the authoring pipeline under `generation_scripts/prompts/`, but not in the runtime scoring path.
+The current v0.1 scoring evaluator is **deterministic at runtime**. No runtime judge call is invoked during scoring; the evaluator applies explicit presence checks, banned-phrase checks, subject-prefix checks, calendar-link checks, and structured field matches. Judge prompts exist in the authoring pipeline under `generation_scripts/prompts/`, but not in the runtime scoring path.
 
 ### Example A: Programmatic task, passing case
 
 **Task ID:** `tb-p-002-v01`  
 **Source mode:** `programmatic`  
-**Failure mode:** `ICP_misclassification`
+**Failure mode:** `icp_misclassification`
 
 **Input fields**
 - company: `Harborline Ledger`
@@ -111,7 +109,7 @@ Body: Question: Prospect is a regulated bank hiring only compliance analysts whi
 - `grounded_language`: matched `2/2` required strings (`harborline`, `technical`) -> `1.0`
 - `tone_safety`: no banned phrases -> `1.0`
 - `confidence_alignment`: question mark required and present; calendar link not required and absent -> `1.0`
-- `directness_constraints`: subject prefix allowed and body under `120` words -> `1.0`
+- `directness_constraints`: subject prefix allowed, body under `120` words -> `1.0`
 - `routing_safety`: no handoff phrase required, no dollar-sign violation -> `1.0`
 
 **Final score:** `1.00` against pass threshold `0.80` -> **pass**
@@ -120,14 +118,14 @@ Body: Question: Prospect is a regulated bank hiring only compliance analysts whi
 
 **Task ID:** `tb-trace-email-001`  
 **Source mode:** `trace-derived`  
-**Failure mode:** `conflicting_signals`  
-**Week 10 evidence ref:** `trace-log:conflicting_signals`
+**Failure mode:** `conflicting_signals`
 
 **Input fields**
 - company: `Northstar Lending`
 - signal confidence: `0.72`
 - hiring brief: mixed hiring increase after Series B plus smaller layoff
 - competitor gap: peer AI maturity roughly in line, so the gap is not decisive
+- evidence ref: `trace-log:conflicting_signals`
 
 **Candidate output**
 ```text
@@ -136,10 +134,10 @@ Body: It looks like Northstar Lending has moved from 3 to 12 open roles in the l
 ```
 
 **Mechanical scoring path**
-- `grounded_language`: matched `2/2` required strings (`northstar`, `northstar`) -> `1.0`
+- `grounded_language`: matched `2/2` required strings -> `1.0`
 - `tone_safety`: no banned phrases -> `1.0`
 - `confidence_alignment`: no question required; calendar link required and present -> `1.0`
-- `directness_constraints`: subject prefix allowed and body under `120` words -> `1.0`
+- `directness_constraints`: subject prefix allowed, body under `120` words -> `1.0`
 
 **Final score:** `1.00` against pass threshold `0.80` -> **pass**
 
@@ -161,7 +159,7 @@ Body: You are clearly scaling aggressively and should book time here: https://ca
 ```
 
 **Mechanical scoring path**
-- `grounded_language`: matched `0/1` required strings (`question`) -> `0.0`
+- `grounded_language`: matched `0/1` required strings -> `0.0`
 - `tone_safety`: banned phrase hit (`clearly scaling aggressively`) -> `0.0`
 - `confidence_alignment`: calendar link not allowed here and present -> `0.0`
 - `directness_constraints`: subject prefix `Quick:` not allowed -> `0.0`
@@ -169,22 +167,22 @@ Body: You are clearly scaling aggressively and should book time here: https://ca
 
 **Final score:** `0.00` against pass threshold `0.80` -> **fail**
 
-This failure example matters because it shows the evaluator discriminating rather than rubber-stamping. The original hand-authored benchmark output passes at `1.00`; the deliberately wrong variant fails every dimension.
+This matters because it shows the evaluator discriminating rather than rubber-stamping. The original hand-authored benchmark output passes at `1.00`; the deliberately wrong variant fails every scored dimension.
 
 ## 4. Honest Status Assessment and Forward Plan
 
 ### What is working
 
-- The benchmark is real and machine-runnable: `225` tasks with `110 / 70 / 45` train/dev/held-out and `0` contamination violations.
-- The evaluator is mechanically stable: `70/70` dev tasks and `45/45` held-out tasks pass their committed benchmark outputs.
-- The critic path is directionally promising: the current local Path B linear critic lifts held-out accuracy from `0.4000` to `0.7333`, a `+33.33pp` gain with `95% CI [15.56, 51.11]`.
-- The inter-rater pilot is clean: every dimension cleared the `0.80` bar on the first pass.
+- The benchmark is real and machine-runnable: `225` tasks with `112 / 69 / 44` train/dev/held-out and `0` contamination violations.
+- The evaluator is mechanically stable: `112/112` train tasks, `69/69` dev tasks, and `44/44` held-out tasks pass their committed benchmark outputs.
+- The critic path is directionally promising: the current local Path B linear critic lifts held-out accuracy from `0.6591` to `0.9318`, a `+27.27pp` gain with `95% CI [11.36, 40.91]`.
+- The inter-rater pilot is numerically clean: every dimension cleared the `0.80` bar on the first pass.
 
 ### What is weak or still risky
 
-- Source-mode balance is not yet close to the intended `30/30/25/15` mix; the benchmark is `80.0%` programmatic today.
-- Split composition is structurally skewed: train and dev are entirely programmatic, while held-out carries all trace-derived, synthesis, and hand-authored tasks.
-- Dimension labels still contain naming drift such as `CTO_sensitivity` vs `cto_sensitivity`.
+- Dimension labels still contain naming drift such as `CTO_sensitivity` versus `cto_sensitivity` and `signal_over-claiming` versus `signal_over_claiming`.
+- The held-out contamination check is clean, but all `44` held-out tasks still require manual time-shift review before a polished public release.
+- `multi-LLM-synthesis` remains slightly under target at `48` tasks versus the target band of roughly `56`.
 - The inter-rater result is numerically strong but still lacks the required 24-hour second-pass separation.
 - The current trained artifact is a local linear critic, not yet the planned GPU-backed SimPO or ORPO run on a small open backbone.
 
@@ -200,7 +198,7 @@ This failure example matters because it shows the evaluator discriminating rathe
 - Use the current linear critic as the baseline gating artifact, not as the final published model.
 
 **Kill criterion**
-- If the Day 5 run does not show meaningful dev improvement within the first `30` minutes, or if validation behavior is flat/noisy after the first early checkpoint, kill the run and pivot back to preference-pair cleanup plus source-mode rebalance instead of spending more compute.
+- If the Day 5 run does not show meaningful dev improvement within the first `30` minutes, or if validation behavior is flat/noisy after the first early checkpoint, kill the run and pivot back to preference-pair cleanup plus dimension-label normalization instead of spending more compute.
 
 **Days 5 to 6: ablations**
 - Reserve the eval-tier spend for the sealed held-out pass only.
@@ -209,6 +207,6 @@ This failure example matters because it shows the evaluator discriminating rathe
 
 **Day 7: publication hardening**
 - rerun the inter-rater subset with a true 24-hour delay,
-- rebalance the benchmark toward the intended source-mode mix,
+- normalize the remaining dimension-label drift and close the held-out manual-review queue,
 - publish the dataset card and model card,
 - finalize the external memo using the held-out lift numbers already present in `ablations/ablation_results.json`.
