@@ -1,0 +1,21 @@
+{
+  "benchmark_version": "tenacious_bench_v0.1",
+  "current_authoring_modes": [
+    "trace-derived",
+    "programmatic",
+    "hand-authored"
+  ],
+  "planned_authoring_modes": [
+    "multi-llm-synthesis"
+  ],
+  "judge_filter_policy": {
+    "current": "deterministic evaluator and contamination filter only",
+    "planned": "cheap-model synthesis triage plus eval-tier calibration spot checks",
+    "preference_leakage_guard": "generator family, cheap judge family, and eval-tier judge family must differ"
+  },
+  "cost_policy": {
+    "days_2_3_eval_tier": "forbidden",
+    "target_authoring_budget_usd": "3-5",
+    "target_training_budget_usd": "0-5"
+  }
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from agent.channels.email.email_generator import generate_grounded_email as generate_fallback_email
@@ -9,6 +10,7 @@ from agent.tenacious.context import load_icp_definition, load_style_guide
 from agent.utils.logger import get_logger
 
 logger = get_logger(__name__)
+VIDEO_DEMO_RECIPIENT_NAME = "Ephrata"
 
 
 CLAIM_LIMITS = {
@@ -255,8 +257,8 @@ def _normalize_email_output(
     if not isinstance(claims_used, list):
         claims_used = []
     return {
-        "subject": str(content.get("subject", "")).strip(),
-        "body": str(content.get("body", "")).strip(),
+        "subject": _replace_unresolved_name_tokens(str(content.get("subject", "")).strip()),
+        "body": _replace_unresolved_name_tokens(str(content.get("body", "")).strip()),
         "confidence_level": confidence_level,
         "claims_used": [str(claim_id) for claim_id in claims_used],
         "available_claims": [claim["id"] for claim in claim_catalog],
@@ -293,8 +295,8 @@ def generate_deterministic_fallback_email(
         company = {"company_name": company_name}
         fallback = generate_fallback_email(company, hiring_signal_brief, competitor_gap_brief)
     return {
-        "subject": fallback["subject"],
-        "body": fallback["body"],
+        "subject": _replace_unresolved_name_tokens(str(fallback["subject"])),
+        "body": _replace_unresolved_name_tokens(str(fallback["body"])),
         "confidence_level": confidence,
         "claims_used": [],
         "available_claims": [claim["id"] for claim in build_claim_catalog(hiring_signal_brief, competitor_gap_brief)],
@@ -307,3 +309,19 @@ def generate_deterministic_fallback_email(
         "cached": False,
         "prompt_snapshot": {"fallback_reason": reason, "fallback_reason_detail": reason_detail or {}},
     }
+
+
+def _replace_unresolved_name_tokens(value: str) -> str:
+    if not value:
+        return value
+    patterns = [
+        r"\{\{\s*first_?name\s*\}\}",
+        r"\{\s*first_?name\s*\}",
+        r"<\s*first_?name\s*>",
+        r"\[\s*first\s*name\s*\]",
+        r"\[\s*name\s*\]",
+    ]
+    normalized = value
+    for pattern in patterns:
+        normalized = re.sub(pattern, VIDEO_DEMO_RECIPIENT_NAME, normalized, flags=re.IGNORECASE)
+    return normalized

@@ -1,0 +1,81 @@
+{
+  "run_name": "signalforge_path_b_linear_critic_v1",
+  "seed": 42,
+  "method": "pairwise_logistic_linear_critic",
+  "vector_size": 2064,
+  "train_pairs": 110,
+  "dev_pairs": 70,
+  "held_out_pairs": 45,
+  "epoch_history": [
+    {
+      "epoch": 1,
+      "train_pair_accuracy": 0.9818,
+      "mean_logistic_loss": 0.016193
+    },
+    {
+      "epoch": 2,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.001246
+    },
+    {
+      "epoch": 3,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000869
+    },
+    {
+      "epoch": 4,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000708
+    },
+    {
+      "epoch": 5,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000613
+    },
+    {
+      "epoch": 6,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000555
+    },
+    {
+      "epoch": 7,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000513
+    },
+    {
+      "epoch": 8,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.00048
+    },
+    {
+      "epoch": 9,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000457
+    },
+    {
+      "epoch": 10,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000439
+    },
+    {
+      "epoch": 11,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000421
+    },
+    {
+      "epoch": 12,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000409
+    },
+    {
+      "epoch": 13,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.000398
+    },
+    {
+      "epoch": 14,
+      "train_pair_accuracy": 1.0,
+      "mean_logistic_loss": 0.00039
+    }
+  ]
+}

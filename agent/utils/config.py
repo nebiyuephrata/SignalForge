@@ -12,11 +12,12 @@ class Settings(BaseSettings):
     base_url: str = Field(default="http://0.0.0.0:10000", validation_alias=AliasChoices("BASE_URL"))
     log_level: str = "INFO"
     frontend_origins: str = "http://127.0.0.1:5173,http://localhost:5173"
+    frontend_origin_regex: str = ""
 
     openai_api_key: str = ""
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "anthropic/claude-sonnet-4.5"
+    openrouter_model: str = "google/gemini-2.5-flash"
     openrouter_fallback_model: str = "qwen/qwen3-32b"
     openrouter_timeout_seconds: int = 20
     openrouter_max_tokens: int = 220
@@ -56,6 +57,21 @@ class Settings(BaseSettings):
     @property
     def public_base_url(self) -> str:
         return self.base_url.rstrip("/")
+
+    @property
+    def cors_origin_regex(self) -> str | None:
+        if self.frontend_origin_regex.strip():
+            return self.frontend_origin_regex.strip()
+        if self.app_env.lower() != "production":
+            return (
+                r"^https?://("
+                r"localhost|127\.0\.0\.1|0\.0\.0\.0|"
+                r"192\.168\.\d{1,3}\.\d{1,3}|"
+                r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
+                r"172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}"
+                r")(:\d+)?$"
+            )
+        return None
 
 
 @lru_cache(maxsize=1)

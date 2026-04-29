@@ -1,0 +1,20 @@
+{
+  "run_name": "signalforge-path-b-simpo-v0",
+  "seed": 42,
+  "method": "simpo",
+  "backbone": "Qwen/Qwen2.5-1.5B-Instruct",
+  "dataset_path": "training_data/path_b_preferences.jsonl",
+  "max_prompt_length": 1024,
+  "max_length": 1536,
+  "learning_rate": 5e-06,
+  "num_train_epochs": 2,
+  "per_device_train_batch_size": 2,
+  "gradient_accumulation_steps": 8,
+  "warmup_ratio": 0.05,
+  "logging_steps": 10,
+  "save_steps": 50,
+  "eval_strategy": "no",
+  "simpo_beta": 2.0,
+  "target_reward_margin": 0.5,
+  "notes": "Starter config only. Tune after the benchmark expands beyond the current 14 training preference pairs."
+}

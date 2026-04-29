@@ -1,0 +1,165 @@
+{
+  "claims": [
+    {
+      "claim_id": "bench_total_tasks_v0_1",
+      "statement": "Tenacious-Bench v0.1 currently contains 225 tasks.",
+      "value": 225,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_split_train",
+      "statement": "The train split contains 110 tasks.",
+      "value": 110,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_split_dev",
+      "statement": "The dev split contains 70 tasks.",
+      "value": 70,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_split_held_out",
+      "statement": "The held-out split contains 45 tasks.",
+      "value": 45,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_source_mode_trace",
+      "statement": "The benchmark contains 9 trace-derived tasks.",
+      "value": 9,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_source_mode_programmatic",
+      "statement": "The benchmark contains 180 programmatic tasks.",
+      "value": 180,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_source_mode_hand_authored",
+      "statement": "The benchmark contains 24 hand-authored tasks.",
+      "value": 24,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json"
+      ]
+    },
+    {
+      "claim_id": "bench_source_mode_synth",
+      "statement": "The benchmark contains 12 multi-LLM-synthesis tasks.",
+      "value": 12,
+      "sources": [
+        "tenacious_bench_v0.1/summary.json",
+        "generation_scripts/synthesis_cache.json"
+      ]
+    },
+    {
+      "claim_id": "contamination_violations",
+      "statement": "The current contamination report shows zero held-out versus train violations.",
+      "value": 0,
+      "sources": [
+        "contamination_check.json"
+      ]
+    },
+    {
+      "claim_id": "train_eval_passed",
+      "statement": "All 110 train tasks pass the machine-verifiable evaluator.",
+      "value": 110,
+      "sources": [
+        "outputs/bench_train_eval.json"
+      ]
+    },
+    {
+      "claim_id": "dev_eval_passed",
+      "statement": "All 70 dev tasks pass the machine-verifiable evaluator.",
+      "value": 70,
+      "sources": [
+        "outputs/bench_dev_eval.json"
+      ]
+    },
+    {
+      "claim_id": "held_out_eval_passed",
+      "statement": "All 45 held-out tasks pass the machine-verifiable evaluator.",
+      "value": 45,
+      "sources": [
+        "outputs/bench_held_out_eval.json"
+      ]
+    },
+    {
+      "claim_id": "preference_pairs",
+      "statement": "The current Path B training-format artifact contains 110 preference pairs.",
+      "value": 110,
+      "sources": [
+        "training_data/path_b_preferences.jsonl"
+      ]
+    },
+    {
+      "claim_id": "inter_rater_overall",
+      "statement": "The executed inter-rater pilot reports overall agreement of 1.00.",
+      "value": 1.0,
+      "sources": [
+        "outputs/inter_rater_summary.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_baseline_accuracy",
+      "statement": "The held-out heuristic baseline accuracy is 0.4000.",
+      "value": 0.4,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_trained_accuracy",
+      "statement": "The held-out trained critic accuracy is 0.7333.",
+      "value": 0.7333,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_delta_pp",
+      "statement": "The held-out trained critic improves accuracy by 33.33 percentage points over the baseline.",
+      "value": 33.33,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_ci_lower",
+      "statement": "The held-out delta lower bound is 15.56 percentage points.",
+      "value": 15.56,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_ci_upper",
+      "statement": "The held-out delta upper bound is 51.11 percentage points.",
+      "value": 51.11,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    },
+    {
+      "claim_id": "critic_held_out_p_value",
+      "statement": "The paired bootstrap p-value for the held-out critic lift is 0.0.",
+      "value": 0.0,
+      "sources": [
+        "ablations/ablation_results.json"
+      ]
+    }
+  ]
+}

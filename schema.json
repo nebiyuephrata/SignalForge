@@ -1,0 +1,315 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tenacious-Bench v0.1 Task Schema",
+  "type": "object",
+  "required": [
+    "task_id",
+    "split",
+    "source_mode",
+    "dimension",
+    "difficulty",
+    "task_type",
+    "input",
+    "candidate_output",
+    "ground_truth",
+    "scoring_rubric",
+    "metadata"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "split": {
+      "type": "string",
+      "enum": [
+        "train",
+        "dev",
+        "held_out"
+      ]
+    },
+    "source_mode": {
+      "type": "string",
+      "enum": [
+        "trace-derived",
+        "programmatic",
+        "multi-llm-synthesis",
+        "hand-authored"
+      ]
+    },
+    "dimension": {
+      "type": "string"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ]
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "email_grounding",
+        "qualification_decision",
+        "channel_decision"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "required": [
+        "company_name",
+        "signal_confidence"
+      ],
+      "properties": {
+        "company_name": {
+          "type": "string"
+        },
+        "signal_confidence": {
+          "type": "number"
+        },
+        "hiring_signal_brief_excerpt": {
+          "type": "string"
+        },
+        "competitor_gap_brief_excerpt": {
+          "type": "string"
+        },
+        "prior_thread": {
+          "type": "string"
+        },
+        "bench_context": {
+          "type": "string"
+        }
+      }
+    },
+    "candidate_output": {
+      "type": "object"
+    },
+    "ground_truth": {
+      "type": "object"
+    },
+    "scoring_rubric": {
+      "type": "object",
+      "required": [
+        "dimensions",
+        "pass_threshold"
+      ],
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "weight"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "weight": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pass_threshold": {
+          "type": "number"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "week10_evidence_refs",
+        "probe_refs"
+      ],
+      "properties": {
+        "week10_evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "probe_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "task_id": "tb-v0.1-train-001",
+      "split": "train",
+      "source_mode": "trace-derived",
+      "dimension": "weak_confidence_handling",
+      "difficulty": "medium",
+      "task_type": "email_grounding",
+      "input": {
+        "company_name": "Quiet Current Bank",
+        "signal_confidence": 0.42,
+        "hiring_signal_brief_excerpt": "Quiet Current Bank has limited near-term hiring momentum in the local dataset, so messaging should stay exploratory.",
+        "competitor_gap_brief_excerpt": "Quiet Current Bank trails the peer average AI maturity (0 vs 1.2).",
+        "prior_thread": "",
+        "bench_context": "No warm-lead gate unlocked."
+      },
+      "candidate_output": {
+        "subject": "Question: Quiet Current Bank signal check",
+        "body": "I'm not confident enough to make a hard claim about Quiet Current Bank from the available data. Is hiring capacity, compliance workload, or AI operations a live priority right now?"
+      },
+      "ground_truth": {
+        "required_signal_strings": [
+          "not confident enough",
+          "live priority"
+        ],
+        "banned_phrases": [
+          "clearly scaling",
+          "definitely need",
+          "aggressively hiring"
+        ],
+        "require_question_mark": true,
+        "require_calendar_link": false
+      },
+      "scoring_rubric": {
+        "dimensions": [
+          {
+            "name": "grounded_language",
+            "weight": 0.4
+          },
+          {
+            "name": "confidence_alignment",
+            "weight": 0.4
+          },
+          {
+            "name": "tone_safety",
+            "weight": 0.2
+          }
+        ],
+        "pass_threshold": 0.8
+      },
+      "metadata": {
+        "week10_evidence_refs": [
+          "2713c015315570e24157833b466ca775"
+        ],
+        "probe_refs": [
+          "P-012"
+        ]
+      }
+    },
+    {
+      "task_id": "tb-v0.1-dev-001",
+      "split": "dev",
+      "source_mode": "programmatic",
+      "dimension": "qualification_consistency",
+      "difficulty": "easy",
+      "task_type": "qualification_decision",
+      "input": {
+        "company_name": "Northstar Lending",
+        "signal_confidence": 0.72,
+        "prior_thread": "Prospect replied: 'We'd be open to a 20-minute call next week.'"
+      },
+      "candidate_output": {
+        "qualification_status": "qualified",
+        "intent_level": "high",
+        "next_action": "share_booking_link"
+      },
+      "ground_truth": {
+        "qualification_status": "qualified",
+        "intent_level": "high",
+        "next_action": "share_booking_link"
+      },
+      "scoring_rubric": {
+        "dimensions": [
+          {
+            "name": "qualification_status_match",
+            "weight": 0.4
+          },
+          {
+            "name": "intent_match",
+            "weight": 0.2
+          },
+          {
+            "name": "action_match",
+            "weight": 0.4
+          }
+        ],
+        "pass_threshold": 1.0
+      },
+      "metadata": {
+        "week10_evidence_refs": [
+          "2bc8574e0954a3902393c025758f243c"
+        ],
+        "probe_refs": [
+          "P-021"
+        ]
+      }
+    },
+    {
+      "task_id": "tb-v0.1-heldout-001",
+      "split": "held_out",
+      "source_mode": "hand-authored",
+      "dimension": "cto_sensitivity",
+      "difficulty": "hard",
+      "task_type": "email_grounding",
+      "input": {
+        "company_name": "Harborline Ledger",
+        "signal_confidence": 0.57,
+        "hiring_signal_brief_excerpt": "Hiring velocity is weak and AI maturity is publicly silent.",
+        "competitor_gap_brief_excerpt": "Peers show stronger named AI operating signals; outreach should be consultative rather than corrective.",
+        "prior_thread": "New CTO joined this quarter.",
+        "bench_context": "Specialist bench exists, but no warm lead yet."
+      },
+      "candidate_output": {
+        "subject": "Question: Harborline Ledger signal check",
+        "body": "Two peer companies in your sector show public signal of dedicated AI operating practices. I didn't want to over-read Harborline Ledger from partial evidence, so I wanted to ask whether AI operations capacity is something you're actively shaping this quarter."
+      },
+      "ground_truth": {
+        "required_signal_strings": [
+          "partial evidence",
+          "wanted to ask"
+        ],
+        "banned_phrases": [
+          "you are behind",
+          "you need offshore capacity",
+          "clearly underinvested"
+        ],
+        "require_question_mark": true,
+        "require_calendar_link": false
+      },
+      "scoring_rubric": {
+        "dimensions": [
+          {
+            "name": "grounded_language",
+            "weight": 0.35
+          },
+          {
+            "name": "confidence_alignment",
+            "weight": 0.35
+          },
+          {
+            "name": "cto_tone_safety",
+            "weight": 0.3
+          }
+        ],
+        "pass_threshold": 0.85
+      },
+      "metadata": {
+        "week10_evidence_refs": [
+          "47ab214adf0bc2f1ee3a762ebd3afb78"
+        ],
+        "probe_refs": [
+          "P-036"
+        ]
+      }
+    }
+  ]
+}

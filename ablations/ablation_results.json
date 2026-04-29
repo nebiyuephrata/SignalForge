@@ -1,0 +1,67 @@
+{
+  "run_name": "signalforge_path_b_linear_critic_v1",
+  "baseline": "static_heuristic_critic",
+  "trained_component": "linear_preference_critic",
+  "splits": {
+    "train": {
+      "split": "train",
+      "pair_count": 110,
+      "baseline_accuracy": 1.0,
+      "trained_accuracy": 1.0,
+      "delta_accuracy_pp": 0.0,
+      "baseline_latency_ms": 0.0395,
+      "trained_latency_ms": 13.2881,
+      "cost_per_pair_usd_baseline": 0.0,
+      "cost_per_pair_usd_trained": 0.0,
+      "cost_delta_usd": 0.0
+    },
+    "dev": {
+      "split": "dev",
+      "pair_count": 70,
+      "baseline_accuracy": 0.7143,
+      "trained_accuracy": 0.9286,
+      "delta_accuracy_pp": 21.43,
+      "baseline_latency_ms": 0.0676,
+      "trained_latency_ms": 12.2228,
+      "cost_per_pair_usd_baseline": 0.0,
+      "cost_per_pair_usd_trained": 0.0,
+      "cost_delta_usd": 0.0
+    },
+    "held_out": {
+      "split": "held_out",
+      "pair_count": 45,
+      "baseline_accuracy": 0.4,
+      "trained_accuracy": 0.7333,
+      "delta_accuracy_pp": 33.33,
+      "baseline_latency_ms": 0.0507,
+      "trained_latency_ms": 11.6393,
+      "cost_per_pair_usd_baseline": 0.0,
+      "cost_per_pair_usd_trained": 0.0,
+      "cost_delta_usd": 0.0,
+      "delta_accuracy_pp_ci_lower": 15.56,
+      "delta_accuracy_pp_ci_upper": 51.11,
+      "paired_bootstrap_p_value": 0.0
+    }
+  },
+  "delta_a": {
+    "description": "Trained critic versus heuristic baseline on sealed held-out preference pairs.",
+    "trained_accuracy": 0.7333,
+    "baseline_accuracy": 0.4,
+    "delta_accuracy_pp": 33.33,
+    "delta_accuracy_pp_ci_lower": 15.56,
+    "delta_accuracy_pp_ci_upper": 51.11,
+    "paired_bootstrap_p_value": 0.0
+  },
+  "delta_b": {
+    "description": "Trained critic versus prompt-engineered static heuristic on the same held-out pairs.",
+    "prompt_engineered_baseline_accuracy": 0.4,
+    "trained_accuracy": 0.7333,
+    "delta_accuracy_pp": 33.33
+  },
+  "cost_pareto": {
+    "baseline_latency_ms": 0.0507,
+    "trained_latency_ms": 11.6393,
+    "latency_delta_ms": 11.5886,
+    "cost_delta_usd": 0.0
+  }
+}

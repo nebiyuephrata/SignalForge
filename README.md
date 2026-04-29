@@ -4,6 +4,71 @@ SignalForge is a deterministic-first outbound system for Tenacious. It enriches 
 
 The governing rule is simple: `the model is never the source of truth`.
 
+## Key Artifacts
+
+- [Audit memo](./audit_memo.md)
+- [Schema](./schema.json)
+- [Scoring evaluator](./scoring_evaluator.py)
+- [Datasheet](./datasheet.md)
+- [Methodology](./methodology.md)
+- [Methodology rationale](./methodology_rationale.md)
+- [Synthesis memos](./synthesis_memos/)
+- [Benchmark partitions](./tenacious_bench_v0.1/)
+- [Ablation results](./ablations/ablation_results.json)
+- [Held-out traces](./ablations/held_out_traces.jsonl)
+- [Evidence graph](./evidence_graph.json)
+- [Week 11 status report](./reports/week11_status_report.md)
+- [Reporting artifacts](./reports/)
+
+## Week 11 Status
+
+The repo now also contains the first working scaffold for **Tenacious-Bench v0.1**, the Week 11 benchmark and training-data path built on top of the Week 10 conversion engine.
+
+Current Week 11 artifacts:
+
+- `audit_memo.md`
+- `schema.json`
+- `scoring_evaluator.py`
+- `tenacious_bench_v0.1/`
+- `datasheet.md`
+- `methodology.md`
+- `methodology_rationale.md`
+- `generation_scripts/`
+- `training_data/path_b_preferences.jsonl`
+- `training/run_path_b_critic.py`
+- `ablations/ablation_results.json`
+- `ablations/held_out_traces.jsonl`
+- `synthesis_memos/`
+
+Current benchmark snapshot:
+
+- total tasks: `225`
+- train/dev/held_out: `110 / 70 / 45`
+- source modes: `trace-derived`, `programmatic`, `hand-authored`, `multi-LLM-synthesis`
+- contamination violations: `0`
+- Path B preference pairs: `110`
+- held-out critic lift: `+33.33pp` over the static heuristic baseline, with `95% CI [15.56, 51.11]`
+
+Rebuild commands:
+
+```bash
+.venv/bin/python generation_scripts/synthesize_tasks.py
+.venv/bin/python generation_scripts/build_bench.py
+.venv/bin/python generation_scripts/contamination_check.py
+.venv/bin/python generation_scripts/run_inter_rater_pilot.py
+.venv/bin/python generation_scripts/prepare_preference_data.py
+.venv/bin/python training/run_path_b_critic.py
+.venv/bin/python scoring_evaluator.py --tasks tenacious_bench_v0.1/train/tasks.jsonl
+.venv/bin/python scoring_evaluator.py --tasks tenacious_bench_v0.1/dev/tasks.jsonl
+.venv/bin/python scoring_evaluator.py --tasks tenacious_bench_v0.1/held_out/tasks.jsonl
+```
+
+Sample evaluator invocation on a committed partition:
+
+```bash
+.venv/bin/python scoring_evaluator.py --tasks tenacious_bench_v0.1/dev/tasks.jsonl
+```
+
 ## Architecture
 
 ```mermaid
@@ -122,6 +187,15 @@ flowchart LR
 - `tenacious_sales_data`: seed collateral and schemas for the Tenacious scenario. Kept separate from runtime code.
 - `tests`: regression coverage for signals, integrations, routing, and end-to-end flow.
 
+## What Is Next
+
+The remaining high-level work is publication hardening rather than more system invention:
+
+1. complete the true 24-hour inter-rater rerun for the public release,
+2. rebalance source-mode coverage toward the intended 30/30/25/15 mix,
+3. publish the dataset and critic artifacts on HuggingFace,
+4. finalize the public memo, blog post, and community artifact.
+
 ## Setup
 
 ### 1. Prerequisites
@@ -183,12 +257,13 @@ If provider credentials are missing, SignalForge degrades safely: LLM email gene
 - `BASE_URL`: public URL for the deployed backend, used for deployment-safe examples and public callbacks
 - `LOG_LEVEL`: logger level
 - `FRONTEND_ORIGINS`: allowed frontend origins, comma-separated
+- `FRONTEND_ORIGIN_REGEX`: optional regex override for CORS; in non-production local/LAN dev origins are allowed by default
 
 #### LLM / observability
 
 - `OPENROUTER_API_KEY`: live model access
 - `OPENROUTER_BASE_URL`: OpenRouter endpoint
-- `OPENROUTER_MODEL`: primary model, defaulting to `anthropic/claude-sonnet-4.5`
+- `OPENROUTER_MODEL`: primary model, defaulting to `google/gemini-2.5-flash`
 - `OPENROUTER_FALLBACK_MODEL`: secondary model, defaulting to `qwen/qwen3-32b`
 - `OPENROUTER_TIMEOUT_SECONDS`: timeout for model calls
 - `OPENROUTER_MAX_TOKENS`: token cap
