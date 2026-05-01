@@ -49,12 +49,26 @@ def build_rejected_structured(task: dict[str, Any]) -> dict[str, Any]:
     return output
 
 
+def output_contract(task_type: str) -> str:
+    if task_type == "email_grounding":
+        return "Return only the final outbound email in exactly this format: Subject: <text> newline Body: <text>. Do not include analysis, scores, bullets, or JSON."
+    if task_type == "qualification_decision":
+        return 'Return only compact JSON with exactly these keys: qualification_status, intent_level, next_action.'
+    if task_type == "channel_decision":
+        return 'Return only compact JSON with exactly these keys: primary_channel, allowed_channels_after_reply.'
+    return "Return only the final answer with no explanation."
+
+
 def task_prompt(task: dict[str, Any], *, normalize_dimensions: bool) -> list[dict[str, str]]:
     dimension = normalize_dimension(task["dimension"]) if normalize_dimensions else task["dimension"]
     return [
         {
             "role": "system",
-            "content": "Score and improve Tenacious outbound behavior using only grounded evidence.",
+            "content": (
+                "Using only grounded evidence, produce the best final Tenacious response for this task. "
+                "Do not explain your reasoning. "
+                f"{output_contract(task['task_type'])}"
+            ),
         },
         {
             "role": "user",
