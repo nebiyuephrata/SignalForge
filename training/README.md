@@ -15,6 +15,7 @@ The critic is intended to sit in front of the existing SignalForge generator as 
 ## Inputs
 
 - preference data: `training_data/path_b_preferences.jsonl`
+- Colab/Unsloth export bundle: `training_data/unsloth/`
 - benchmark source: `tenacious_bench_v0.1/train/tasks.jsonl`
 - rationale: `methodology_rationale.md`
 
@@ -29,12 +30,35 @@ The repo now includes an executable local critic run in [`run_path_b_critic.py`]
 
 This is intentionally a local, dependency-light Path B run rather than a TRL/Unsloth GPU training job, because the current repo environment does not ship the full transformer fine-tuning stack. It still gives the project a real trained critic artifact and a statistically tested held-out comparison.
 
+## Colab / Unsloth bridge
+
+The repo now includes a Colab-ready export step for the Week 11 notebook:
+
+```bash
+.venv/bin/python training/export_unsloth_datasets.py
+```
+
+This writes:
+
+- `training_data/unsloth/preferences_train.jsonl`
+- `training_data/unsloth/preferences_dev.jsonl`
+- `training_data/unsloth/preferences_held_out.jsonl`
+- `training_data/unsloth/manifest.json`
+
+Use the export bundle as follows:
+
+- `sft_text` for an optional short SFT warm start,
+- `prompt` / `chosen` / `rejected` for ORPO, DPO, or SimPO,
+- `held_out` only after the training recipe is locked.
+
+See [`COLAB_UNSLOTH_PLAN.md`](./COLAB_UNSLOTH_PLAN.md) for the execution plan.
+
 ## Current result
 
-- held-out baseline accuracy: `0.4000`
-- held-out trained accuracy: `0.7333`
-- held-out lift: `+33.33pp`
-- `95% CI`: `[15.56, 51.11]`
+- held-out baseline accuracy: `0.5116`
+- held-out trained accuracy: `1.0000`
+- held-out lift: `+48.84pp`
+- `95% CI`: `[34.88, 62.79]`
 - paired bootstrap `p-value`: `0.0`
 
 ## Optional next run
