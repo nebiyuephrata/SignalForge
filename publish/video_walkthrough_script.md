@@ -19,6 +19,7 @@
   - `manifest.json`
 - Open `manifest.json` and say: “This shows the three discoverable partitions and their counts: train `62`, dev `113`, held-out `50`.”
 - Open one row in `preferences_train.jsonl` and point to `source_mode`.
+- Explicitly say: “The held-out metadata is public, but the held-out rows remain sealed.”
 
 ## 2. End-to-End Task Scoring
 
@@ -33,6 +34,7 @@
 - Point to the held-out delta and confidence interval.
 - Open `ablations/held_out_traces.jsonl`.
 - Trace one numeric claim back to a specific held-out row.
+- Explicitly say: “This executed ablation artifact uses the earlier held-out evaluation slice; I’m keeping that separate from the later public dataset manifest counts.”
 
 ## 4. Blog Post
 
@@ -53,3 +55,9 @@
 - blog post: `0:35`
 - community artifact: `0:25`
 - transitions / close: `0:15`
+
+## 7. Risk Notes
+
+- Do not claim the ORPO scaffold is the executed headline result.
+- Do not claim the 24-hour inter-rater protocol is complete.
+- Do not say held-out rows are public; only the partition metadata is public.

@@ -12,6 +12,8 @@ That gap became obvious in my Week 11 project. I was working on **SignalForge**,
 
 That is the kind of behavior that a broad assistant benchmark or a retail-agent benchmark can easily under-measure.
 
+The short version of the result is this: the current Path B critic improved held-out accuracy by **+48.84 percentage points** over the pre-trained heuristic gate on the executed held-out preference set, with a **95% confidence interval of [34.88, 62.79]**. That is not a claim that the system is finished, but it is strong evidence that narrowing the problem to judgment and evaluation was the right move.
+
 ## What I built
 
 I built **Tenacious-Bench v0.1**, a benchmark designed around those workflow-specific failure modes.
@@ -100,6 +102,7 @@ Even so, the result is meaningful:
 - held-out trained accuracy: `1.0000`
 - held-out lift: `+48.84` percentage points
 - `95%` bootstrap CI: `[34.88, 62.79]`
+- paired bootstrap `p-value`: `0.0`
 
 That result matters because it is not a generic quality score. It is a measured improvement on the exact business-specific failure modes the benchmark was designed to catch.
 
@@ -113,9 +116,9 @@ The biggest remaining limitation is procedural:
 
 There are also a few practical hardening tasks left:
 
-- expand the limitations and bias framing in the datasheet
 - continue increasing multi-LLM synthesis coverage
 - complete the stronger ORPO or SimPO small-model pass
+- complete the true 24-hour inter-rater rerun for the public-release version
 
 ## What I learned
 
