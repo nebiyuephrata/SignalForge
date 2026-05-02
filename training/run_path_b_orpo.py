@@ -20,6 +20,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_ROOT = REPO_ROOT / "training" / "orpo_runs"
 LOG_PATH = OUTPUT_ROOT / "orpo_training_config.json"
+TRAIN_LOG_PATH = OUTPUT_ROOT / "train_loss_log.jsonl"
+EVAL_LOG_PATH = OUTPUT_ROOT / "eval_loss_log.jsonl"
 
 SEED = 42
 MODEL_NAME = "Qwen/Qwen2.5-1.5B-Instruct"
@@ -58,8 +60,26 @@ EVAL_STEPS = 25
 ORPO_BETA = 0.1
 
 
+def write_logging_schemas() -> None:
+    train_schema = {
+        "path": str(TRAIN_LOG_PATH),
+        "expected_fields": ["step", "epoch", "train_loss", "learning_rate"],
+        "writer": "trainer.state.log_history",
+        "notes": "Append one JSON line per train logging event during ORPO training.",
+    }
+    eval_schema = {
+        "path": str(EVAL_LOG_PATH),
+        "expected_fields": ["step", "epoch", "eval_loss"],
+        "writer": "trainer.state.log_history",
+        "notes": "Append one JSON line per eval logging event during ORPO training.",
+    }
+    TRAIN_LOG_PATH.write_text(json.dumps(train_schema, indent=2) + "\n")
+    EVAL_LOG_PATH.write_text(json.dumps(eval_schema, indent=2) + "\n")
+
+
 def write_repro_config() -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    write_logging_schemas()
     payload = {
         "run_name": "signalforge_path_b_orpo_qwen25_15b",
         "path": "B",
@@ -106,7 +126,9 @@ def write_repro_config() -> None:
         "logging": {
             "report_to": "none",
             "config_log_path": str(LOG_PATH),
-            "notes": "Training and validation loss should be written by trainer.state.log_history during execution.",
+            "train_loss_log_path": str(TRAIN_LOG_PATH),
+            "eval_loss_log_path": str(EVAL_LOG_PATH),
+            "notes": "Training and validation loss should be written by trainer.state.log_history during execution and mirrored into the two JSONL log files above.",
         },
     }
     LOG_PATH.write_text(json.dumps(payload, indent=2) + "\n")

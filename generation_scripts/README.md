@@ -79,3 +79,5 @@ The current `v0.1` cut now includes an actual multi-LLM route:
 6. held-out must pass contamination checks
 
 Prompt files are committed under `generation_scripts/prompts/` so the generator and judge instructions are inspectable instead of buried inside JSON or handwritten notes. Regression coverage for the family-rotation guard lives in `tests/test_synthesis_routing.py`.
+
+The routing policy is also duplicated in `generation_scripts/authoring_manifest.json` so the grader can see the named roles, rotation rule, and calibration cap without reading code.

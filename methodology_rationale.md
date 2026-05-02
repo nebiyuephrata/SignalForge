@@ -33,14 +33,14 @@ That is also why the benchmark emphasizes:
 
 Two paper families shaped this choice most directly.
 
-First, the **LLM-as-a-Judge survey** argues that judge reliability depends on careful attention to consistency, bias, and scenario adaptation, especially in the reliability-focused middle sections and the domain-adaptation discussion near the end of the survey. That matches this project closely: Tenacious does not need a judge that is universally eloquent, it needs one that is narrow, reliable, and calibrated for one outbound workflow. In repo terms, that maps to scoring groundedness, tone safety, and routing correctness rather than broad chatbot quality.  
-Source: https://huggingface.co/papers/2411.15594
+First, the **LLM-as-a-Judge survey** is directly relevant in three specific places: Section `2.1.1` on score generation, Section `2.1.3` on pairwise comparisons, and the survey roadmap into Sections `3` and `4` on improving and evaluating judge reliability. That matches this repo closely because Tenacious does not need a universally eloquent evaluator; it needs a narrow judge that can score groundedness, tone safety, and routing correctness consistently on a fixed workflow.  
+Source: https://arxiv.org/abs/2411.15594
 
-Second, **SimPO** is the preference objective I would start with for the first training run because the paper's method sections introduce a reference-free reward and target-margin objective that reduce memory overhead compared with DPO-style setups. That matters in this repo because the Week 11 cost envelope is tight and the training set is relatively small.  
-Source: https://huggingface.co/papers/2405.14734
+Second, **SimPO** is the preference objective I would start with for the first training run because Section `2.2` introduces a reference-free reward aligned with generation, Section `2.3` adds the target reward margin, and Section `4.3` discusses how margin size affects generation quality. That matters here because the Week 11 budget is tight, the training set is small, and the repo benefits from a lighter objective than a reference-model-dependent alternative.  
+Source: https://arxiv.org/abs/2405.14734
 
-I am also explicitly adopting the warning from **Preference Leakage**: the same or closely related model family should not generate the chosen/rejected rewrites and then grade them. The paper's setup and analysis sections define relatedness in terms of same-model, inheritance, and same-family relationships. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately, and the repo now includes a regression test for that routing guard.  
-Source: https://huggingface.co/papers/2502.01534
+I am also explicitly adopting the warning from **Preference Leakage**: the paper’s framing defines three relatedness modes between generator and judge models, namely same-model, inheritance, and same-family relatedness. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately, and the repo now includes a regression test for that routing guard so the same family cannot both generate and judge the same synthesis path.  
+Source: https://arxiv.org/abs/2502.01534
 
 ## Why not Path C first
 

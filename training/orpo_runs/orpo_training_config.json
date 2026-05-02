@@ -52,6 +52,8 @@
   "logging": {
     "report_to": "none",
     "config_log_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training/orpo_runs/orpo_training_config.json",
-    "notes": "Training and validation loss should be written by trainer.state.log_history during execution."
+    "train_loss_log_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training/orpo_runs/train_loss_log.jsonl",
+    "eval_loss_log_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training/orpo_runs/eval_loss_log.jsonl",
+    "notes": "Training and validation loss should be written by trainer.state.log_history during execution and mirrored into the two JSONL log files above."
   }
 }

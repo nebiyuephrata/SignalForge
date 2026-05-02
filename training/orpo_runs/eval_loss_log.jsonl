@@ -1,0 +1,10 @@
+{
+  "path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training/orpo_runs/eval_loss_log.jsonl",
+  "expected_fields": [
+    "step",
+    "epoch",
+    "eval_loss"
+  ],
+  "writer": "trainer.state.log_history",
+  "notes": "Append one JSON line per eval logging event during ORPO training."
+}

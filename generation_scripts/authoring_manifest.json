@@ -3,15 +3,23 @@
   "current_authoring_modes": [
     "trace-derived",
     "programmatic",
-    "hand-authored"
-  ],
-  "planned_authoring_modes": [
+    "hand-authored",
     "multi-llm-synthesis"
   ],
+  "share_targets": {
+    "trace-derived": "about 30%",
+    "programmatic": "about 30%",
+    "multi-llm-synthesis": "about 25%",
+    "hand-authored": "about 15%"
+  },
   "judge_filter_policy": {
-    "current": "deterministic evaluator and contamination filter only",
-    "planned": "cheap-model synthesis triage plus eval-tier calibration spot checks",
-    "preference_leakage_guard": "generator family, cheap judge family, and eval-tier judge family must differ"
+    "frontier_seed_author": "google/gemini-2.5-flash",
+    "dev_tier_bulk_generator_judge": "qwen/qwen3-32b",
+    "eval_tier_calibration_judge": "anthropic/claude-sonnet-4.5",
+    "calibration_sample_size_cap": 50,
+    "rotation_rule": "the same model family may never both generate and judge the same synthesis path",
+    "family_separation_rule": "generator family, dev-tier judge family, and eval-tier judge family must all differ",
+    "preference_leakage_guard": "same-model, inheritance, and same-family relatedness are all treated as forbidden overlaps for synthesis judging"
   },
   "cost_policy": {
     "days_2_3_eval_tier": "forbidden",
