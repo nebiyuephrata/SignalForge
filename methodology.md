@@ -29,9 +29,9 @@ The decision is also consistent with the failure taxonomy. `weak confidence hand
 
 The benchmark targets the required `50/30/20` split at the partition level, with family-level grouping taking precedence so near-duplicate task families do not leak into held-out:
 
-- `train`: `98` tasks
-- `dev`: `78` tasks
-- `held_out`: `49` tasks
+- `train`: `62` tasks
+- `dev`: `113` tasks
+- `held_out`: `50` tasks
 
 The v0.1 stratification logic is explicit rather than implicit. Tasks are first grouped by source family and failure dimension, then distributed across `train`, `dev`, and `held_out` so that every split contains all four source modes rather than a single-mode silo. The actual resulting source totals are `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, and `36` `hand-authored`, which is close to the intended `30/30/25/15` shape. The partition split is slightly off the exact target because contamination prevention keeps near-duplicate families together.
 
@@ -46,6 +46,14 @@ Each held-out task must pass three checks before release:
 3. Time-shift verification for any public-signal-dependent task.
 
 The current implementation lives in [generation_scripts/contamination_check.py](./generation_scripts/contamination_check.py) and writes [contamination_check.json](./contamination_check.json). The script now emits structured reports for both `held_out_vs_train` and `held_out_vs_dev`, and the cheap embedding check is implemented as a local hashing-based embedding surrogate with cosine thresholding.
+
+The synthesis route is also explicitly tiered in code:
+
+- generator family: `google/gemini-2.5-flash`
+- dev-tier bulk judge family: `qwen/qwen3-32b`
+- eval-tier calibration family: `anthropic/claude-sonnet-4.5`
+
+The generator, bulk judge, and eval-tier calibration routes are validated in `generation_scripts/synthesize_tasks.py`, and regression coverage for those family-rotation guards lives in `tests/test_synthesis_routing.py`.
 
 Current results, reported in prose:
 

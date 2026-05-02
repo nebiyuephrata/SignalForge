@@ -21,6 +21,7 @@ process is inspectable and reproducible.
 
 import json
 import random
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 from typing import Any
@@ -37,10 +38,32 @@ PROMPT_ROOT = REPO_ROOT / "generation_scripts" / "prompts"
 
 RANDOM_SEED = 11
 GENERATOR_MODEL = "google/gemini-2.5-flash"
-JUDGE_MODEL = "qwen/qwen3-32b"
-EVAL_TIER_MODEL = "anthropic/claude-sonnet-4.5"
 POINTWISE_MIN_SCORE = 4
 CALIBRATION_SAMPLE_SIZE = 50
+CALIBRATION_SEED_FAMILIES = {"synth-weak-confidence", "synth-cto-sensitivity"}
+
+
+@dataclass(frozen=True)
+class JudgeRoute:
+    role: str
+    model: str
+    max_tokens: int
+    temperature: float
+
+
+BULK_JUDGE_ROUTE = JudgeRoute(
+    role="dev_tier_bulk_filter",
+    model="qwen/qwen3-32b",
+    max_tokens=900,
+    temperature=0.3,
+)
+
+EVAL_TIER_JUDGE_ROUTE = JudgeRoute(
+    role="eval_tier_calibration",
+    model="anthropic/claude-sonnet-4.5",
+    max_tokens=900,
+    temperature=0.0,
+)
 
 
 SEED_FAMILIES = [
@@ -114,8 +137,8 @@ def _generator_client() -> OpenRouterClient:
 def _judge_client() -> OpenRouterClient:
     settings = get_settings().model_copy(
         update={
-            "openrouter_model": JUDGE_MODEL,
-            "openrouter_fallback_model": JUDGE_MODEL,
+            "openrouter_model": BULK_JUDGE_ROUTE.model,
+            "openrouter_fallback_model": BULK_JUDGE_ROUTE.model,
             "openrouter_max_tokens": 1000,
         }
     )
@@ -125,12 +148,23 @@ def _judge_client() -> OpenRouterClient:
 def _eval_tier_client() -> OpenRouterClient:
     settings = get_settings().model_copy(
         update={
-            "openrouter_model": EVAL_TIER_MODEL,
-            "openrouter_fallback_model": EVAL_TIER_MODEL,
+            "openrouter_model": EVAL_TIER_JUDGE_ROUTE.model,
+            "openrouter_fallback_model": EVAL_TIER_JUDGE_ROUTE.model,
             "openrouter_max_tokens": 1000,
         }
     )
     return OpenRouterClient(settings=settings)
+
+
+def validate_routing_policy(
+    generator_model: str = GENERATOR_MODEL,
+    bulk_judge_model: str = BULK_JUDGE_ROUTE.model,
+    eval_tier_model: str = EVAL_TIER_JUDGE_ROUTE.model,
+) -> None:
+    if _model_family(generator_model) == _model_family(bulk_judge_model):
+        raise ValueError("Generator and bulk judge model families must differ to avoid preference leakage.")
+    if _model_family(eval_tier_model) in {_model_family(generator_model), _model_family(bulk_judge_model)}:
+        raise ValueError("Eval-tier calibration model family must differ from both generator and bulk judge families.")
 
 
 def _prompt_template(name: str) -> str:
@@ -191,7 +225,8 @@ def _normalize_task(seed: dict[str, str], generated: dict[str, Any], task_index:
         "ground_truth": ground_truth,
         "metadata": {
             "generator_model": GENERATOR_MODEL,
-            "judge_model": JUDGE_MODEL,
+            "judge_model": BULK_JUDGE_ROUTE.model,
+            "judge_role": BULK_JUDGE_ROUTE.role,
             "judge_scores": {
                 "coherence": judge_score["coherence"],
                 "verifiability": judge_score["verifiability"],
@@ -250,6 +285,11 @@ def _run_eval_tier_calibration(
     tasks: list[dict[str, Any]],
     rng: random.Random,
 ) -> dict[str, Any] | None:
+    """Spot-check a bounded slice with an eval-tier judge.
+
+    The calibration sample is intentionally capped at 50 tasks so the expensive
+    judge stays a sampled audit path rather than the main authoring filter.
+    """
     if not tasks:
         return None
     sample_size = min(CALIBRATION_SAMPLE_SIZE, len(tasks))
@@ -259,11 +299,12 @@ def _run_eval_tier_calibration(
         system_prompt=system,
         user_prompt=user,
         prompt_name="week11_eval_tier_judge_calibration",
-        temperature=0.0,
-        max_tokens=900,
+        temperature=EVAL_TIER_JUDGE_ROUTE.temperature,
+        max_tokens=EVAL_TIER_JUDGE_ROUTE.max_tokens,
         metadata={"seed_family": seed["family_id"], "mode": "eval_calibration"},
     )
     return {
+        "role": EVAL_TIER_JUDGE_ROUTE.role,
         "model": judged.model,
         "task_count": sample_size,
         "scores": judged.content["scores"],
@@ -272,10 +313,7 @@ def _run_eval_tier_calibration(
 
 
 def main() -> None:
-    if _model_family(GENERATOR_MODEL) == _model_family(JUDGE_MODEL):
-        raise ValueError("Generator and judge model families must differ to avoid preference leakage.")
-    if _model_family(EVAL_TIER_MODEL) in {_model_family(GENERATOR_MODEL), _model_family(JUDGE_MODEL)}:
-        raise ValueError("Eval-tier calibration model family must differ from both generator and bulk judge families.")
+    validate_routing_policy()
 
     generator = _generator_client()
     judge = _judge_client()
@@ -302,9 +340,9 @@ def main() -> None:
             system_prompt=judge_system,
             user_prompt=judge_user,
             prompt_name="week11_judge_bench_tasks",
-            temperature=0.3,
-            max_tokens=900,
-            metadata={"seed_family": seed["family_id"], "mode": "judge"},
+            temperature=BULK_JUDGE_ROUTE.temperature,
+            max_tokens=BULK_JUDGE_ROUTE.max_tokens,
+            metadata={"seed_family": seed["family_id"], "mode": BULK_JUDGE_ROUTE.role},
         )
         score_rows = judged.content["scores"]
         scored_rows = []
@@ -352,7 +390,7 @@ def main() -> None:
             for index, row in enumerate(deduped)
         ]
         all_tasks.extend(kept)
-        if seed["family_id"] in {"synth-weak-confidence", "synth-cto-sensitivity"}:
+        if seed["family_id"] in CALIBRATION_SEED_FAMILIES:
             calibration = _run_eval_tier_calibration(eval_judge, seed, tasks, rng)
             if calibration:
                 calibration_log.append({"seed_family": seed["family_id"], **calibration})
@@ -361,6 +399,7 @@ def main() -> None:
                 "seed_family": seed["family_id"],
                 "generation_model": generated.model,
                 "judge_model": judged.model,
+                "judge_role": BULK_JUDGE_ROUTE.role,
                 "generation_cost_usd": generated.cost_details.get("estimated_cost_usd", 0.0),
                 "judge_cost_usd": judged.cost_details.get("estimated_cost_usd", 0.0),
                 "generated_count": len(tasks),

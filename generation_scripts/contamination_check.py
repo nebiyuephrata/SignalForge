@@ -102,6 +102,7 @@ def compare_splits(
     cosine_threshold: float,
     split_name: str,
     boilerplate_ngram_cutoff: int = 3,
+    embedding_width: int = 256,
 ) -> dict[str, Any]:
     findings: list[dict[str, Any]] = []
     violations = 0
@@ -110,7 +111,7 @@ def compare_splits(
         held_text = task_text(held_out)
         held_tokens = tokenize(held_text)
         held_counter = Counter(held_tokens)
-        held_embedding = cheap_embedding_vector(held_text)
+        held_embedding = cheap_embedding_vector(held_text, width=embedding_width)
         max_overlap = 0
         max_sparse_cosine = 0.0
         max_embedding_cosine = 0.0
@@ -126,7 +127,10 @@ def compare_splits(
             }
             overlap = ngram_threshold if filtered_overlap else 0
             sparse_cosine = cosine_similarity(held_counter, Counter(reference_tokens))
-            embedding_cosine = dense_cosine_similarity(held_embedding, cheap_embedding_vector(reference_text))
+            embedding_cosine = dense_cosine_similarity(
+                held_embedding,
+                cheap_embedding_vector(reference_text, width=embedding_width),
+            )
             if overlap > max_overlap or sparse_cosine > max_sparse_cosine or embedding_cosine > max_embedding_cosine:
                 max_overlap = max(max_overlap, overlap)
                 max_sparse_cosine = max(max_sparse_cosine, sparse_cosine)
@@ -155,6 +159,7 @@ def compare_splits(
         "ngram_overlap_threshold": ngram_threshold,
         "boilerplate_ngram_cutoff": boilerplate_ngram_cutoff,
         "embedding_similarity_threshold": cosine_threshold,
+        "embedding_width": embedding_width,
         "embedding_model": "cheap_local_hashing_embedding_v1",
         "violations": violations,
         "findings": findings,
@@ -165,6 +170,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run contamination checks across Tenacious-Bench partitions.")
     parser.add_argument("--ngram-threshold", type=int, default=8)
     parser.add_argument("--cosine-threshold", type=float, default=0.85)
+    parser.add_argument("--boilerplate-ngram-cutoff", type=int, default=3)
+    parser.add_argument("--embedding-width", type=int, default=256)
     args = parser.parse_args()
 
     train_tasks = load_tasks("train")
@@ -177,6 +184,8 @@ def main() -> None:
             args.ngram_threshold,
             args.cosine_threshold,
             "train",
+            boilerplate_ngram_cutoff=args.boilerplate_ngram_cutoff,
+            embedding_width=args.embedding_width,
         ),
         "held_out_vs_dev": compare_splits(
             dev_tasks,
@@ -184,6 +193,8 @@ def main() -> None:
             args.ngram_threshold,
             args.cosine_threshold,
             "dev",
+            boilerplate_ngram_cutoff=args.boilerplate_ngram_cutoff,
+            embedding_width=args.embedding_width,
         ),
     }
     out_path = REPO_ROOT / "contamination_check.json"

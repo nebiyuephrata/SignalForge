@@ -7,8 +7,9 @@ It keeps all hyperparameters explicit, fixes the random seed, pins a concrete
 backbone name plus revision string, and logs both train/eval metrics to disk.
 
 Expected wall-time:
-- about 30 to 90 minutes on a Colab-class single GPU for the 106-pair train split
+- about 30 to 90 minutes on a Colab-class single GPU for the current 62-pair train split
 - longer if warm-start SFT is enabled
+- hardware assumption: single T4/L4/A10-class GPU with 4-bit loading and LoRA-only updates
 """
 
 import json

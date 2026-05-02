@@ -21,6 +21,8 @@ ABLATION_PATH = REPO_ROOT / "ablations" / "ablation_harness_summary.json"
 TRACE_PATH = REPO_ROOT / "ablations" / "held_out_traces.jsonl"
 TRAINED_RESULTS_PATH = REPO_ROOT / "ablations" / "ablation_results.json"
 SEED = 42
+BOOTSTRAP_ROUNDS = 1000
+MIN_TRACE_ROWS = 10
 
 
 @dataclass
@@ -35,7 +37,15 @@ def load_existing_traces() -> list[dict[str, Any]]:
     return [json.loads(line) for line in TRACE_PATH.read_text().splitlines() if line.strip()]
 
 
-def bootstrap_delta_ci(rows: list[dict[str, Any]], rounds: int = 1000) -> dict[str, float]:
+def bootstrap_delta_ci(rows: list[dict[str, Any]], rounds: int = BOOTSTRAP_ROUNDS) -> dict[str, float]:
+    """Paired bootstrap over held-out rows.
+
+    Assumptions:
+    - the harness should not report intervals for trivially small samples,
+    - 1000 rounds is the current reproducibility/latency compromise for this repo.
+    """
+    if len(rows) < MIN_TRACE_ROWS:
+        raise ValueError(f"Need at least {MIN_TRACE_ROWS} held-out rows for bootstrap reporting.")
     rng = random.Random(SEED)
     deltas: list[float] = []
     n = len(rows)

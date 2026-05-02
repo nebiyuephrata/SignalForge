@@ -17,5 +17,5 @@
   "eval_strategy": "no",
   "simpo_beta": 2.0,
   "target_reward_margin": 0.5,
-  "notes": "Starter config only. The current train split exports 98 preference pairs; tune further after hard-negative expansion and dimension normalization."
+  "notes": "Starter config only. The current train split exports 62 preference pairs; tune further after hard-negative expansion and dimension normalization."
 }

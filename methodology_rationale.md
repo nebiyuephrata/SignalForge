@@ -16,6 +16,12 @@ Those three traces, together with the Week 10 confidence analysis showing over-c
 
 Path A would improve phrasing, but it would not directly solve the underlying business problem. Tenacious is not primarily hurt by awkward wording; it is hurt when the system sends a fluent message that is wrong in confidence, routing, or social calibration. In other words, the expensive failures are judgment failures.
 
+The practical dismissal is:
+
+- Week 10 already showed acceptable generations in traces `2713c015315570e24157833b466ca775`, `1d08f6e1a9f4db0c23a48c5f728f7b2d`, and `47ab214adf0bc2f1ee3a762ebd3afb78`.
+- The misses were inconsistent restraint, not missing language capacity.
+- A generator-only adapter would therefore optimize the part of the system that is already sometimes good while leaving the safety gate weak.
+
 That is also why the benchmark emphasizes:
 
 - confidence-conditioned language
@@ -27,18 +33,24 @@ That is also why the benchmark emphasizes:
 
 Two paper families shaped this choice most directly.
 
-First, the **LLM-as-a-Judge survey** argues that judge reliability depends on careful attention to consistency, bias, and scenario adaptation, especially in the sections on evaluator reliability and domain-specific judging behavior. That matches this project closely: Tenacious does not need a judge that is universally eloquent, it needs one that is narrow, reliable, and calibrated for one outbound workflow.  
+First, the **LLM-as-a-Judge survey** argues that judge reliability depends on careful attention to consistency, bias, and scenario adaptation, especially in the reliability-focused middle sections and the domain-adaptation discussion near the end of the survey. That matches this project closely: Tenacious does not need a judge that is universally eloquent, it needs one that is narrow, reliable, and calibrated for one outbound workflow. In repo terms, that maps to scoring groundedness, tone safety, and routing correctness rather than broad chatbot quality.  
 Source: https://huggingface.co/papers/2411.15594
 
-Second, **SimPO** is the preference objective I would start with for the first training run because its method section centers a reference-free reward formulation and a lower-overhead preference objective than DPO. That matters in this repo because the Week 11 cost envelope is tight and the training set is relatively small.  
+Second, **SimPO** is the preference objective I would start with for the first training run because the paper's method sections introduce a reference-free reward and target-margin objective that reduce memory overhead compared with DPO-style setups. That matters in this repo because the Week 11 cost envelope is tight and the training set is relatively small.  
 Source: https://huggingface.co/papers/2405.14734
 
-I am also explicitly adopting the warning from **Preference Leakage**: the same or closely related model family should not generate the chosen/rejected rewrites and then grade them. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately, following the paper’s model-family leakage warning.  
+I am also explicitly adopting the warning from **Preference Leakage**: the same or closely related model family should not generate the chosen/rejected rewrites and then grade them. The paper's setup and analysis sections define relatedness in terms of same-model, inheritance, and same-family relationships. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately, and the repo now includes a regression test for that routing guard.  
 Source: https://huggingface.co/papers/2502.01534
 
 ## Why not Path C first
 
-Path C would be defensible only if the main Week 10 failure were long-horizon trajectory control, multistep reasoning across branches, or process supervision. That is not what the evidence shows. The dominant failures in the cited traces are still local judgment failures inside otherwise plausible outputs: over-claiming, tone drift, poor calibration, and socially wrong benchmarking. A PRM-first route would therefore solve a more complex problem than the repo currently needs to solve.
+Path C would be defensible only if the main Week 10 failure were long-horizon trajectory control, multistep reasoning across branches, or process supervision. That is not what the evidence shows. The dominant failures in traces `2bc8574e0954a3902393c025758f243c`, `47ab214adf0bc2f1ee3a762ebd3afb78`, and `2713c015315570e24157833b466ca775` are still local judgment failures inside otherwise plausible outputs: over-claiming, tone drift, poor calibration, and socially wrong benchmarking. A PRM-first route would therefore solve a more complex problem than the repo currently needs to solve.
+
+The practical dismissal is:
+
+- there is little evidence that multistep search or branch selection is the bottleneck,
+- the benchmark tasks are mostly single-turn judgment checks,
+- a PRM route would add more implementation complexity than the current failure mode justifies.
 
 ## Practical consequence
 

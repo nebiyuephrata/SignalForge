@@ -25,9 +25,9 @@ The current release contains **225 total tasks**, inside the required 200-300 ba
 
 | Partition | Count | Share |
 | --- | ---: | ---: |
-| `train` | 98 | 43.6% |
-| `dev` | 78 | 34.7% |
-| `held_out` | 49 | 21.8% |
+| `train` | 62 | 27.6% |
+| `dev` | 113 | 50.2% |
+| `held_out` | 50 | 22.2% |
 
 ### Source modes
 
@@ -44,9 +44,9 @@ The target design mix is `30/30/25/15`. The current release is much closer to th
 
 | Task type | Count | Share |
 | --- | ---: | ---: |
-| `email_grounding` | 174 | 77.3% |
-| `channel_decision` | 24 | 10.7% |
-| `qualification_decision` | 27 | 12.0% |
+| `email_grounding` | 161 | 71.6% |
+| `channel_decision` | 41 | 18.2% |
+| `qualification_decision` | 23 | 10.2% |
 
 ### Failure dimensions
 
@@ -139,13 +139,25 @@ Current contamination status from `contamination_check.json`:
 
 - n-gram overlap threshold: `8`
 - similarity threshold: `0.85`
-- held-out comparisons: `49`
+- held-out comparisons: `50`
 - held_out_vs_train flags: `0`
 - held_out_vs_dev flags: `0`
 - manual time-shift reviews: `23`
 - embedding model in code: `cheap_local_hashing_embedding_v1`
 
 The time-shift review is still partly manual because some held-out tasks intentionally anchor to Week 10 repository artifacts rather than newly fetched public snapshots. The contamination script now covers `held_out` against both `train` and `dev`; the current structured report shows `0` violations on both comparisons under the boilerplate-aware overlap policy.
+
+### Limitations and known biases
+
+This dataset is intentionally narrow, and that creates real bias:
+
+- it privileges Tenacious-style outbound norms over broader sales or support norms,
+- many checks are machine-verifiable, which improves agreement but underweights ambiguous social nuance,
+- the source mix is still slightly overweight on `programmatic` examples and slightly under target on `multi-LLM-synthesis`,
+- public-signal tasks may inherit bias from what is easy to scrape or summarize in repository fixtures,
+- the current cheap embedding contamination check is pragmatic rather than state of the art.
+
+There is also an evaluation-process limitation. The inter-rater pilot is executed and logged in-repo, but the public-release-grade rerun with a true `24`-hour gap is still pending. That means the benchmark is strong for development and rubric demonstration, but still has one process-hardening step before it should be treated as a polished external benchmark artifact.
 
 ## 5. Uses
 

@@ -43,10 +43,10 @@ Current Week 11 artifacts:
 Current benchmark snapshot:
 
 - total tasks: `225`
-- train/dev/held_out: `98 / 78 / 49`
+- train/dev/held_out: `62 / 113 / 50`
 - source modes: `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, `36` `hand-authored`
 - contamination violations: `0`
-- Path B preference pairs: `98`
+- Path B preference pairs: `62`
 - held-out critic lift: `+48.84pp` over the static heuristic baseline, with `95% CI [34.88, 62.79]`
 
 Public artifact URLs:
@@ -209,7 +209,7 @@ The remaining high-level work is publication hardening rather than more system i
 1. complete the true 24-hour inter-rater rerun for the public release,
 2. normalize the remaining dimension-label drift in the benchmark rows,
 3. run the intended small-backbone Path B training pass beyond the local linear critic,
-4. publish the dataset and critic artifacts on HuggingFace,
+4. publish the critic artifact on HuggingFace,
 5. finalize the public memo, blog post, and community artifact.
 
 ## License And Credits
@@ -576,3 +576,9 @@ These are the concrete handoff items a new engineer will hit:
 - [HANDOFF_NOTES.md](./HANDOFF_NOTES.md)
 - [docs/system_architecture.md](./docs/system_architecture.md)
 - [docs/evidence/real_run.md](./docs/evidence/real_run.md)
+## Troubleshooting
+
+- If the benchmark counts in docs and local files disagree, rerun `generation_scripts/build_bench.py`, `generation_scripts/prepare_preference_data.py`, and then inspect `tenacious_bench_v0.1/summary.json`.
+- If ORPO or SimPO setup fails on a free GPU, keep `4-bit` loading enabled and verify the pinned Qwen revision in `training/run_path_b_orpo.py`.
+- If contamination flags appear unexpectedly, rerun `generation_scripts/contamination_check.py` and tune `--boilerplate-ngram-cutoff` only as a sensitivity-analysis step, not as a way to suppress real leakage.
+- If the live walkthrough needs a sealed held-out partition to be visible on screen, use the metadata file in `publish/hf_dataset_release/preferences_held_out_metadata.json` rather than publishing held-out rows.

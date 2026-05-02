@@ -16,10 +16,11 @@ This directory contains the reproducible Week 11 authoring pipeline for `tenacio
   - writes:
     - `generation_scripts/synthesis_cache.json`
 - `contamination_check.py`
-  - checks held-out overlap against `train`
+  - checks held-out overlap against `train` and `dev`
   - reports:
     - longest shared n-gram overlap
     - lexical cosine similarity
+    - cheap embedding cosine similarity
     - manual time-shift verification status
 - `prepare_preference_data.py`
   - formats the train split into Path B preference pairs
@@ -60,21 +61,21 @@ From the repo root:
 As of the latest rebuild:
 
 - total tasks: `225`
-- train: `110`
-- dev: `70`
-- held_out: `45`
+- train: `62`
+- dev: `113`
+- held_out: `50`
 - contamination violations: `0`
-- preference pairs: `110`
+- preference pairs: `62`
 
 ## Judge filter policy in v0.1
 
 The current `v0.1` cut now includes an actual multi-LLM route:
 
 1. `google/gemini-2.5-flash` authors synthesis seeds
-2. `qwen/qwen3-32b` performs the cheap-model judge filter
-3. an eval-tier frontier-family calibration sample spot-checks a small slice
+2. `qwen/qwen3-32b` performs the dev-tier bulk judge filter
+3. `anthropic/claude-sonnet-4.5` performs eval-tier calibration on a sampled slice capped at `50` tasks
 4. pairwise duplicate resolution keeps the stronger diagnostic variant
 5. tasks are normalized into the schema used by `scoring_evaluator.py`
 6. held-out must pass contamination checks
 
-Prompt files are committed under `generation_scripts/prompts/` so the generator and judge instructions are inspectable instead of buried inside JSON or handwritten notes.
+Prompt files are committed under `generation_scripts/prompts/` so the generator and judge instructions are inspectable instead of buried inside JSON or handwritten notes. Regression coverage for the family-rotation guard lives in `tests/test_synthesis_routing.py`.
