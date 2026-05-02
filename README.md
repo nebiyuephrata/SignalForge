@@ -18,6 +18,7 @@ The governing rule is simple: `the model is never the source of truth`.
 - [Held-out traces](./ablations/held_out_traces.jsonl)
 - [Evidence graph](./evidence_graph.json)
 - [Week 11 status report](./reports/week11_status_report.md)
+- [Executive memo](./reports/executive_memo.md)
 - [Reporting artifacts](./reports/)
 
 ## Week 11 Status
