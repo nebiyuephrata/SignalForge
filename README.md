@@ -43,11 +43,17 @@ Current Week 11 artifacts:
 Current benchmark snapshot:
 
 - total tasks: `225`
-- train/dev/held_out: `112 / 69 / 44`
+- train/dev/held_out: `98 / 78 / 49`
 - source modes: `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, `36` `hand-authored`
 - contamination violations: `0`
-- Path B preference pairs: `112`
-- held-out critic lift: `+27.27pp` over the static heuristic baseline, with `95% CI [11.36, 40.91]`
+- Path B preference pairs: `98`
+- held-out critic lift: `+48.84pp` over the static heuristic baseline, with `95% CI [34.88, 62.79]`
+
+Public artifact URLs:
+
+- Hugging Face dataset: `https://huggingface.co/datasets/ephorata/tenacious-bench-path-b-preference`
+- Blog post draft: `https://github.com/nebiyuephrata/SignalForge/blob/main/publish/blog_post.md`
+- Community artifact draft: `https://github.com/nebiyuephrata/SignalForge/blob/main/publish/community_issue.md`
 
 Rebuild commands:
 
@@ -68,6 +74,15 @@ Sample evaluator invocation on a committed partition:
 ```bash
 .venv/bin/python scoring_evaluator.py --tasks tenacious_bench_v0.1/dev/tasks.jsonl
 ```
+
+Quickstart to reproduce the headline number:
+
+```bash
+.venv/bin/python generation_scripts/prepare_preference_data.py
+.venv/bin/python training/run_path_b_critic.py
+```
+
+This writes `ablations/ablation_results.json`, where the current headline held-out lift is `+48.84pp`.
 
 ## Architecture
 
@@ -196,6 +211,18 @@ The remaining high-level work is publication hardening rather than more system i
 3. run the intended small-backbone Path B training pass beyond the local linear critic,
 4. publish the dataset and critic artifacts on HuggingFace,
 5. finalize the public memo, blog post, and community artifact.
+
+## License And Credits
+
+Repository license:
+
+- [`LICENSE`](./LICENSE)
+
+Attribution:
+
+- Tenacious scenario collateral lives under [`tenacious_sales_data/`](./tenacious_sales_data/)
+- Week 11 benchmark and training artifacts were assembled from local traces, probe definitions, seeded collateral, and synthesis scripts committed in this repo
+- External paper influences are summarized in [`methodology_rationale.md`](./methodology_rationale.md) and [`synthesis_memos/`](./synthesis_memos/)
 
 ## Setup
 

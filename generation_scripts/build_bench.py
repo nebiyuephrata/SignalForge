@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from collections import Counter, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
@@ -30,31 +31,42 @@ TENACIOUS_BANNED_PHRASES = [
 class CompanyProfile:
     name: str
     confidence: float
+    company_size: str
+    headcount_band: str
     sector: str
     location: str
     stage: str
+    stack: str
+    bench_state: str
+    ai_maturity_score: float
     buying_center: str
 
 
 COMPANY_PROFILES = [
-    CompanyProfile("Northstar Lending", 0.72, "fintech lender", "Austin, TX", "Series B", "VP Engineering"),
-    CompanyProfile("Quiet Current Bank", 0.42, "regulated bank", "Nashville, TN", "Series A", "Head of Platform"),
-    CompanyProfile("Harborline Ledger", 0.57, "payments ledger platform", "Seattle, WA", "Seed", "New CTO"),
-    CompanyProfile("Beacon Ridge Payments", 0.81, "payments processor", "Chicago, IL", "Series C", "Director of AI Operations"),
-    CompanyProfile("Elm Street Treasury", 0.68, "treasury ops SaaS", "New York, NY", "Series B", "VP Risk Engineering"),
-    CompanyProfile("Delta Pine Credit", 0.76, "credit infra company", "Atlanta, GA", "Growth", "CTO"),
-    CompanyProfile("Apex Harbor Finance", 0.79, "enterprise finance platform", "London, UK", "Growth", "Head of Platform"),
-    CompanyProfile("Cinder Vault Capital", 0.51, "capital markets tooling", "Berlin, DE", "Series A", "VP Engineering"),
-    CompanyProfile("Marula Core Systems", 0.61, "East Africa core banking vendor", "Nairobi, KE", "Series B", "COO"),
-    CompanyProfile("Sable River Underwriting", 0.55, "insurtech workflow platform", "Dublin, IE", "Series A", "VP Engineering"),
-    CompanyProfile("Juniper Atlas Bank", 0.47, "regional bank", "Johannesburg, ZA", "Private", "Head of Transformation"),
-    CompanyProfile("Kitebridge Data Rail", 0.74, "data infra vendor", "Toronto, CA", "Series C", "Chief Architect"),
+    CompanyProfile("Northstar Lending", 0.72, "mid-market", "220-350", "fintech lender", "Austin, TX", "Series B", "Python / Postgres / dbt", "bench_gap_visible", 1.1, "VP Engineering"),
+    CompanyProfile("Quiet Current Bank", 0.42, "regional", "500-900", "regulated bank", "Nashville, TN", "Series A", "Java / Oracle / Mulesoft", "bench_gap_thin", 0.4, "Head of Platform"),
+    CompanyProfile("Harborline Ledger", 0.57, "startup", "50-120", "payments ledger platform", "Seattle, WA", "Seed", "Go / Kafka / GCP", "bench_gap_unclear", 0.7, "New CTO"),
+    CompanyProfile("Beacon Ridge Payments", 0.81, "enterprise", "1200-2000", "payments processor", "Chicago, IL", "Series C", "Python / Snowflake / AWS", "bench_gap_visible", 1.6, "Director of AI Operations"),
+    CompanyProfile("Elm Street Treasury", 0.68, "mid-market", "180-260", "treasury ops SaaS", "New York, NY", "Series B", "TypeScript / Postgres / Azure", "bench_gap_mixed", 0.9, "VP Risk Engineering"),
+    CompanyProfile("Delta Pine Credit", 0.76, "growth", "300-500", "credit infra company", "Atlanta, GA", "Growth", "Kotlin / BigQuery / GCP", "bench_gap_visible", 1.3, "CTO"),
+    CompanyProfile("Apex Harbor Finance", 0.79, "enterprise", "900-1400", "enterprise finance platform", "London, UK", "Growth", "Java / Databricks / AWS", "bench_gap_visible", 1.4, "Head of Platform"),
+    CompanyProfile("Cinder Vault Capital", 0.51, "startup", "70-140", "capital markets tooling", "Berlin, DE", "Series A", "Python / Airflow / GCP", "bench_gap_thin", 0.6, "VP Engineering"),
+    CompanyProfile("Marula Core Systems", 0.61, "growth", "250-380", "East Africa core banking vendor", "Nairobi, KE", "Series B", "Java / Postgres / on-prem", "bench_gap_mixed", 0.8, "COO"),
+    CompanyProfile("Sable River Underwriting", 0.55, "mid-market", "140-220", "insurtech workflow platform", "Dublin, IE", "Series A", "Python / AWS / Terraform", "bench_gap_unclear", 0.75, "VP Engineering"),
+    CompanyProfile("Juniper Atlas Bank", 0.47, "regional", "800-1200", "regional bank", "Johannesburg, ZA", "Private", "C# / SQL Server / on-prem", "bench_gap_thin", 0.5, "Head of Transformation"),
+    CompanyProfile("Kitebridge Data Rail", 0.74, "growth", "320-480", "data infra vendor", "Toronto, CA", "Series C", "Go / Kubernetes / AWS", "bench_gap_visible", 1.5, "Chief Architect"),
 ]
 
 PROGRAMMATIC_VARIANTS_PER_PROBE = 2
 HAND_AUTHORED_VARIANTS = 36
 LLM_SYNTHESIS_VARIANTS_PER_TASK = 4
 SPLIT_NAMES = ("train", "dev", "held_out")
+SOURCE_MODE_SHARE_TARGETS = {
+    "trace-derived": 0.30,
+    "programmatic": 0.30,
+    "multi-llm-synthesis": 0.25,
+    "hand-authored": 0.15,
+}
 TRACE_ROW_LIMITS = {
     "conflicting_signals": 8,
     "no_hiring_signals": 8,
@@ -128,6 +140,35 @@ def _normalize_dimension_name(value: str) -> str:
     collapsed = "_".join(part for part in collapsed.replace(" ", "_").split("_") if part)
     normalized = DIMENSION_NORMALIZATION.get(value, DIMENSION_NORMALIZATION.get(collapsed, collapsed))
     return normalized.lower()
+
+
+def _task_text(task: dict[str, Any]) -> str:
+    parts = [
+        task["dimension"],
+        task["input"].get("company_name", ""),
+        task["input"].get("hiring_signal_brief_excerpt", ""),
+        task["input"].get("competitor_gap_brief_excerpt", ""),
+        task["input"].get("prior_thread", ""),
+    ]
+    return " ".join(str(part) for part in parts if part).lower()
+
+
+def _tokenize(text: str) -> list[str]:
+    return [token for token in "".join(char if char.isalnum() else " " for char in text).split() if token]
+
+
+def _ngrams(tokens: list[str], n: int = 8) -> set[tuple[str, ...]]:
+    if len(tokens) < n:
+        return set()
+    return {tuple(tokens[idx : idx + n]) for idx in range(len(tokens) - n + 1)}
+
+
+def _shared_ngram_violation(left: dict[str, Any], right: dict[str, Any], n: int = 8) -> bool:
+    left_tokens = _tokenize(_task_text(left))
+    right_tokens = _tokenize(_task_text(right))
+    if len(left_tokens) < n or len(right_tokens) < n:
+        return False
+    return bool(_ngrams(left_tokens, n) & _ngrams(right_tokens, n))
 
 
 def _subject_for_confidence(company: str, confidence: float) -> str:
@@ -257,10 +298,10 @@ def build_trace_tasks(seed_context: dict[str, str]) -> list[dict[str, Any]]:
                 or result.get("confidence_score")
                 or 0.5
             )
-            trace_ref = row.get("result", {}).get("trace_id") or f"trace-log:{scenario_name}-{trace_index:03d}"
-            family_id = f"trace-{scenario_name}-{trace_index:03d}"
             company_token = company.lower().split()[0]
             normalized_dimension = _normalize_dimension_name(scenario_name)
+            trace_ref = row.get("result", {}).get("trace_id") or f"trace-log:{scenario_name}-{trace_index:03d}"
+            family_id = f"trace-{normalized_dimension}"
 
             tasks.append(
                 _family_task(
@@ -300,7 +341,7 @@ def build_trace_tasks(seed_context: dict[str, str]) -> list[dict[str, Any]]:
             tasks.append(
                 _family_task(
                     task_id=f"tb-trace-qual-{trace_index:03d}",
-                    family_id=f"{family_id}-qual",
+                    family_id=family_id,
                     source_mode="trace-derived",
                     dimension=_normalize_dimension_name(f"{scenario_name}_qualification"),
                     difficulty="easy",
@@ -333,7 +374,7 @@ def build_trace_tasks(seed_context: dict[str, str]) -> list[dict[str, Any]]:
             tasks.append(
                 _family_task(
                     task_id=f"tb-trace-channel-{trace_index:03d}",
-                    family_id=f"{family_id}-channel",
+                    family_id=family_id,
                     source_mode="trace-derived",
                     dimension=_normalize_dimension_name(f"{scenario_name}_channel_plan"),
                     difficulty="medium",
@@ -373,8 +414,8 @@ def _build_programmatic_email_task(
     setup = probe["setup"]
     expected_failure = probe["expected_failure"]
     setup_hint = setup.split(",")[0].strip(". ")
-    family_id = f"probe-{probe['id']}"
     dimension = _normalize_dimension_name(category)
+    family_id = f"programmatic-{dimension}"
     task_id = f"tb-{probe['id'].lower()}-v{variant_index:02d}"
     company_token = company.name.lower().split()[0]
 
@@ -439,9 +480,14 @@ def _build_programmatic_email_task(
     input_payload = {
         "company_name": company.name,
         "signal_confidence": confidence,
-        "hiring_signal_brief_excerpt": f"{setup} Location context: {company.location}. Segment context: {company.sector}.",
-        "competitor_gap_brief_excerpt": expected_failure,
-        "prior_thread": "" if variant_index % 2 else f"{company.buying_center} is reviewing the team plan this quarter.",
+        "hiring_signal_brief_excerpt": (
+            f"{setup} Company size: {company.company_size}. Headcount band: {company.headcount_band}. "
+            f"Segment: {company.sector}. Stack: {company.stack}. Locale: {company.location}."
+        ),
+        "competitor_gap_brief_excerpt": (
+            f"{expected_failure} Bench state: {company.bench_state}. AI maturity score: {company.ai_maturity_score}."
+        ),
+        "prior_thread": "" if variant_index % 2 else f"Thread active for {company.buying_center}.",
         "bench_context": seed_context["style_guide_excerpt"][:300],
     }
     return _family_task(
@@ -472,6 +518,14 @@ def _build_programmatic_email_task(
             "probe_refs": [probe["id"]],
             "authoring_mode_detail": f"programmatic_variant_{variant_index}",
             "tenacious_specific": probe.get("tenacious_specific", False),
+            "slot_values": {
+                "company_size": company.company_size,
+                "segment": company.sector,
+                "headcount_band": company.headcount_band,
+                "stack": company.stack,
+                "bench_state": company.bench_state,
+                "ai_maturity_score": company.ai_maturity_score,
+            },
             "notes": f"Programmatic task derived from probe {probe['id']} variant {variant_index}.",
         },
     )
@@ -487,8 +541,8 @@ def _build_programmatic_channel_task(
     category = probe["category"]
     setup = probe["setup"]
     expected_failure = probe["expected_failure"]
-    family_id = f"probe-{probe['id']}"
     dimension = _normalize_dimension_name(category)
+    family_id = f"programmatic-{dimension}"
     task_id = f"tb-{probe['id'].lower()}-v{variant_index:02d}"
 
     if "scheduling edge cases" in category:
@@ -514,8 +568,13 @@ def _build_programmatic_channel_task(
         input_payload={
             "company_name": company.name,
             "signal_confidence": max(0.45, min(company.confidence, 0.8)),
-            "hiring_signal_brief_excerpt": f"{setup} Segment: {company.sector}. Stage: {company.stage}.",
-            "competitor_gap_brief_excerpt": expected_failure,
+            "hiring_signal_brief_excerpt": (
+                f"{setup} Sector: {company.sector}. Stage: {company.stage}. "
+                f"Company size: {company.company_size}. Headcount band: {company.headcount_band}. Stack: {company.stack}."
+            ),
+            "competitor_gap_brief_excerpt": (
+                f"{expected_failure} Bench state: {company.bench_state}. AI maturity score: {company.ai_maturity_score}."
+            ),
             "prior_thread": prior_thread,
             "bench_context": seed_context["warm_reply_excerpt"][:300],
         },
@@ -533,6 +592,14 @@ def _build_programmatic_channel_task(
             "probe_refs": [probe["id"]],
             "authoring_mode_detail": f"programmatic_variant_{variant_index}",
             "tenacious_specific": probe.get("tenacious_specific", False),
+            "slot_values": {
+                "company_size": company.company_size,
+                "segment": company.sector,
+                "headcount_band": company.headcount_band,
+                "stack": company.stack,
+                "bench_state": company.bench_state,
+                "ai_maturity_score": company.ai_maturity_score,
+            },
             "notes": f"Programmatic routing task derived from probe {probe['id']} variant {variant_index}.",
         },
     )
@@ -654,7 +721,7 @@ def build_hand_authored_tasks(seed_context: dict[str, str]) -> list[dict[str, An
                     "company_name": company.name,
                     "signal_confidence": company.confidence,
                     "hiring_signal_brief_excerpt": prior_thread,
-                    "competitor_gap_brief_excerpt": f"{company.name} should receive a direct, bounded answer grounded in the local brief.",
+                    "competitor_gap_brief_excerpt": f"{template['dimension']} constraint for {company.name}.",
                     "prior_thread": prior_thread,
                     "bench_context": seed_context["case_studies_excerpt"][:260],
                 },
@@ -735,7 +802,7 @@ def build_multi_llm_synthesis_tasks(seed_context: dict[str, str]) -> list[dict[s
             tasks.append(
                 _family_task(
                     task_id=f"{row['task_id']}-v{variant_index:02d}",
-                    family_id=f"{row['family_id']}-variant-{variant_index:02d}",
+                    family_id=row["family_id"],
                     source_mode="multi-llm-synthesis",
                     dimension=_normalize_dimension_name(row["dimension"]),
                     difficulty=row["difficulty"],
@@ -775,13 +842,26 @@ def assign_splits(tasks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]
 
     assigned: dict[str, list[dict[str, Any]]] = {"train": [], "dev": [], "held_out": []}
     current_counts = {"train": 0, "dev": 0, "held_out": 0}
+    source_counts: dict[str, dict[str, int]] = defaultdict(lambda: {"train": 0, "dev": 0, "held_out": 0})
+    source_totals = Counter(task["source_mode"] for task in tasks)
+    source_targets = {
+        source_mode: {
+            "train": round(source_total * 0.5),
+            "dev": round(source_total * 0.3),
+            "held_out": source_total - round(source_total * 0.5) - round(source_total * 0.3),
+        }
+        for source_mode, source_total in source_totals.items()
+    }
 
-    def split_score(split: str, family_size: int) -> tuple[float, float, int]:
-        target = max(target_split_counts[split], 1)
-        projected = current_counts[split] + family_size
-        overflow = max(0, projected - target)
-        fill_ratio = current_counts[split] / target
-        return (overflow, fill_ratio, current_counts[split])
+    def split_score(source_mode: str, split: str, family_size: int) -> tuple[float, float, float, int]:
+        source_target = max(source_targets[source_mode][split], 1)
+        split_target = max(target_split_counts[split], 1)
+        source_projected = source_counts[source_mode][split] + family_size
+        split_projected = current_counts[split] + family_size
+        source_overflow = max(0, source_projected - source_target)
+        split_overflow = max(0, split_projected - split_target)
+        source_fill_ratio = source_counts[source_mode][split] / source_target
+        return (source_overflow, split_overflow, source_fill_ratio, current_counts[split])
 
     for family_id, family_tasks in sorted(
         families.items(),
@@ -793,21 +873,80 @@ def assign_splits(tasks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]
     ):
         source_mode = family_tasks[0]["source_mode"]
         family_size = len(family_tasks)
-        if source_mode == "multi-llm-synthesis":
-            if current_counts["held_out"] + family_size <= target_split_counts["held_out"]:
-                split = "held_out"
-            else:
-                split = "dev"
-        else:
-            split = min(("train", "dev"), key=lambda name: split_score(name, family_size))
+        split = min(SPLIT_NAMES, key=lambda name: split_score(source_mode, name, family_size))
         for task in family_tasks:
             task["split"] = split
             assigned[split].append(task)
         current_counts[split] += len(family_tasks)
+        source_counts[source_mode][split] += len(family_tasks)
 
     for split, rows in assigned.items():
         rows.sort(key=lambda item: item["task_id"])
-    return assigned
+    return _repair_held_out_overlap(assigned, target_split_counts)
+
+
+def _repair_held_out_overlap(
+    assigned: dict[str, list[dict[str, Any]]],
+    target_split_counts: dict[str, int],
+) -> dict[str, list[dict[str, Any]]]:
+    families: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    family_split: dict[str, str] = {}
+    for split, rows in assigned.items():
+        for row in rows:
+            family_id = row["metadata"]["family_id"]
+            families[family_id].append(row)
+            family_split[family_id] = split
+
+    def split_rows(split: str) -> list[dict[str, Any]]:
+        return [row for family_id, rows in families.items() if family_split[family_id] == split for row in rows]
+
+    def family_overlaps_reference(family_id: str, reference_rows: list[dict[str, Any]]) -> bool:
+        return any(
+            _shared_ngram_violation(candidate, reference)
+            for candidate in families[family_id]
+            for reference in reference_rows
+        )
+
+    changed = True
+    while changed:
+        changed = False
+        train_rows = split_rows("train")
+        dev_rows = split_rows("dev")
+        held_families = [family_id for family_id, split in family_split.items() if split == "held_out"]
+        for family_id in held_families:
+            if family_overlaps_reference(family_id, train_rows) or family_overlaps_reference(family_id, dev_rows):
+                target = "dev" if len(dev_rows) < len(train_rows) else "train"
+                family_split[family_id] = target
+                changed = True
+
+    # Greedy refill: move safe non-heldout families into held_out until we are close to the target count.
+    while len(split_rows("held_out")) < target_split_counts["held_out"]:
+        train_rows = split_rows("train")
+        dev_rows = split_rows("dev")
+        candidate_family = None
+        candidate_gap = math.inf
+        for family_id, split in family_split.items():
+            if split == "held_out":
+                continue
+            reference_rows = train_rows + dev_rows
+            reference_rows = [row for row in reference_rows if row["metadata"]["family_id"] != family_id]
+            if family_overlaps_reference(family_id, reference_rows):
+                continue
+            held_out_after = len(split_rows("held_out")) + len(families[family_id])
+            gap = abs(target_split_counts["held_out"] - held_out_after)
+            if gap < candidate_gap:
+                candidate_family = family_id
+                candidate_gap = gap
+        if candidate_family is None:
+            break
+        family_split[candidate_family] = "held_out"
+
+    repaired = {"train": [], "dev": [], "held_out": []}
+    for family_id, rows in families.items():
+        repaired[family_split[family_id]].extend(rows)
+    for split, rows in repaired.items():
+        rows.sort(key=lambda item: item["task_id"])
+    return repaired
 
 
 def summarize(partitions: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:

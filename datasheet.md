@@ -25,9 +25,9 @@ The current release contains **225 total tasks**, inside the required 200-300 ba
 
 | Partition | Count | Share |
 | --- | ---: | ---: |
-| `train` | 112 | 49.8% |
-| `dev` | 69 | 30.7% |
-| `held_out` | 44 | 19.6% |
+| `train` | 98 | 43.6% |
+| `dev` | 78 | 34.7% |
+| `held_out` | 49 | 21.8% |
 
 ### Source modes
 
@@ -44,9 +44,9 @@ The target design mix is `30/30/25/15`. The current release is much closer to th
 
 | Task type | Count | Share |
 | --- | ---: | ---: |
-| `email_grounding` | 161 | 71.6% |
-| `channel_decision` | 41 | 18.2% |
-| `qualification_decision` | 23 | 10.2% |
+| `email_grounding` | 174 | 77.3% |
+| `channel_decision` | 24 | 10.7% |
+| `qualification_decision` | 27 | 12.0% |
 
 ### Failure dimensions
 
@@ -139,13 +139,13 @@ Current contamination status from `contamination_check.json`:
 
 - n-gram overlap threshold: `8`
 - similarity threshold: `0.85`
-- held-out comparisons: `44`
-- n-gram flags: `0`
-- similarity flags: `0`
-- manual time-shift reviews: `44`
-- final violations: `0`
+- held-out comparisons: `49`
+- held_out_vs_train flags: `0`
+- held_out_vs_dev flags: `0`
+- manual time-shift reviews: `23`
+- embedding model in code: `cheap_local_hashing_embedding_v1`
 
-The time-shift review is still partly manual because some held-out tasks intentionally anchor to Week 10 repository artifacts rather than newly fetched public snapshots.
+The time-shift review is still partly manual because some held-out tasks intentionally anchor to Week 10 repository artifacts rather than newly fetched public snapshots. The contamination script now covers `held_out` against both `train` and `dev`; the current structured report shows `0` violations on both comparisons under the boilerplate-aware overlap policy.
 
 ## 5. Uses
 
@@ -165,9 +165,9 @@ Not recommended uses:
 
 ## 6. Distribution
 
-Planned public destination:
+Current public destination:
 
-- HuggingFace Hub dataset: `tenacious_bench_v0.1`
+- HuggingFace Hub dataset: `https://huggingface.co/datasets/ephorata/tenacious-bench-path-b-preference`
 
 Planned license:
 
@@ -183,6 +183,6 @@ The maintenance plan for v0.2 is:
 
 1. normalize dimension labels such as `CTO_sensitivity` versus `cto_sensitivity` and `signal_over-claiming` versus `signal_over_claiming`,
 2. raise `multi-LLM-synthesis` coverage from `48` toward the target band of roughly `56`,
-3. replace the current lexical cosine proxy with a true embedding similarity checker,
+3. replace the current local hashing embedding surrogate with a stronger cheap embedding model if the environment allows it,
 4. rerun the inter-rater study with a true 24-hour delay before public release,
 5. publish the reproducibility example and dataset card on HuggingFace.

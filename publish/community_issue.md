@@ -1,45 +1,49 @@
-# Draft Community Engagement Post
+# GitHub Issue / Community Post Ready Draft
 
-## Title
+## Suggested Title
 
-Tenacious-Bench v0.1: a sales-domain benchmark for grounded outbound failures generic agent benchmarks miss
+Tenacious-Bench v0.1: feedback request on a sales-domain benchmark for grounded outbound failures generic agent benchmarks miss
 
-## Body
+## Suggested Body
 
-I’ve been working on a benchmark derived from a Tenacious-style outbound workflow, and I wanted to share one concrete gap I found in generic retail/assistant benchmarks.
+I’m sharing a benchmark and training scaffold built around one narrow question: what do generic agent benchmarks miss when the task is not retail or general chat, but grounded B2B outbound work?
 
-The core issue is that a lot of existing benchmarks do not grade the commercially expensive failure modes in B2B outbound:
+The failure modes that mattered most in this project were:
 
 - over-claiming from weak public signals
 - drifting into generic outsourcing language
-- mishandling pricing handoffs
-- sounding technically plausible but politically tone-deaf to a newly hired CTO
+- unsafe pricing handoffs
+- qualification or channel decisions that do not match the thread state
+- technically plausible but politically wrong messaging to a newly hired CTO
 
-To address that, I built **Tenacious-Bench v0.1** as a machine-verifiable benchmark with:
+To address that, I built **Tenacious-Bench v0.1** with:
 
 - `225` tasks total
-- `110 / 70 / 45` train/dev/held-out
-- `trace-derived`, `programmatic`, `hand-authored`, and `multi-LLM-synthesis` source modes
-- contamination checks on the sealed held-out split
-- a narrow Path B critic run that improves held-out preference ranking by `+33.33pp` over a static heuristic baseline
+- `98 / 78 / 49` train/dev/held-out
+- four authoring modes: `trace-derived`, `programmatic`, `multi-LLM-synthesis`, `hand-authored`
+- machine-verifiable scoring rules instead of free-form “sounds on-brand” judging
+- a public Path B preference dataset: `https://huggingface.co/datasets/ephorata/tenacious-bench-path-b-preference`
+- a local Path B critic baseline with held-out lift of `+48.84pp`
 
-What felt most important methodologically:
+Methodology choices I would especially value feedback on:
 
-1. the held-out slice is not just a random sample of templates; it is weighted toward trace-derived, hand-authored, and synthesized tasks
-2. the benchmark is machine-verifiable rather than “sounds on-brand” hand-waving
-3. the judge component is evaluated against the benchmark’s own failure taxonomy rather than generic assistant preferences
+1. `tau2-bench` retail is a useful public contrast, but it does not measure Tenacious-specific dimensions like `weak_confidence_handling`, `outsourcing_mismatch`, `pricing_handoff`, or `cto_sensitivity`.
+2. The synthesis route uses explicit model-family rotation: Gemini-family generation, Qwen-family bulk judging, and a separate eval-tier calibration role.
+3. The held-out contamination report now checks `held_out` against both `train` and `dev`, with a boilerplate-aware 8-gram filter plus a cheap local embedding surrogate. Current report status is `0` violations under that policy.
 
-I’d especially love feedback on:
+If you work on GTM agents, outbound personalization, or domain-specific evaluation, I’d love feedback on:
 
-- whether the contamination protocol is strong enough for a small-data synthetic benchmark
-- whether the source-mode balance feels right for a first public release
-- whether others have seen similar “socially unsafe but technically fluent” failure modes in outbound or GTM agents
+- whether this contamination policy feels strict enough for a small synthetic benchmark
+- whether the four-mode source mix is reasonable for a first public release
+- whether you have seen similarly costly “socially unsafe but technically fluent” failure modes
 
-Local repo artifacts:
+Repo artifacts:
 
 - benchmark summary: `tenacious_bench_v0.1/summary.json`
-- datasheet: `datasheet.md`
 - methodology: `methodology.md`
-- critic ablations: `ablations/ablation_results.json`
+- rationale: `methodology_rationale.md`
+- datasheet: `datasheet.md`
+- ablation harness: `ablations/run_path_b_ablations.py`
+- held-out comparison summary: `ablations/ablation_results.json`
 
-If this is useful, I’d be glad to adapt the benchmark packaging for a cleaner public release.
+If this seems useful, I’d be happy to open up the packaging further or compare notes with similar benchmark efforts.

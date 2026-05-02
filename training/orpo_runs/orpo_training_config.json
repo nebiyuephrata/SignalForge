@@ -1,0 +1,57 @@
+{
+  "run_name": "signalforge_path_b_orpo_qwen25_15b",
+  "path": "B",
+  "trainer": "ORPOTrainer",
+  "seed": 42,
+  "backbone": {
+    "model_name": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": "989aa79",
+    "load_in_4bit": true,
+    "max_seq_length": 1536
+  },
+  "lora": {
+    "enabled": true,
+    "rank": 16,
+    "alpha": 16,
+    "dropout": 0.0,
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "sft_warmstart": {
+    "enabled": false,
+    "max_steps": 120,
+    "learning_rate": 0.0001
+  },
+  "orpo": {
+    "learning_rate": 5e-06,
+    "num_train_epochs": 1,
+    "per_device_train_batch_size": 1,
+    "per_device_eval_batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "warmup_ratio": 0.05,
+    "lr_scheduler_type": "cosine",
+    "logging_steps": 5,
+    "save_steps": 50,
+    "eval_steps": 25,
+    "max_length": 1536,
+    "max_prompt_length": 1024,
+    "beta": 0.1
+  },
+  "data": {
+    "train": "training_data/unsloth/preferences_train.jsonl",
+    "dev": "training_data/unsloth/preferences_dev.jsonl",
+    "held_out": "training_data/unsloth/preferences_held_out.jsonl"
+  },
+  "logging": {
+    "report_to": "none",
+    "config_log_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training/orpo_runs/orpo_training_config.json",
+    "notes": "Training and validation loss should be written by trainer.state.log_history during execution."
+  }
+}

@@ -1,15 +1,15 @@
 {
   "total_tasks": 225,
   "splits": {
-    "train": 112,
-    "dev": 69,
-    "held_out": 44
+    "train": 62,
+    "dev": 113,
+    "held_out": 50
   },
   "source_modes": {
     "hand-authored": 36,
     "programmatic": 72,
-    "trace-derived": 69,
-    "multi-llm-synthesis": 48
+    "multi-llm-synthesis": 48,
+    "trace-derived": 69
   },
   "task_types": {
     "email_grounding": 161,

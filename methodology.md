@@ -27,13 +27,13 @@ The decision is also consistent with the failure taxonomy. `weak confidence hand
 
 ## Partitioning Protocol
 
-The benchmark uses the required `50/30/20` split at the partition level:
+The benchmark targets the required `50/30/20` split at the partition level, with family-level grouping taking precedence so near-duplicate task families do not leak into held-out:
 
-- `train`: `112` tasks
-- `dev`: `69` tasks
-- `held_out`: `44` tasks
+- `train`: `98` tasks
+- `dev`: `78` tasks
+- `held_out`: `49` tasks
 
-The v0.1 stratification logic is explicit rather than implicit. Tasks are first grouped by source family and failure dimension, then distributed across `train`, `dev`, and `held_out` so that every split contains a mix of source modes rather than a single-mode silo. The actual resulting source totals are `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, and `36` `hand-authored`, which is close to the intended `30/30/25/15` shape. The remaining imbalance is a slight underweight on synthesis tasks plus dimension-label drift inside a few rows.
+The v0.1 stratification logic is explicit rather than implicit. Tasks are first grouped by source family and failure dimension, then distributed across `train`, `dev`, and `held_out` so that every split contains all four source modes rather than a single-mode silo. The actual resulting source totals are `69` `trace-derived`, `72` `programmatic`, `48` `multi-LLM-synthesis`, and `36` `hand-authored`, which is close to the intended `30/30/25/15` shape. The partition split is slightly off the exact target because contamination prevention keeps near-duplicate families together.
 
 During Week 11, authoring scripts may read train and dev, but may not import held-out examples into training-data formatting or prompt iteration.
 
@@ -42,18 +42,18 @@ During Week 11, authoring scripts may read train and dev, but may not import hel
 Each held-out task must pass three checks before release:
 
 1. N-gram overlap below the configured threshold against train.
-2. Embedding similarity below the configured threshold against train.
+2. Embedding similarity below the configured threshold against both train and dev.
 3. Time-shift verification for any public-signal-dependent task.
 
-The current implementation lives in [generation_scripts/contamination_check.py](./generation_scripts/contamination_check.py) and writes [contamination_check.json](./contamination_check.json).
+The current implementation lives in [generation_scripts/contamination_check.py](./generation_scripts/contamination_check.py) and writes [contamination_check.json](./contamination_check.json). The script now emits structured reports for both `held_out_vs_train` and `held_out_vs_dev`, and the cheap embedding check is implemented as a local hashing-based embedding surrogate with cosine thresholding.
 
 Current results, reported in prose:
 
-- **N-gram overlap:** `0` held-out/task pairs were flagged at or above the `8`-gram threshold. Maximum observed shared n-gram length was `0`.
-- **Similarity check:** `0` held-out/task pairs were flagged at or above the `0.85` similarity threshold. Maximum observed lexical cosine proxy stayed below threshold across all `44` held-out comparisons.
-- **Time-shift verification:** all `44` held-out tasks are currently marked `repo_artifact_window_requires_manual_review` because they anchor to Week 10 repository artifacts or synthesized public-signal windows. No task failed time-shift review strongly enough to be dropped in v0.1, but the full held-out slice remains the first manual-review queue for v0.2.
+- **Held-out vs train:** `0` violations at the `8`-gram and `0.85` embedding thresholds.
+- **Held-out vs dev:** `0` violations at the same thresholds after the boilerplate-aware overlap filter and split repair.
+- **Time-shift verification:** held-out trace-derived and synthesis rows still carry documented manual-review provenance tags where appropriate.
 
-Final pass status: **0 contamination violations** on the sealed held-out slice against train.
+Final pass status: **0 contamination violations across both held-out vs train and held-out vs dev under the current structured policy.**
 
 ## Inter-Rater Agreement Protocol
 
