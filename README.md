@@ -52,8 +52,8 @@ Current benchmark snapshot:
 Public artifact URLs:
 
 - Hugging Face dataset: `https://huggingface.co/datasets/ephorata/tenacious-bench-path-b-preference`
-- Blog post draft: `https://github.com/nebiyuephrata/SignalForge/blob/main/publish/blog_post.md`
-- Community artifact draft: `https://github.com/nebiyuephrata/SignalForge/blob/main/publish/community_issue.md`
+- Blog post: `https://github.com/nebiyuephrata/SignalForge/blob/main/publish/blog_post.md`
+- Community engagement issue: `https://github.com/nebiyuephrata/SignalForge/issues/1`
 
 Rebuild commands:
 

@@ -1,0 +1,10 @@
+{
+  "split": "held_out",
+  "rows": 50,
+  "access": "sealed",
+  "public_rows_included": false,
+  "notes": [
+    "The held-out preference rows are intentionally excluded from the public Hugging Face dataset release.",
+    "This metadata file exists so the held-out partition is discoverable during walkthroughs while preserving a sealed final evaluation set."
+  ]
+}

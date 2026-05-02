@@ -3,17 +3,17 @@
   "splits": [
     {
       "split": "train",
-      "rows": 98,
+      "rows": 62,
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_train.jsonl"
     },
     {
       "split": "dev",
-      "rows": 78,
+      "rows": 113,
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_dev.jsonl"
     },
     {
       "split": "held_out",
-      "rows": 49,
+      "rows": 50,
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_held_out.jsonl"
     }
   ],

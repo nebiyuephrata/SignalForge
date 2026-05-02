@@ -12,13 +12,11 @@ size_categories:
 
 # Tenacious Bench Path B Preference
 
-## Summary
+## 1. Motivation
 
-This dataset contains the public training and development preference pairs for the Tenacious Bench Path B workflow.
+This dataset exists because generic assistant benchmarks do not reliably measure the failure modes that matter in Tenacious-style B2B outbound work. The goal here is not broad conversational quality; it is grounded business behavior under uncertainty.
 
-Each row represents a preference comparison for a narrow sales-domain task. The preferred output is stored as `chosen`, and a controlled lower-quality alternative is stored as `rejected`.
-
-The dataset is intended for preference optimization or preference-based critic training focused on:
+The preference pairs focus on:
 
 - grounded language
 - weak-confidence handling
@@ -27,22 +25,26 @@ The dataset is intended for preference optimization or preference-based critic t
 - qualification correctness
 - channel routing behavior
 
-## Files
+## 2. Composition
+
+This public Hugging Face release contains the Path B preference bundle built from Tenacious-Bench.
+
+Files in this release:
 
 - `preferences_train.jsonl`
 - `preferences_dev.jsonl`
+- `preferences_held_out_metadata.json`
 - `manifest.json`
 
-## Split Sizes
+Split counts:
 
-- `train`: `106`
-- `dev`: `76`
+- `train`: `62`
+- `dev`: `113`
+- `held_out`: `50` rows recorded as sealed metadata only
 
-The sealed `held_out` split is intentionally excluded from this public release so final evaluation remains credible.
+The `held_out` partition is intentionally represented as metadata rather than public preference rows so final evaluation remains sealed.
 
-## Schema
-
-Each row includes:
+Each row in `train` and `dev` includes:
 
 - `task_id`
 - `split`
@@ -60,35 +62,71 @@ Each row includes:
 - `rejected_chatml`
 - `metadata`
 
-## How It Was Built
+## 3. Collection Process
 
-The benchmark tasks were assembled from four source modes:
+The underlying benchmark tasks were assembled from four source modes:
 
 - `trace-derived`
 - `programmatic`
 - `multi-llm-synthesis`
 - `hand-authored`
 
-Preference pairs were then created by:
+Preference pairs were created by:
 
 1. taking the benchmark-approved output as `chosen`
 2. generating a controlled worse variant as `rejected`
 
-For email tasks, the rejected variant intentionally introduces issues such as overconfident wording, poor subject prefixes, removed uncertainty markers, or banned sales phrasing. For structured tasks, the rejected variant flips fields toward worse qualification or channel decisions.
+For email tasks, the rejected variant introduces problems such as worse subject prefixes, removed uncertainty markers, or banned sales phrasing. For structured tasks, the rejected variant flips fields toward worse qualification or channel decisions.
 
-## Intended Use
+## 4. Preprocessing, Cleaning, and Labeling
+
+The benchmark rows are normalized into a consistent preference-training schema.
+
+Preprocessing includes:
+
+- converting prompts into trainer-friendly plain strings
+- keeping `chosen` and `rejected` in both rendered and structured form
+- exporting `sft_text` for optional warm-start supervised tuning
+- preserving `source_mode` and task metadata for provenance
+
+The corresponding contamination report in the repo checks held-out overlap against both `train` and `dev`, with a boilerplate-aware 8-gram filter and a cheap local embedding surrogate.
+
+## 5. Uses
+
+Recommended uses:
 
 - train a small preference model or critic
 - run ORPO, DPO, or SimPO style experiments
 - regression-test sales-domain safety and groundedness behavior
 
-## Limitations
+Not recommended uses:
 
-- this is a narrow domain dataset, not a general instruction-following benchmark
-- the public release excludes the sealed held-out split
-- synthetic rejected examples are controlled corruptions, not free-form human rewrites
+- treating this as a broad instruction-following benchmark
+- tuning directly against the sealed held-out partition
+- interpreting the dataset as a measure of real-world conversion performance
+
+## 6. Distribution
+
+This dataset is distributed publicly on Hugging Face as the Tenacious Bench Path B preference bundle.
+
+License:
+
+- `CC-BY-4.0`
+
+Repo context:
+
+- benchmark and methodology live in the public SignalForge repository
+- this Hugging Face dataset is the public preference-training slice, not the full benchmark release
+
+## 7. Maintenance
+
+The current maintenance priorities are:
+
+1. keep benchmark and preference export counts aligned with the benchmark source of truth
+2. complete the ideal 24-hour inter-rater rerun in the repo artifacts
+3. publish a fuller benchmark-facing Hugging Face artifact if and when the sealed evaluation protocol is frozen
 
 ## Notes
 
-- `manifest.json` describes the export bundle layout
-- `sft_text` is included for optional short supervised warm-start experiments
+- `manifest.json` is the top-level split index for the preference bundle
+- `preferences_held_out_metadata.json` exists so the sealed held-out partition is discoverable during walkthroughs without exposing the held-out rows themselves
