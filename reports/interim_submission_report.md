@@ -33,40 +33,47 @@ The benchmark is now close enough to the intended source-mode shape to be defens
 
 ### Integrated cross-tabulation
 
-The full dimension-by-partition-by-source-mode cross-tab is reproduced below. This lets the reader answer questions like “how many held-out multi-LLM synthesis tasks exist for a given failure mode?” at a glance.
+To make the three-axis composition visible in one frame, I render the integrated cross-tab below in compact form. Abbreviations:
 
-| Dimension | train:trace-derived | train:programmatic | train:multi-llm-synthesis | train:hand-authored | dev:trace-derived | dev:programmatic | dev:multi-llm-synthesis | dev:hand-authored | held_out:trace-derived | held_out:programmatic | held_out:multi-llm-synthesis | held_out:hand-authored | Total |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| bench_to_brief_match | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| conflicting_signals | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
-| conflicting_signals_channel_plan | 4 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 8 |
-| conflicting_signals_qualification | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
-| coordination_failures | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
-| cost_issues | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| cto_sensitivity | 0 | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 2 | 2 | 0 | 10 |
-| defensive_reply_recovery | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 6 |
-| gap_over_claiming | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| icp_misclassification | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
-| multi_thread_leakage | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| new_cto_transition | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 6 |
-| no_hiring_signals | 3 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
-| no_hiring_signals_channel_plan | 5 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 8 |
-| no_hiring_signals_qualification | 3 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 8 |
-| outsourcing_mismatch | 0 | 2 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 2 | 2 | 0 | 14 |
-| outsourcing_perception | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 |
-| pricing_handoff | 0 | 0 | 4 | 6 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 14 |
-| scheduling_calibration | 0 | 0 | 4 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 0 | 0 | 8 |
-| scheduling_edge_cases_eu_us_africa | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
-| signal_over_claiming | 0 | 4 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 0 | 2 | 0 | 14 |
-| signal_reliability | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 6 |
-| soft_defer_graceful_close | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| tone_drift | 0 | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 6 |
-| warm_reply_grounded_answer | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 6 |
-| weak_confidence | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 7 |
-| weak_confidence_channel_plan | 3 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 7 |
-| weak_confidence_handling | 0 | 4 | 4 | 0 | 0 | 2 | 2 | 0 | 0 | 2 | 2 | 0 | 16 |
-| weak_confidence_qualification | 4 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 7 |
-| Total | 34 | 36 | 24 | 18 | 21 | 22 | 14 | 12 | 14 | 14 | 10 | 6 | 225 |
+- `TrTD / TrP / TrS / TrH` = train trace-derived / programmatic / synthesis / hand-authored
+- `DvTD / DvP / DvS / DvH` = dev trace-derived / programmatic / synthesis / hand-authored
+- `HoTD / HoP / HoS / HoH` = held-out trace-derived / programmatic / synthesis / hand-authored
+
+```text
+Dimension                           TrTD TrP TrS TrH | DvTD DvP DvS DvH | HoTD HoP HoS HoH | Total
+bench_to_brief_match                  0   0   0   6 |    0   0   0   0 |    0   0   0   0 |     6
+conflicting_signals                   5   0   0   0 |    3   0   0   0 |    0   0   0   0 |     8
+conflicting_signals_channel_plan      5   0   0   0 |    3   0   0   0 |    0   0   0   0 |     8
+conflicting_signals_qualification     4   0   0   0 |    4   0   0   0 |    0   0   0   0 |     8
+coordination_failures                 0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+cost_issues                           0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+cto_sensitivity                       0   2   0   0 |    0   0   0   0 |    0   0   8   0 |    10
+defensive_reply_recovery              0   0   0   0 |    0   0   0   6 |    0   0   0   0 |     6
+gap_over_claiming                     0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+icp_misclassification                 0   2   0   0 |    0   4   0   0 |    0   0   0   0 |     6
+multi_thread_leakage                  0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+new_cto_transition                    0   0   0   6 |    0   0   0   0 |    0   0   0   0 |     6
+no_hiring_signals                     5   0   0   0 |    3   0   0   0 |    0   0   0   0 |     8
+no_hiring_signals_channel_plan        5   0   0   0 |    3   0   0   0 |    0   0   0   0 |     8
+no_hiring_signals_qualification       5   0   0   0 |    3   0   0   0 |    0   0   0   0 |     8
+outsourcing_mismatch                  0   4   0   0 |    0   2   0   0 |    0   0   8   0 |    14
+outsourcing_perception                0   2   0   0 |    0   0   0   0 |    0   0   0   0 |     2
+pricing_handoff                       0   0   0   0 |    0   0   0   6 |    0   0   8   0 |    14
+scheduling_calibration                0   0   0   0 |    0   0   0   0 |    0   0   8   0 |     8
+scheduling_edge_cases_eu_us_africa    0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+signal_over_claiming                  0   2   0   0 |    0   4   0   0 |    0   0   8   0 |    14
+signal_reliability                    0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+soft_defer_graceful_close             0   0   0   6 |    0   0   0   0 |    0   0   0   0 |     6
+tone_drift                            0   4   0   0 |    0   2   0   0 |    0   0   0   0 |     6
+warm_reply_grounded_answer            0   0   0   6 |    0   0   0   0 |    0   0   0   0 |     6
+weak_confidence                       5   0   0   0 |    2   0   0   0 |    0   0   0   0 |     7
+weak_confidence_channel_plan          4   0   0   0 |    3   0   0   0 |    0   0   0   0 |     7
+weak_confidence_handling              0   6   0   0 |    0   2   4   0 |    0   0   4   0 |    16
+weak_confidence_qualification         4   0   0   0 |    3   0   0   0 |    0   0   0   0 |     7
+TOTAL                                42  46   0  24 |   27  26   4  12 |    0   0  44   0 |   225
+```
+
+One visible example from the table: `pricing_handoff` has `6` dev hand-authored tasks and `8` held-out synthesis tasks, for `14` total. The same table also shows that there are `8` held-out synthesis tasks targeting `cto_sensitivity`, which is the sort of “single look” query the rubric asks for.
 
 The table exposes one cleanup task that should happen in the dataset itself: a few dimension families still carry older naming variants and should be normalized in the next release.
 
@@ -138,13 +145,17 @@ Body: Question: Prospect is a regulated bank hiring only compliance analysts whi
 ```
 
 **Rubric path**
-- `grounded_language`: `2/2` required strings matched -> `1.0`
-- `tone_safety`: no banned phrases -> `1.0`
-- `confidence_alignment`: question mark required and present; calendar link not required and absent -> `1.0`
-- `directness_constraints`: allowed subject prefix, body under `120` words -> `1.0`
-- `routing_safety`: no handoff phrase required, no dollar-sign violation -> `1.0`
+- weighted breakdown:
 
-**Final score:** `1.00` with pass threshold `0.80` -> **pass**
+| Dimension | Weight | Score | Fired check |
+| --- | ---: | ---: | --- |
+| `grounded_language` | 0.25 | 1.00 | matched `2/2` required signal strings |
+| `confidence_alignment` | 0.25 | 1.00 | `question_ok=True`, `calendar_ok=True` |
+| `tone_safety` | 0.20 | 1.00 | no banned phrases found |
+| `directness_constraints` | 0.15 | 1.00 | `subject_ok=True`, `body_word_count=43`, `max_body_words=120` |
+| `routing_safety` | 0.15 | 1.00 | `handoff_ok=True`, `dollar_ok=True` |
+
+**Final score:** `(0.25*1.00) + (0.25*1.00) + (0.20*1.00) + (0.15*1.00) + (0.15*1.00) = 1.00` with pass threshold `0.80` -> **pass**
 
 ### Example B: Trace-derived passing case
 
@@ -166,12 +177,17 @@ Body: It looks like Northstar Lending has moved from 3 to 12 open roles in the l
 ```
 
 **Rubric path**
-- `grounded_language`: `2/2` required strings matched -> `1.0`
-- `tone_safety`: no banned phrases -> `1.0`
-- `confidence_alignment`: no question required; calendar link required and present -> `1.0`
-- `directness_constraints`: allowed subject prefix, body under `120` words -> `1.0`
+- weighted breakdown:
 
-**Final score:** `1.00` with pass threshold `0.80` -> **pass**
+| Dimension | Weight | Score | Fired check |
+| --- | ---: | ---: | --- |
+| `grounded_language` | 0.25 | 1.00 | matched `2/2` required signal strings |
+| `confidence_alignment` | 0.25 | 1.00 | `question_ok=True`, `calendar_ok=True` |
+| `tone_safety` | 0.20 | 1.00 | no banned phrases found |
+| `directness_constraints` | 0.15 | 1.00 | `subject_ok=True`, `body_word_count=77`, `max_body_words=120` |
+| `routing_safety` | 0.00 | 1.00 | reported by evaluator but unweighted for this task’s rubric |
+
+**Final score:** `(0.25*1.00) + (0.25*1.00) + (0.20*1.00) + (0.15*1.00) = 0.85`, then normalized by the active weight mass `0.85`, yielding `1.00` with pass threshold `0.80` -> **pass**
 
 ### Example C: Hand-authored adversarial failure case
 
@@ -191,13 +207,17 @@ Body: You are clearly scaling aggressively and should book time here: https://ca
 ```
 
 **Rubric path**
-- `grounded_language`: `0/1` required strings matched -> `0.0`
-- `tone_safety`: banned phrase hit (`clearly scaling aggressively`) -> `0.0`
-- `confidence_alignment`: calendar link not allowed here and present -> `0.0`
-- `directness_constraints`: subject prefix `Quick:` not allowed -> `0.0`
-- `routing_safety`: required handoff phrase missing -> `0.0`
+- weighted breakdown:
 
-**Final score:** `0.00` with pass threshold `0.80` -> **fail**
+| Dimension | Weight | Score | Fired check |
+| --- | ---: | ---: | --- |
+| `grounded_language` | 0.25 | 0.00 | matched `0/1` required signal strings |
+| `confidence_alignment` | 0.25 | 0.00 | `question_ok=True`, `calendar_ok=False` |
+| `tone_safety` | 0.20 | 0.00 | banned phrase hit: `clearly scaling aggressively` |
+| `directness_constraints` | 0.15 | 0.00 | `subject_ok=False`, `body_word_count=11`, `max_body_words=120` |
+| `routing_safety` | 0.15 | 0.00 | `handoff_ok=False`, `dollar_ok=True` |
+
+**Final score:** `(0.25*0.00) + (0.25*0.00) + (0.20*0.00) + (0.15*0.00) + (0.15*0.00) = 0.00` with pass threshold `0.80` -> **fail**
 
 This worked example matters because it proves the evaluator is not just rubber-stamping committed outputs. The original hand-authored benchmark output for the same task passes at `1.00`; the deliberately broken variant fails every scoring dimension.
 

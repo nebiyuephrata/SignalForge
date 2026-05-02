@@ -40,7 +40,7 @@ GENERATOR_MODEL = "google/gemini-2.5-flash"
 JUDGE_MODEL = "qwen/qwen3-32b"
 EVAL_TIER_MODEL = "anthropic/claude-sonnet-4.5"
 POINTWISE_MIN_SCORE = 4
-CALIBRATION_SAMPLE_SIZE = 2
+CALIBRATION_SAMPLE_SIZE = 50
 
 
 SEED_FAMILIES = [
@@ -274,6 +274,8 @@ def _run_eval_tier_calibration(
 def main() -> None:
     if _model_family(GENERATOR_MODEL) == _model_family(JUDGE_MODEL):
         raise ValueError("Generator and judge model families must differ to avoid preference leakage.")
+    if _model_family(EVAL_TIER_MODEL) in {_model_family(GENERATOR_MODEL), _model_family(JUDGE_MODEL)}:
+        raise ValueError("Eval-tier calibration model family must differ from both generator and bulk judge families.")
 
     generator = _generator_client()
     judge = _judge_client()
@@ -282,6 +284,7 @@ def main() -> None:
     all_tasks: list[dict[str, Any]] = []
     cost_log: list[dict[str, Any]] = []
     calibration_log: list[dict[str, Any]] = []
+    filter_log: list[dict[str, Any]] = []
 
     for seed in SEED_FAMILIES:
         system_prompt, user_prompt = _generation_prompt(seed)
@@ -307,7 +310,40 @@ def main() -> None:
         scored_rows = []
         for index, task in enumerate(tasks):
             judge_score = next((row for row in score_rows if int(row["index"]) == index), None)
-            if not judge_score or not _should_include(judge_score):
+            if not judge_score:
+                filter_log.append(
+                    {
+                        "seed_family": seed["family_id"],
+                        "task_index": index,
+                        "passed": False,
+                        "reason": "missing_judge_score",
+                    }
+                )
+                continue
+            passed = _should_include(judge_score)
+            reasons = []
+            if not bool(judge_score.get("include", False)):
+                reasons.append("judge_marked_exclude")
+            if int(judge_score.get("coherence", 0)) < POINTWISE_MIN_SCORE:
+                reasons.append("coherence_below_threshold")
+            if int(judge_score.get("verifiability", 0)) < POINTWISE_MIN_SCORE:
+                reasons.append("verifiability_below_threshold")
+            if int(judge_score.get("rubric_clarity", 0)) < POINTWISE_MIN_SCORE:
+                reasons.append("rubric_clarity_below_threshold")
+            filter_log.append(
+                {
+                    "seed_family": seed["family_id"],
+                    "task_index": index,
+                    "passed": passed,
+                    "reason": "passed" if passed else ",".join(reasons),
+                    "scores": {
+                        "coherence": judge_score.get("coherence"),
+                        "verifiability": judge_score.get("verifiability"),
+                        "rubric_clarity": judge_score.get("rubric_clarity"),
+                    },
+                }
+            )
+            if not passed:
                 continue
             scored_rows.append({"task": task, "judge_score": judge_score})
         deduped = _deduplicate_pairs(scored_rows)
@@ -339,6 +375,7 @@ def main() -> None:
                 "tasks": all_tasks,
                 "cost_log": cost_log,
                 "calibration_log": calibration_log,
+                "filter_log": filter_log,
             },
             indent=2,
         )
@@ -351,6 +388,7 @@ def main() -> None:
                 "task_count": len(all_tasks),
                 "cost_log": cost_log,
                 "calibration_log": calibration_log,
+                "filter_log_rows": len(filter_log),
             },
             indent=2,
         )

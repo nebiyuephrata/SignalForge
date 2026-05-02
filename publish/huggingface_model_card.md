@@ -18,16 +18,16 @@ This model is a narrow Path B critic trained to rank grounded Tenacious-style ou
 
 - benchmark source: `tenacious_bench_v0.1/train/tasks.jsonl`
 - preference pairs: `training_data/path_b_preferences.jsonl`
-- pair count: `110`
+- pair count: `106`
 
 ## Evaluation
 
 Primary result from `ablations/ablation_results.json`:
 
-- held-out baseline accuracy: `0.4000`
-- held-out trained accuracy: `0.7333`
-- lift: `+33.33pp`
-- `95% CI`: `[15.56, 51.11]`
+- held-out baseline accuracy: `0.5116`
+- held-out trained accuracy: `1.0000`
+- lift: `+48.84pp`
+- `95% CI`: `[34.88, 62.79]`
 - paired bootstrap `p-value`: `0.0`
 
 ## Intended use

@@ -3,79 +3,79 @@
   "seed": 42,
   "method": "pairwise_logistic_linear_critic",
   "vector_size": 2064,
-  "train_pairs": 112,
-  "dev_pairs": 69,
-  "held_out_pairs": 44,
+  "train_pairs": 106,
+  "dev_pairs": 76,
+  "held_out_pairs": 43,
   "epoch_history": [
     {
       "epoch": 1,
-      "train_pair_accuracy": 0.9464,
-      "mean_logistic_loss": 0.044074
+      "train_pair_accuracy": 0.8962,
+      "mean_logistic_loss": 0.073051
     },
     {
       "epoch": 2,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025969
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.053091
     },
     {
       "epoch": 3,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025601
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052925
     },
     {
       "epoch": 4,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025439
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052837
     },
     {
       "epoch": 5,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025355
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052786
     },
     {
       "epoch": 6,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025289
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052744
     },
     {
       "epoch": 7,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025251
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052717
     },
     {
       "epoch": 8,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025218
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052696
     },
     {
       "epoch": 9,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025197
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052678
     },
     {
       "epoch": 10,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025171
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052662
     },
     {
       "epoch": 11,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025165
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052653
     },
     {
       "epoch": 12,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025148
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.05264
     },
     {
       "epoch": 13,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025138
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052634
     },
     {
       "epoch": 14,
-      "train_pair_accuracy": 0.9643,
-      "mean_logistic_loss": 0.025128
+      "train_pair_accuracy": 0.9245,
+      "mean_logistic_loss": 0.052624
     }
   ]
 }

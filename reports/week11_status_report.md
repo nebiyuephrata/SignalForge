@@ -1,8 +1,10 @@
 # Week 11 Status Report
 
+> Current source of truth after the contamination-safe split repair: `225` tasks with `106 / 76 / 43` train/dev/held-out, all three partitions passing the evaluator, `0` contamination violations, and a Path B held-out lift of `+48.84pp` with `95% CI [34.88, 62.79]`. The refreshed composition table lives in [`bench_composition_table.md`](./bench_composition_table.md).
+
 ## 1. Bench Composition Reporting
 
-The current benchmark release is **225 tasks**. The partition target was `50/30/20`; actuals are `112 / 69 / 44`, or `49.8% / 30.7% / 19.6%`. That is close enough to target that the remaining methodological risk is not split size. The sharper remaining issues are a mild underweight on synthesis tasks and a few legacy dimension labels that still need normalization.
+The current benchmark release is **225 tasks**. The partition target was `50/30/20`; actuals are `106 / 76 / 43`, or `47.1% / 33.8% / 19.1%`. The split is intentionally family-aware: exact partition sizing yields to contamination prevention when near-duplicate task families would otherwise cross from train into held-out.
 
 The source-mode target was `30/30/25/15` for `trace-derived / programmatic / multi-LLM synthesis / hand-authored`. Actuals are:
 
@@ -173,15 +175,15 @@ This matters because it shows the evaluator discriminating rather than rubber-st
 
 ### What is working
 
-- The benchmark is real and machine-runnable: `225` tasks with `112 / 69 / 44` train/dev/held-out and `0` contamination violations.
-- The evaluator is mechanically stable: `112/112` train tasks, `69/69` dev tasks, and `44/44` held-out tasks pass their committed benchmark outputs.
-- The critic path is directionally promising: the current local Path B linear critic lifts held-out accuracy from `0.6591` to `0.9318`, a `+27.27pp` gain with `95% CI [11.36, 40.91]`.
+- The benchmark is real and machine-runnable: `225` tasks with `106 / 76 / 43` train/dev/held-out and `0` contamination violations.
+- The evaluator is mechanically stable: `106/106` train tasks, `76/76` dev tasks, and `43/43` held-out tasks pass their committed benchmark outputs.
+- The critic path is directionally promising: the current local Path B linear critic lifts held-out accuracy from `0.5116` to `1.0000`, a `+48.84pp` gain with `95% CI [34.88, 62.79]`.
 - The inter-rater pilot is numerically clean: every dimension cleared the `0.80` bar on the first pass.
 
 ### What is weak or still risky
 
 - Dimension labels still contain naming drift such as `CTO_sensitivity` versus `cto_sensitivity` and `signal_over-claiming` versus `signal_over_claiming`.
-- The held-out contamination check is clean, but all `44` held-out tasks still require manual time-shift review before a polished public release.
+- The held-out contamination check is clean, but `23` held-out repo-artifact or synthesis tasks still require manual time-shift review before a polished public release.
 - `multi-LLM-synthesis` remains slightly under target at `48` tasks versus the target band of roughly `56`.
 - The inter-rater result is numerically strong but still lacks the required 24-hour second-pass separation.
 - The current trained artifact is a local linear critic, not yet the planned GPU-backed SimPO or ORPO run on a small open backbone.

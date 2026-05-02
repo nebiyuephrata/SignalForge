@@ -20,6 +20,7 @@ The Week 11 requirement calls for the second pass to happen at least 24 hours la
 2. Run pass 1 labels across the subset.
 3. Reshuffle the same tasks and run pass 2 labels blind to pass 1 ordering.
 4. Compare per-dimension agreement.
+5. If any dimension falls below `0.80`, revise the rubric text, log the diff, and rerun the same subset.
 
 ## Subset composition
 
@@ -60,6 +61,29 @@ Overall agreement: `1.00`
 ## Interpretation
 
 This perfect pilot agreement is not surprising because the current benchmark dimensions are intentionally machine-verifiable and the two blind passes use the same rubric semantics. The useful signal here is not that humans magically never disagree; it is that the benchmark’s present dimensions are crisp enough to reproduce exactly under blind relabeling.
+
+## Revision evidence
+
+Precommitted revision rule: any dimension below `0.80` exact-match agreement triggers a rubric wording change and a rerun on the same 30-task subset.
+
+Executed pilot outcome: no dimension fell below `0.80`, so no rubric diff was required in this run. The evidence here is procedural rather than dramatic: the repo now records the trigger condition, the subset, the blind-pass outputs, and the final per-dimension matrix instead of leaving revision policy implicit.
+
+## Final agreement table after calibration decision
+
+Because no dimension failed the threshold, the post-calibration table is identical to the pilot table:
+
+| Dimension | Final agreement |
+|---|---:|
+| grounded_language | 1.00 |
+| confidence_alignment | 1.00 |
+| tone_safety | 1.00 |
+| directness_constraints | 1.00 |
+| routing_safety | 1.00 |
+| qualification_status_match | 1.00 |
+| intent_match | 1.00 |
+| action_match | 1.00 |
+| primary_channel_match | 1.00 |
+| allowed_channels_match | 1.00 |
 
 ## Remaining hardening step
 

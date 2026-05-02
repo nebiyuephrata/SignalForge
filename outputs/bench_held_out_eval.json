@@ -1,8 +1,700 @@
 {
-  "split": "held_out",
-  "task_count": 44,
-  "passed_count": 44,
+  "task_count": 43,
+  "passed": 43,
+  "failed": 0,
   "results": [
+    {
+      "task_id": "tb-hand-004",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-hand-010",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-hand-016",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-hand-022",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-hand-028",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-hand-034",
+      "dimension": "new_cto_transition",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 1 of 1 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=41, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-019-v01",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-019-v02",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-020-v01",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-020-v02",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-021-v01",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-021-v02",
+      "dimension": "coordination_failures",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-025-v01",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=38, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-025-v02",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=37, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-026-v01",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=42, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-026-v02",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=43, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-027-v01",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=38, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-027-v02",
+      "dimension": "signal_reliability",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=38, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-035-v01",
+      "dimension": "outsourcing_perception",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=45, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-p-035-v02",
+      "dimension": "outsourcing_perception",
+      "task_type": "email_grounding",
+      "score": 1.0,
+      "pass_threshold": 0.8,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "grounded_language",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "matched 2 of 2 required signal strings"
+        },
+        {
+          "name": "tone_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "no banned phrases found"
+        },
+        {
+          "name": "confidence_alignment",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "question_ok=True, calendar_ok=True"
+        },
+        {
+          "name": "directness_constraints",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "subject_ok=True, body_word_count=44, max_body_words=120"
+        },
+        {
+          "name": "routing_safety",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "handoff_ok=True, dollar_ok=True"
+        }
+      ]
+    },
     {
       "task_id": "tb-synth-cto-sensitivity-01-v01",
       "dimension": "cto_sensitivity",
@@ -324,8 +1016,162 @@
       ]
     },
     {
-      "task_id": "tb-synth-outsourcing-mismatch-01-v01",
-      "dimension": "outsourcing_mismatch",
+      "task_id": "tb-trace-channel-017",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-018",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-019",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-020",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-021",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-022",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-channel-023",
+      "dimension": "weak_confidence_channel_plan",
+      "task_type": "channel_decision",
+      "score": 1.0,
+      "pass_threshold": 1.0,
+      "passed": true,
+      "dimension_results": [
+        {
+          "name": "primary_channel_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "observed=email expected=email"
+        },
+        {
+          "name": "allowed_channels_match",
+          "score": 1.0,
+          "max_score": 1.0,
+          "detail": "exact list match required"
+        }
+      ]
+    },
+    {
+      "task_id": "tb-trace-email-001",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -353,7 +1199,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=89, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -364,8 +1210,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-outsourcing-mismatch-01-v02",
-      "dimension": "outsourcing_mismatch",
+      "task_id": "tb-trace-email-002",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -393,7 +1239,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=93, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -404,8 +1250,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-outsourcing-mismatch-01-v03",
-      "dimension": "outsourcing_mismatch",
+      "task_id": "tb-trace-email-003",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -433,7 +1279,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=88, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -444,8 +1290,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-outsourcing-mismatch-01-v04",
-      "dimension": "outsourcing_mismatch",
+      "task_id": "tb-trace-email-004",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -473,7 +1319,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=89, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -484,808 +1330,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-outsourcing-mismatch-02-v01",
-      "dimension": "outsourcing_mismatch",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=88, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-outsourcing-mismatch-02-v02",
-      "dimension": "outsourcing_mismatch",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=92, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-outsourcing-mismatch-02-v03",
-      "dimension": "outsourcing_mismatch",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=87, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-outsourcing-mismatch-02-v04",
-      "dimension": "outsourcing_mismatch",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=88, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-01-v01",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=91, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-01-v02",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=95, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-01-v03",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=90, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-01-v04",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=91, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-02-v01",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=93, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-02-v02",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=97, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-02-v03",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=92, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-pricing-handoff-02-v04",
-      "dimension": "pricing_handoff",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=93, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-01-v01",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=67, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-01-v02",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=71, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-01-v03",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=66, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-01-v04",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=67, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-02-v01",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=72, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-02-v02",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=76, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-02-v03",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=71, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-scheduling-calibration-02-v04",
-      "dimension": "scheduling_calibration",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=72, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-signal-overclaiming-01-v01",
-      "dimension": "signal_over_claiming",
+      "task_id": "tb-trace-email-005",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -1313,7 +1359,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=82, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -1324,8 +1370,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-signal-overclaiming-01-v02",
-      "dimension": "signal_over_claiming",
+      "task_id": "tb-trace-email-006",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -1353,7 +1399,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=86, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -1364,8 +1410,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-signal-overclaiming-01-v03",
-      "dimension": "signal_over_claiming",
+      "task_id": "tb-trace-email-007",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -1393,7 +1439,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=81, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",
@@ -1404,8 +1450,8 @@
       ]
     },
     {
-      "task_id": "tb-synth-signal-overclaiming-01-v04",
-      "dimension": "signal_over_claiming",
+      "task_id": "tb-trace-email-008",
+      "dimension": "conflicting_signals",
       "task_type": "email_grounding",
       "score": 1.0,
       "pass_threshold": 0.8,
@@ -1433,327 +1479,7 @@
           "name": "directness_constraints",
           "score": 1.0,
           "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=82, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-signal-overclaiming-02-v01",
-      "dimension": "signal_over_claiming",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=82, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-signal-overclaiming-02-v02",
-      "dimension": "signal_over_claiming",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=86, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-signal-overclaiming-02-v03",
-      "dimension": "signal_over_claiming",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=81, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-signal-overclaiming-02-v04",
-      "dimension": "signal_over_claiming",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=82, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-weak-confidence-01-v01",
-      "dimension": "weak_confidence_handling",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=82, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-weak-confidence-01-v02",
-      "dimension": "weak_confidence_handling",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 3 of 3 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=86, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-weak-confidence-02-v01",
-      "dimension": "weak_confidence_handling",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=88, max_body_words=120"
-        },
-        {
-          "name": "routing_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "handoff_ok=True, dollar_ok=True"
-        }
-      ]
-    },
-    {
-      "task_id": "tb-synth-weak-confidence-02-v02",
-      "dimension": "weak_confidence_handling",
-      "task_type": "email_grounding",
-      "score": 1.0,
-      "pass_threshold": 0.8,
-      "passed": true,
-      "dimension_results": [
-        {
-          "name": "grounded_language",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "matched 4 of 4 required signal strings"
-        },
-        {
-          "name": "tone_safety",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "no banned phrases found"
-        },
-        {
-          "name": "confidence_alignment",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "question_ok=True, calendar_ok=True"
-        },
-        {
-          "name": "directness_constraints",
-          "score": 1.0,
-          "max_score": 1.0,
-          "detail": "subject_ok=True, body_word_count=92, max_body_words=120"
+          "detail": "subject_ok=True, body_word_count=77, max_body_words=120"
         },
         {
           "name": "routing_safety",

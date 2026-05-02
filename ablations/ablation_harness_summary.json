@@ -1,0 +1,42 @@
+{
+  "path": "B",
+  "shared_interface": [
+    "delta_a",
+    "delta_b",
+    "delta_c",
+    "cost_pareto"
+  ],
+  "delta_a": {
+    "description": "Trained Path B critic versus Week 10 heuristic baseline on held-out pairs.",
+    "baseline_accuracy": 0.5116,
+    "trained_accuracy": 1.0,
+    "delta_accuracy_pp": 48.84,
+    "ci_lower": 34.88,
+    "ci_upper": 62.79,
+    "p_value": 0.0
+  },
+  "delta_b": {
+    "description": "Same backbone, prompt-engineered heuristic only versus trained critic.",
+    "prompt_engineered_baseline_accuracy": 0.5116,
+    "trained_accuracy": 1.0,
+    "delta_accuracy_pp": 48.84
+  },
+  "delta_c": {
+    "description": "Informational reference only: tau2-bench retail is used as an external contrast benchmark and is not rerun inside this repo.",
+    "public_reference": "tau2-bench retail",
+    "rerun_performed": false
+  },
+  "cost_pareto": {
+    "baseline_latency_ms": 0.032,
+    "trained_latency_ms": 3.7356,
+    "latency_delta_ms": 3.7036,
+    "baseline_cost_usd": 0.0,
+    "trained_cost_usd": 0.0,
+    "cost_delta_usd": 0.0
+  },
+  "failure_handling": {
+    "status": "ok",
+    "message": ""
+  },
+  "wall_time_ms": 68.4371
+}

@@ -1,0 +1,25 @@
+{
+  "format": "unsloth_preference_bundle_v1",
+  "splits": [
+    {
+      "split": "train",
+      "rows": 106,
+      "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_train.jsonl"
+    },
+    {
+      "split": "dev",
+      "rows": 76,
+      "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_dev.jsonl"
+    },
+    {
+      "split": "held_out",
+      "rows": 43,
+      "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_held_out.jsonl"
+    }
+  ],
+  "notes": [
+    "prompt/chosen/rejected are plain strings for DPO/ORPO/SimPO trainers.",
+    "sft_text is a ChatML-style text field for optional warm-start SFT on chosen responses.",
+    "held_out export exists for final sealed evaluation and should stay untouched during tuning."
+  ]
+}

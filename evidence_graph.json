@@ -10,24 +10,24 @@
     },
     {
       "claim_id": "bench_split_train",
-      "statement": "The train split contains 112 tasks.",
-      "value": 112,
+      "statement": "The train split contains 106 tasks.",
+      "value": 106,
       "sources": [
         "tenacious_bench_v0.1/summary.json"
       ]
     },
     {
       "claim_id": "bench_split_dev",
-      "statement": "The dev split contains 69 tasks.",
-      "value": 69,
+      "statement": "The dev split contains 76 tasks.",
+      "value": 76,
       "sources": [
         "tenacious_bench_v0.1/summary.json"
       ]
     },
     {
       "claim_id": "bench_split_held_out",
-      "statement": "The held-out split contains 44 tasks.",
-      "value": 44,
+      "statement": "The held-out split contains 43 tasks.",
+      "value": 43,
       "sources": [
         "tenacious_bench_v0.1/summary.json"
       ]
@@ -75,32 +75,32 @@
     },
     {
       "claim_id": "train_eval_passed",
-      "statement": "All 112 train tasks pass the machine-verifiable evaluator.",
-      "value": 112,
+      "statement": "All 106 train tasks pass the machine-verifiable evaluator.",
+      "value": 106,
       "sources": [
         "outputs/bench_train_eval.json"
       ]
     },
     {
       "claim_id": "dev_eval_passed",
-      "statement": "All 69 dev tasks pass the machine-verifiable evaluator.",
-      "value": 69,
+      "statement": "All 76 dev tasks pass the machine-verifiable evaluator.",
+      "value": 76,
       "sources": [
         "outputs/bench_dev_eval.json"
       ]
     },
     {
       "claim_id": "held_out_eval_passed",
-      "statement": "All 44 held-out tasks pass the machine-verifiable evaluator.",
-      "value": 44,
+      "statement": "All 43 held-out tasks pass the machine-verifiable evaluator.",
+      "value": 43,
       "sources": [
         "outputs/bench_held_out_eval.json"
       ]
     },
     {
       "claim_id": "preference_pairs",
-      "statement": "The current Path B training-format artifact contains 112 preference pairs.",
-      "value": 112,
+      "statement": "The current Path B training-format artifact contains 106 preference pairs.",
+      "value": 106,
       "sources": [
         "training_data/path_b_preferences.jsonl"
       ]
@@ -115,40 +115,40 @@
     },
     {
       "claim_id": "critic_held_out_baseline_accuracy",
-      "statement": "The held-out heuristic baseline accuracy is 0.6591.",
-      "value": 0.6591,
+      "statement": "The held-out heuristic baseline accuracy is 0.5116.",
+      "value": 0.5116,
       "sources": [
         "ablations/ablation_results.json"
       ]
     },
     {
       "claim_id": "critic_held_out_trained_accuracy",
-      "statement": "The held-out trained critic accuracy is 0.9318.",
-      "value": 0.9318,
+      "statement": "The held-out trained critic accuracy is 1.0000.",
+      "value": 1.0,
       "sources": [
         "ablations/ablation_results.json"
       ]
     },
     {
       "claim_id": "critic_held_out_delta_pp",
-      "statement": "The held-out trained critic improves accuracy by 27.27 percentage points over the baseline.",
-      "value": 27.27,
+      "statement": "The held-out trained critic improves accuracy by 48.84 percentage points over the baseline.",
+      "value": 48.84,
       "sources": [
         "ablations/ablation_results.json"
       ]
     },
     {
       "claim_id": "critic_held_out_ci_lower",
-      "statement": "The held-out delta lower bound is 11.36 percentage points.",
-      "value": 11.36,
+      "statement": "The held-out delta lower bound is 34.88 percentage points.",
+      "value": 34.88,
       "sources": [
         "ablations/ablation_results.json"
       ]
     },
     {
       "claim_id": "critic_held_out_ci_upper",
-      "statement": "The held-out delta upper bound is 40.91 percentage points.",
-      "value": 40.91,
+      "statement": "The held-out delta upper bound is 62.79 percentage points.",
+      "value": 62.79,
       "sources": [
         "ablations/ablation_results.json"
       ]

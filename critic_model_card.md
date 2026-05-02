@@ -24,7 +24,7 @@ It is not intended as a general-purpose assistant-quality judge.
 
 - source benchmark: [`tenacious_bench_v0.1/train/tasks.jsonl`](./tenacious_bench_v0.1/train/tasks.jsonl)
 - formatted preferences: [`training_data/path_b_preferences.jsonl`](./training_data/path_b_preferences.jsonl)
-- pair count: `110`
+- pair count: `106`
 
 Training pairs are constructed from benchmark gold outputs plus programmatically mutated rejected variants.
 
@@ -47,10 +47,10 @@ Primary ablation artifact:
 
 Held-out result:
 
-- baseline accuracy: `0.4000`
-- trained accuracy: `0.7333`
-- lift: `+33.33pp`
-- `95% CI`: `[15.56, 51.11]`
+- baseline accuracy: `0.5116`
+- trained accuracy: `1.0000`
+- lift: `+48.84pp`
+- `95% CI`: `[34.88, 62.79]`
 - paired bootstrap `p-value`: `0.0`
 
 Held-out trace rows:

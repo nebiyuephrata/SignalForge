@@ -11,7 +11,7 @@ Tenacious-Bench v0.1 is a sales-domain evaluation dataset for grounded outbound 
 ## Composition
 
 - total tasks: `225`
-- train/dev/held_out: `110 / 70 / 45`
+- train/dev/held_out: `106 / 76 / 43`
 - source modes:
   - `trace-derived`: `9`
   - `programmatic`: `180`
@@ -44,9 +44,9 @@ Contamination report:
 ## Benchmark status
 
 - held-out contamination violations: `0`
-- train evaluator pass rate: `110 / 110`
-- dev evaluator pass rate: `70 / 70`
-- held-out evaluator pass rate: `45 / 45`
+- train evaluator pass rate: `106 / 106`
+- dev evaluator pass rate: `76 / 76`
+- held-out evaluator pass rate: `43 / 43`
 
 ## Intended use
 

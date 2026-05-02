@@ -9,7 +9,7 @@
       "input": {
         "company_name": "Harborline Ledger",
         "signal_confidence": 0.54,
-        "hiring_signal_brief_excerpt": "Prospect is a regulated bank hiring only compliance analysts while SignalForge matches a technical ICP. Location context: Seattle, WA. Segment context: payments ledger platform.",
+        "hiring_signal_brief_excerpt": "Prospect is a regulated bank hiring only compliance analysts while SignalForge matches a technical ICP. Locale: Seattle, WA.",
         "competitor_gap_brief_excerpt": "Message claims engineering capacity pressure with no technical evidence.",
         "prior_thread": "",
         "bench_context": "# Tenacious Style Guide\n\nFive tone markers. Every outreach, every reply, every discovery-call context brief your agent produces must preserve these markers. A tone drift of more than two markers in a single message is a Tenacious brand violation and will be caught by the tone-preservation probe in A"
@@ -195,7 +195,7 @@
         "authoring_mode_detail": "trace-derived",
         "notes": "Derived from scenario conflicting_signals."
       },
-      "split": "dev"
+      "split": "held_out"
     },
     "evaluation": {
       "task_id": "tb-trace-email-001",
@@ -249,7 +249,7 @@
         "company_name": "Northstar Lending",
         "signal_confidence": 0.72,
         "hiring_signal_brief_excerpt": "Prospect asks for specific long-range pricing.",
-        "competitor_gap_brief_excerpt": "Northstar Lending should receive a direct, bounded answer grounded in the local brief.",
+        "competitor_gap_brief_excerpt": "pricing_handoff constraint for Northstar Lending.",
         "prior_thread": "Prospect asks for specific long-range pricing.",
         "bench_context": "# Tenacious Case Studies (Redacted)\n\nThree case studies with client names replaced by sector + size descriptors. You may quote outcomes but may **not** fabricate additional case studies. If a prospect asks for a reference in a specific sector Tenacious has not"
       },
@@ -313,7 +313,7 @@
         "authoring_mode_detail": "hand-authored",
         "notes": "Hand-authored Tenacious-specific task pricing_handoff."
       },
-      "split": "dev"
+      "split": "train"
     },
     "agent_output": {
       "subject": "Quick: Northstar Lending signal check",

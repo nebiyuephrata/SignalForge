@@ -27,14 +27,18 @@ That is also why the benchmark emphasizes:
 
 Two paper families shaped this choice most directly.
 
-First, the **LLM-as-a-Judge survey** argues that judge reliability depends on careful attention to consistency, bias, and scenario adaptation. That matches this project closely: Tenacious does not need a judge that is universally eloquent, it needs one that is narrow, reliable, and calibrated for one outbound workflow.  
+First, the **LLM-as-a-Judge survey** argues that judge reliability depends on careful attention to consistency, bias, and scenario adaptation, especially in the sections on evaluator reliability and domain-specific judging behavior. That matches this project closely: Tenacious does not need a judge that is universally eloquent, it needs one that is narrow, reliable, and calibrated for one outbound workflow.  
 Source: https://huggingface.co/papers/2411.15594
 
-Second, **SimPO** is the preference objective I would start with for the first training run because it removes the need for a reference model and is explicitly positioned as simpler and more compute-efficient than DPO while staying strong on preference benchmarks. That matters in this repo because the Week 11 cost envelope is tight and the training set is relatively small.  
+Second, **SimPO** is the preference objective I would start with for the first training run because its method section centers a reference-free reward formulation and a lower-overhead preference objective than DPO. That matters in this repo because the Week 11 cost envelope is tight and the training set is relatively small.  
 Source: https://huggingface.co/papers/2405.14734
 
-I am also explicitly adopting the warning from **Preference Leakage**: the same or closely related model family should not generate the chosen/rejected rewrites and then grade them. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately.  
+I am also explicitly adopting the warning from **Preference Leakage**: the same or closely related model family should not generate the chosen/rejected rewrites and then grade them. For Tenacious-Bench, that means generator family, cheap judge family, and eval-tier judge family should be rotated deliberately, following the paper’s model-family leakage warning.  
 Source: https://huggingface.co/papers/2502.01534
+
+## Why not Path C first
+
+Path C would be defensible only if the main Week 10 failure were long-horizon trajectory control, multistep reasoning across branches, or process supervision. That is not what the evidence shows. The dominant failures in the cited traces are still local judgment failures inside otherwise plausible outputs: over-claiming, tone drift, poor calibration, and socially wrong benchmarking. A PRM-first route would therefore solve a more complex problem than the repo currently needs to solve.
 
 ## Practical consequence
 
