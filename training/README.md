@@ -18,6 +18,7 @@ The critic is intended to sit in front of the existing SignalForge generator as 
 - Colab/Unsloth export bundle: `training_data/unsloth/`
 - benchmark source: `tenacious_bench_v0.1/train/tasks.jsonl`
 - rationale: `methodology_rationale.md`
+- Colab notebook: [`SignalForge_PathB_ORPO_Colab.ipynb`](./SignalForge_PathB_ORPO_Colab.ipynb)
 
 ## Implemented run
 
@@ -51,6 +52,12 @@ Use the export bundle as follows:
 - `prompt` / `chosen` / `rejected` for ORPO, DPO, or SimPO,
 - `held_out` only after the training recipe is locked.
 
+The current export now mines three rejected variants per source task:
+
+- `strong_overclaiming`
+- `constraint_break`
+- `wordy_overconfident`
+
 See [`COLAB_UNSLOTH_PLAN.md`](./COLAB_UNSLOTH_PLAN.md) for the execution plan.
 
 ## Current result
@@ -63,7 +70,7 @@ See [`COLAB_UNSLOTH_PLAN.md`](./COLAB_UNSLOTH_PLAN.md) for the execution plan.
 
 ## Optional next run
 
-1. Expand the train split to at least 100–300 preference pairs.
+1. Add replay pairs from actual dev failures instead of only synthetic negatives.
 2. Swap the local linear critic for the intended SimPO/ORPO run once `transformers`, `trl`, and `datasets` are available.
 3. Keep the judge narrow: score Tenacious criteria, not broad assistant quality.
 4. Evaluate only on the sealed held-out split after training.

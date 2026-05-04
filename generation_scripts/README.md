@@ -65,7 +65,8 @@ As of the latest rebuild:
 - dev: `113`
 - held_out: `50`
 - contamination violations: `0`
-- preference pairs: `62`
+- train preference pairs: `186`
+- train pair construction: `3` rejected variants per train task
 
 ## Judge filter policy in v0.1
 

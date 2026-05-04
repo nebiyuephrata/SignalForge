@@ -17,9 +17,11 @@ The rows are derived from the `train` split of `tenacious_bench_v0.1`.
 
 ## Current status
 
-- total preference pairs: `106`
+- total preference pairs: `186`
 - source benchmark split: `train`
-- chosen examples evaluator status: `106 / 106 passing`
+- source train tasks: `62`
+- negative variants per task: `3`
+- rejection strategies: `strong_overclaiming`, `constraint_break`, `wordy_overconfident`
 
 ## Scope
 
