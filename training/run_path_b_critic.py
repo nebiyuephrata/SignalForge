@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from generation_scripts.prepare_preference_data import build_rejected_email, build_rejected_structured
+from training.preference_data_utils import build_rejected_email, build_rejected_structured
 
 
 BENCH_ROOT = REPO_ROOT / "tenacious_bench_v0.1"

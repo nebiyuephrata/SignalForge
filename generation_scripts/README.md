@@ -23,7 +23,7 @@ This directory contains the reproducible Week 11 authoring pipeline for `tenacio
     - cheap embedding cosine similarity
     - manual time-shift verification status
 - `prepare_preference_data.py`
-  - formats the train split into Path B preference pairs
+  - formats the combined non-held-out pool into Path B preference pairs
   - writes:
     - `training_data/path_b_preferences.jsonl`
 
@@ -65,8 +65,9 @@ As of the latest rebuild:
 - dev: `113`
 - held_out: `50`
 - contamination violations: `0`
-- train preference pairs: `186`
-- train pair construction: `3` rejected variants per train task
+- non-held-out preference pairs: `525`
+- non-held-out source tasks: `175`
+- pair construction: `3` rejected variants per source task
 
 ## Judge filter policy in v0.1
 

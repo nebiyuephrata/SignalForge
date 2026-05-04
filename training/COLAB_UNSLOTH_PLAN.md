@@ -8,13 +8,14 @@ This plan connects `TRP1_week11_unsloth.ipynb` to the current SignalForge repo.
 - QLoRA plus 4-bit loading is the right default for a `T4`.
 - A small Qwen-family backbone is a sensible starting point for Week 11.
 
-## What is currently missing
+## What was missing in the older export path
 
 1. The notebook expects `/content/preferences_train.jsonl` and `/content/preferences_dev.jsonl`, but the repo only ships a single local file at `training_data/path_b_preferences.jsonl`.
 2. The repo preference rows store `prompt` as messages and `chosen` / `rejected` as structured objects; the notebook expects plain strings.
 3. The notebook switches from Path B language into pure SFT on `chosen` responses. That is useful as a warm start, but it is not the main Path B objective.
 4. There is no Colab-ready held-out export or documented rule for when to touch held-out.
 5. There is no explicit post-training evaluation loop for "generate on dev, then score with `scoring_evaluator.py`".
+6. The benchmark `train` split contains only `email_grounding`, which leaves structured routing and qualification behavior out of tuning.
 
 ## Files added to close the gap
 
@@ -38,6 +39,13 @@ That means the same export works for either:
 
 - optional SFT warm start
 - ORPO / DPO / SimPO preference tuning
+
+The refreshed bundle now uses:
+
+- combined non-held-out benchmark tasks as the source pool
+- a task-level re-split into tuning `train` and tuning `dev`
+- all three task types during tuning: `email_grounding`, `qualification_decision`, and `channel_decision`
+- a separate sealed `held_out` export for final evaluation only
 
 ## Recommended training path
 
@@ -96,7 +104,7 @@ Why this order:
 
 ### Phase 3: Dev evaluation
 
-After each run, generate outputs for the `dev` split only.
+After each run, generate outputs for the tuning `dev` split only.
 
 Evaluate:
 

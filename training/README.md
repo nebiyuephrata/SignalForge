@@ -16,7 +16,7 @@ The critic is intended to sit in front of the existing SignalForge generator as 
 
 - preference data: `training_data/path_b_preferences.jsonl`
 - Colab/Unsloth export bundle: `training_data/unsloth/`
-- benchmark source: `tenacious_bench_v0.1/train/tasks.jsonl`
+- benchmark source: `tenacious_bench_v0.1/train/tasks.jsonl` plus `tenacious_bench_v0.1/dev/tasks.jsonl`
 - rationale: `methodology_rationale.md`
 - Colab notebook: [`SignalForge_PathB_ORPO_Colab.ipynb`](./SignalForge_PathB_ORPO_Colab.ipynb)
 
@@ -52,11 +52,30 @@ Use the export bundle as follows:
 - `prompt` / `chosen` / `rejected` for ORPO, DPO, or SimPO,
 - `held_out` only after the training recipe is locked.
 
-The current export now mines three rejected variants per source task:
+The current export now:
+
+- re-splits the combined non-held-out benchmark pool into tuning `train` and tuning `dev`
+- keeps benchmark `held_out` separate for final sealed evaluation
+- mines three rejected variants per source task
+- covers `email_grounding`, `qualification_decision`, and `channel_decision`
+
+Current train/dev export counts:
+
+- tuning `train`: `420` rows
+- tuning `dev`: `105` rows
+- sealed `held_out`: `142` rows
+
+Current negative families:
 
 - `strong_overclaiming`
 - `constraint_break`
 - `wordy_overconfident`
+- `qualification_aggressive`
+- `qualification_conservative`
+- `qualification_mixed_signal`
+- `channel_primary_mismatch`
+- `channel_over_broad_followup`
+- `channel_over_narrow_followup`
 
 See [`COLAB_UNSLOTH_PLAN.md`](./COLAB_UNSLOTH_PLAN.md) for the execution plan.
 

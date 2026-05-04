@@ -1,25 +1,60 @@
 {
-  "format": "unsloth_preference_bundle_v1",
+  "format": "unsloth_preference_bundle_v2",
+  "source_pool": {
+    "train": "combined_non_heldout_benchmark_tasks",
+    "benchmark_splits_used_for_train_dev": [
+      "train",
+      "dev"
+    ],
+    "held_out_policy": "held_out rows remain exported separately for final sealed evaluation only"
+  },
   "splits": [
     {
       "split": "train",
-      "rows": 186,
+      "rows": 420,
+      "task_type_counts": {
+        "channel_decision": 81,
+        "email_grounding": 303,
+        "qualification_decision": 36
+      },
+      "benchmark_source_split_counts": {
+        "dev": 270,
+        "train": 150
+      },
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_train.jsonl"
     },
     {
       "split": "dev",
-      "rows": 243,
+      "rows": 105,
+      "task_type_counts": {
+        "channel_decision": 18,
+        "email_grounding": 78,
+        "qualification_decision": 9
+      },
+      "benchmark_source_split_counts": {
+        "dev": 69,
+        "train": 36
+      },
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_dev.jsonl"
     },
     {
       "split": "held_out",
-      "rows": 110,
+      "rows": 142,
+      "task_type_counts": {
+        "email_grounding": 102,
+        "channel_decision": 24,
+        "qualification_decision": 16
+      },
+      "benchmark_source_split_counts": {
+        "held_out": 142
+      },
       "output_path": "/home/rata/Documents/Ephrata/work/10Acadamy/training/SignalForge/training_data/unsloth/preferences_held_out.jsonl"
     }
   ],
   "notes": [
     "prompt/chosen/rejected are plain strings for DPO/ORPO/SimPO trainers.",
     "sft_text is a ChatML-style text field for optional warm-start SFT on chosen responses.",
+    "train/dev are re-split from the combined non-held-out pool so all task types appear during tuning.",
     "held_out export exists for final sealed evaluation and should stay untouched during tuning."
   ]
 }

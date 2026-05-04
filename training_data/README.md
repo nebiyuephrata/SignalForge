@@ -13,15 +13,16 @@ Each row contains:
 - a `rejected` response
 - task metadata
 
-The rows are derived from the `train` split of `tenacious_bench_v0.1`.
+The rows are derived from the combined non-held-out benchmark pool in `tenacious_bench_v0.1`: `train` + `dev`.
 
 ## Current status
 
-- total preference pairs: `186`
-- source benchmark split: `train`
-- source train tasks: `62`
+- total preference pairs: `525`
+- source benchmark splits: `train`, `dev`
+- source benchmark tasks: `175`
 - negative variants per task: `3`
-- rejection strategies: `strong_overclaiming`, `constraint_break`, `wordy_overconfident`
+- task types covered: `email_grounding`, `qualification_decision`, `channel_decision`
+- rejection strategies: `strong_overclaiming`, `constraint_break`, `wordy_overconfident`, `qualification_aggressive`, `qualification_conservative`, `qualification_mixed_signal`, `channel_primary_mismatch`, `channel_over_broad_followup`, `channel_over_narrow_followup`
 
 ## Scope
 

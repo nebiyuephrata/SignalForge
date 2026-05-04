@@ -175,6 +175,87 @@ def _wordy_confident_email(task: dict[str, Any], chosen: dict[str, str]) -> dict
     return {"subject": mutated_subject.strip(), "body": mutated_body.strip()}
 
 
+def _qualification_negative_candidates(chosen: dict[str, Any]) -> list[dict[str, Any]]:
+    status = chosen.get("qualification_status")
+    is_partial = status == "partial"
+    candidates = [
+        {
+            "rejection_strategy": "qualification_aggressive",
+            "rejected": {
+                "qualification_status": "qualified",
+                "intent_level": "high",
+                "next_action": "share_booking_link",
+            },
+        },
+        {
+            "rejection_strategy": "qualification_conservative",
+            "rejected": (
+                {
+                    "qualification_status": "partial",
+                    "intent_level": "high",
+                    "next_action": "share_booking_link",
+                }
+                if is_partial
+                else {
+                    "qualification_status": "partial",
+                    "intent_level": "medium",
+                    "next_action": "ask_follow_up_question",
+                }
+            ),
+        },
+        {
+            "rejection_strategy": "qualification_mixed_signal",
+            "rejected": (
+                {
+                    "qualification_status": "qualified",
+                    "intent_level": "medium",
+                    "next_action": "ask_follow_up_question",
+                }
+                if is_partial
+                else {
+                    "qualification_status": "partial",
+                    "intent_level": "high",
+                    "next_action": "share_booking_link",
+                }
+            ),
+        },
+    ]
+    return candidates
+
+
+def _channel_negative_candidates(chosen: dict[str, Any]) -> list[dict[str, Any]]:
+    allowed = list(chosen.get("allowed_channels_after_reply", []))
+    broadened = list(allowed)
+    for candidate in ["sms", "whatsapp", "calendar"]:
+        if candidate not in broadened:
+            broadened.append(candidate)
+    narrowed = ["calendar"] if allowed == ["email"] else ["email"]
+    candidates = [
+        {
+            "rejection_strategy": "channel_primary_mismatch",
+            "rejected": {
+                "primary_channel": "sms",
+                "allowed_channels_after_reply": broadened,
+            },
+        },
+        {
+            "rejection_strategy": "channel_over_broad_followup",
+            "rejected": {
+                "primary_channel": chosen.get("primary_channel", "email"),
+                "allowed_channels_after_reply": broadened,
+            },
+        },
+        {
+            "rejection_strategy": "channel_over_narrow_followup",
+            "rejected": {
+                "primary_channel": chosen.get("primary_channel", "email"),
+                "allowed_channels_after_reply": narrowed,
+            },
+        },
+    ]
+    return candidates
+
+
 def build_rejected_candidates(task: dict[str, Any]) -> list[dict[str, Any]]:
     chosen = dict(task["candidate_output"])
     if task["task_type"] == "email_grounding":
@@ -193,15 +274,12 @@ def build_rejected_candidates(task: dict[str, Any]) -> list[dict[str, Any]]:
             },
         ]
     else:
-        output = dict(chosen)
         if task["task_type"] == "qualification_decision":
-            output["qualification_status"] = "qualified"
-            output["intent_level"] = "high"
-            output["next_action"] = "share_booking_link"
+            candidates = _qualification_negative_candidates(chosen)
         elif task["task_type"] == "channel_decision":
-            output["primary_channel"] = "sms"
-            output["allowed_channels_after_reply"] = ["sms", "whatsapp", "calendar"]
-        candidates = [{"rejection_strategy": "routing_override", "rejected": output}]
+            candidates = _channel_negative_candidates(chosen)
+        else:
+            candidates = []
 
     unique: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -214,6 +292,18 @@ def build_rejected_candidates(task: dict[str, Any]) -> list[dict[str, Any]]:
         seen.add(rejected_key)
         unique.append(candidate)
     return unique
+
+
+def build_rejected_email(task: dict[str, Any]) -> dict[str, str]:
+    chosen = dict(task["candidate_output"])
+    return _strong_overclaiming_email(chosen)
+
+
+def build_rejected_structured(task: dict[str, Any]) -> dict[str, Any]:
+    candidates = build_rejected_candidates(task)
+    if not candidates:
+        return dict(task["candidate_output"])
+    return dict(candidates[0]["rejected"])
 
 
 def build_preference_rows(
