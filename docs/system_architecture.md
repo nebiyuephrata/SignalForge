@@ -48,6 +48,35 @@ SignalForge is supposed to win trust by being more disciplined than a generic ou
 - channel escalation follows recorded state instead of caller intent
 - external integration failures produce explicit fallbacks instead of hidden partial success
 
+## Channel-Orchestrator Invariants
+
+The centralized orchestrator is not just a convenience wrapper around channel
+handlers. It is the policy layer that protects a few system-wide invariants:
+
+- `authoritative lifecycle state lives in one place`
+  `ChannelOrchestrator` reads and updates the shared `LeadLifecycleState`
+  through `ProspectStateStore` instead of letting each provider adapter keep its
+  own partial view of progress.
+
+- `transitions are monotonic`
+  `_transition()` only allows forward movement through the lifecycle and rejects
+  invalid or backward transitions, which keeps retries and stale events from
+  rewriting the lead into an earlier stage.
+
+- `duplicate inbound events are no-ops when identifiable`
+  `_is_duplicate_event()` suppresses replay of inbound events that reuse the
+  same `external_id`, `channel`, and `event_type`, so retries do not trigger
+  repeated policy decisions.
+
+- `tool eligibility is derived from global state, not local handler context`
+  `allowed_next_channels()` computes which channels are currently legal from the
+  full lifecycle state. Handlers execute provider calls, but they do not decide
+  whether SMS, WhatsApp, calendar, or voice should be available.
+
+- `provider adapters and policy are deliberately separated`
+  The handlers are responsible for talking to providers and parsing payloads.
+  The orchestrator is responsible for deciding what happens next.
+
 ## Operational Notes
 
 - The local repo is intentionally offline-friendly.

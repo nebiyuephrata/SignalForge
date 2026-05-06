@@ -43,6 +43,12 @@ So below, I stay centered on **structured argument generation under strict
 schema enforcement**, and I treat tool choice as neighboring context rather
 than the core question.
 
+The practical deployment question sitting underneath all of this is:
+if your stack is `client -> OpenRouter -> upstream model provider`, which
+guarantees are actually enforced end to end, and which are only documented at
+the upstream provider layer? That matters because it determines whether your
+fallback parsing chain is truly removable or still the right defensive code.
+
 ## The load-bearing mechanism
 
 At the token level, a language model always predicts the next token from a
@@ -136,6 +142,54 @@ top of ordinary next-token prediction. The model still produces logits, but the
 serving layer intersects those logits with the set of schema-valid continuations
 at that exact step.
 
+## A concrete strict-mode example
+
+Here is the shortest useful contrast with your current `complete_json()` style
+approach.
+
+### Current pattern: free-form JSON plus repair
+
+```python
+resp = client.responses.create(
+    model="gpt-4.1-mini",
+    input="Classify this reply and return JSON with reply_class, should_book_call, needs_human_handoff"
+)
+
+text = resp.output_text
+text = strip_fences(text)
+text = strip_think_blocks(text)
+payload = json.loads(extract_first_json_object(text))
+```
+
+This works only because you repair invalid generations after the fact.
+
+### Strict structured outputs: schema-valid object by construction
+
+```python
+from pydantic import BaseModel
+from openai import OpenAI
+
+class ReplyDecision(BaseModel):
+    reply_class: str
+    should_book_call: bool
+    needs_human_handoff: bool
+
+client = OpenAI()
+resp = client.responses.parse(
+    model="gpt-4.1-mini",
+    input="Classify this reply for workflow routing.",
+    text_format=ReplyDecision,
+)
+
+decision = resp.output_parsed
+```
+
+In the strict structured-output path, the key engineering difference is that
+you are no longer asking the model to "please emit JSON." You are asking the
+serving stack to return an object that must satisfy a schema. If strict mode is
+actually enforced end to end, much of the fence stripping / substring salvage
+logic becomes unnecessary.
+
 ## Show it as a stack
 
 The clean mental model is:
@@ -180,6 +234,19 @@ This is why your clarified framing is so useful:
   is effectively guaranteed by construction for structural validity, and much of
   that fallback chain becomes dead code
 
+That gives you an immediate grounding-commit test:
+
+1. run your current `complete_json()` path on a small eval set
+2. swap one endpoint to a strict structured-output call
+3. compare:
+   - parse failures
+   - wrong-key failures
+   - wrong-type failures
+   - how much cleanup code still executes
+
+If the strict path still requires your salvage chain in practice, then the relay
+layer is weakening or not exposing the guarantee you thought you had.
+
 ## Connect the dots
 
 ### Why your fallback parser is evidence of free-form decoding
@@ -208,6 +275,35 @@ generation, but the operational question becomes: which guarantees survive the
 gateway, and which only exist when the upstream provider's strict mode is
 actually exposed end to end?
 
+This feedback surfaced an important honesty point: I have explained the upstream
+mechanisms, but I have not fully resolved the relay-layer question for your
+exact deployment. For `OpenRouter -> gpt-4.1-mini`, the operational issue is not
+"does OpenAI support strict constrained decoding?" but "does OpenRouter expose
+that mode in a way that preserves the same guarantee?" Until you verify that in
+the actual response path you are using, you should treat deletion of the
+fallback chain as a testable hypothesis, not as an assumption.
+
+The practical rule is:
+
+- if the relay exposes the provider's strict structured-output mode faithfully,
+  your structural fallback code should shrink dramatically
+- if the relay only gives you JSON-ish output or a weaker compatibility layer,
+  you still need validation and probably some repair logic
+
+So the operational answer is: **assume nothing, test the exact route you deploy**.
+
+## Adjacent but important: tool choice itself
+
+You scoped this correctly as secondary, but it is worth one paragraph because it
+completes the picture. Tool choice is usually not a single magical "call tool"
+token that solves the whole problem in one step. It is better thought of as a
+protocol-level branch in the assistant's output space: the model is deciding
+between continuing ordinary assistant output and emitting a tool-call-shaped
+response. Depending on the provider, that may be scaffolded by special training,
+special prompt construction, assistant prefills, or constrained output formats.
+So the wrong-tool-selection problem is adjacent, but it is a different mechanism
+from "once a tool call is chosen, are the arguments structurally guaranteed?"
+
 ## Bottom line
 
 If you prompt for raw JSON, the model is still doing free-form text generation
@@ -225,6 +321,10 @@ place.
 
 That is the real line between "poor man's function call" and an actual
 tool-calling interface.
+
+The cleanest one-sentence version is:
+
+**A prompt can encourage a model to output the right key. A decoder constraint can forbid it from outputting the wrong key. For workflow safety, forbidding beats encouraging.**
 
 ## Pointers
 
