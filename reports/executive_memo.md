@@ -19,6 +19,14 @@ The current Path B critic improves held-out Tenacious-Bench accuracy by **+48.84
 
 Plain-English interpretation: on the current held-out evaluation slice, the trained critic is materially better at separating preferred from rejected behavior than the pre-trained heuristic gate.
 
+Statistical interpretation note: the bootstrap is **paired** because the
+baseline and trained critic are both evaluated on the same held-out preference
+pairs, so the resampling procedure preserves the per-example dependence between
+the two systems rather than pretending they are independent samples. The
+resulting confidence interval is evidence about benchmark lift on this sealed
+slice, not a guarantee of the same magnitude of lift in production traffic or
+in a differently composed evaluation distribution.
+
 ### Delta B Honesty
 
 **Delta B definition:** trained critic versus the current prompt-engineered baseline using the same intervention shape, meaning a non-learned gate over the same held-out preference pairs rather than a new model family.
